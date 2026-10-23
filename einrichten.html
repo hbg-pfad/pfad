@@ -120,6 +120,12 @@ button{font:inherit;cursor:pointer}
 .menu .row{border:0;padding:9px 14px;justify-content:flex-start;gap:12px}
 .menu .row svg{stroke:#5f6368}
 .menu hr{border:0;border-top:1px solid #e8eaed;margin:4px 0}
+.ctx{position:absolute;bottom:62px;width:72%;background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.28);font-size:12px;z-index:3;display:flex;flex-direction:column}
+.ipad .ctx{bottom:auto;top:44px}
+.iconrow{display:flex;justify-content:space-around;padding:4px 6px}.iconrow svg{width:16px;height:16px;stroke:#5f6368;fill:none;stroke-width:2}
+.vers{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.vers button{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 12px;font-weight:700;font-size:.85rem}
+.vers button[aria-pressed="true"]{border-color:var(--acc);background:var(--accs)}
 .adialog{position:absolute;left:8%;right:8%;top:32%;background:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;font-size:12.5px;color:#202124;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .adialog .t{font-size:15px;font-weight:600}
 .adialog .app{display:flex;gap:10px;align-items:center}
@@ -177,7 +183,7 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
   <div class="phases" id="phases" aria-label="Fortschritt"></div>
   <main id="stage"></main>
 
-  <footer>Die Bilder aus Pfad sind echte Bildschirmfotos der App. Die Ansichten von Safari, Chrome und dem Home-Bildschirm sind vereinfacht nachgezeichnet und können auf deinem Gerät etwas anders aussehen. Pfad ist ein freiwilliges Angebot des Sonderpädagogik-Teams. Stand: 23.10.2026.</footer>
+  <footer>Die Bilder aus Pfad sind echte Bildschirmfotos der App. Die Ansichten von Safari, Chrome und dem Home-Bildschirm sind vereinfacht nachgezeichnet und können auf deinem Gerät etwas anders aussehen. Pfad ist ein freiwilliges Angebot des Sonderpädagogik-Teams. Nachgezeichnet nach Safari in iOS und iPadOS 27 und 26 sowie Chrome 150 für Android. Stand: 23.10.2026.</footer>
 </div>
 
 <script>
@@ -207,6 +213,12 @@ const ic={
  phone:'<svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M12 9v6M9.5 12.5L12 15l2.5-2.5"/></svg>',
  home:'<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>',
  newtab:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+ page:'<svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg>',
+ side:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 5v14"/></svg>',
+ find:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>',
+ down:'<svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14"/></svg>',
+ info:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8h.01"/></svg>',
+ reload:'<svg viewBox="0 0 24 24"><path d="M19 12a7 7 0 11-2.05-4.95M19 5v4h-4"/></svg>',
  hist:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>'
 };
 const pct=(v,t)=>(v/t*100).toFixed(2)+"%";
@@ -216,67 +228,92 @@ function boxTap(dev,b,pad=4){if(!b)return "";const vp=BOX[dev].vp;
 function appShot(dev,name,b){return `<div class="shot"><img src="${IMG[dev+"-"+name]}" alt="Pfad, Bildschirmfoto">${boxTap(dev,b)}</div>`}
 const T=(on,cls="ico")=>on?`class="${cls} tapin" role="button" tabindex="0" aria-label="Hier tippen" onclick="next()" onkeydown="if(event.key==='Enter')next()"`:`class="${cls}"`;
 
-// Browser-Rahmen
-function safari(dev,{tapUrl,tapShare}={}){
+// Browser-Rahmen (nachgezeichnet: Safari in iOS/iPadOS 27 und 26, Chrome 150 für Android)
+const TAP=`role="button" tabindex="0" onclick="next()" onkeydown="if(event.key==='Enter')next()"`;
+const v27=()=>S.ios!=="26";
+function shotB(dev){return `<div class="shot"><img src="${IMG[dev+"-browser"]}" alt="Pfad im Browser"></div>`}
+function safari(dev,{tapUrl,tapMenu,tapShare}={}){
   const url=`<div ${T(tapUrl,"url")}>${URL_TXT}</div>`;
-  const shot=`<div class="shot"><img src="${IMG[dev+"-browser"]}" alt="Pfad im Browser"></div>`;
-  if(dev==="ipad")return `<div class="bar top"><span class="ico">${ic.back}</span><span class="ico">${ic.fwd}</span><span class="ico">${ic.book}</span>${url}<span ${T(tapShare)}>${ic.share}</span><span class="ico">${ic.newtab}</span><span class="ico">${ic.tabs}</span></div>${shot}`;
-  return `${shot}<div class="bar bottom" style="flex-direction:column;align-items:stretch;gap:6px">${url}<div class="tools"><span class="ico">${ic.back}</span><span class="ico">${ic.fwd}</span><span ${T(tapShare)}>${ic.share}</span><span class="ico">${ic.book}</span><span class="ico">${ic.tabs}</span></div></div>`}
-function chrome(dev,{tapUrl,tapMenu}={}){
-  return `<div class="bar top" style="background:#fff"><span class="ico">${ic.home}</span><div ${T(tapUrl,"url")}>${URL_TXT}</div><span class="ico">${ic.tabs}</span><span ${T(tapMenu)}>${ic.dots}</span></div><div class="shot"><img src="${IMG[dev+"-browser"]}" alt="Pfad im Browser"></div>`}
+  if(dev==="ipad")return `<div class="bar top"><span class="ico">${ic.side}</span><span class="ico">${ic.back}</span><span class="ico">${ic.fwd}</span>${v27()?`<span ${T(tapMenu)}>${ic.page}</span>`:""}${url}<span ${T(tapShare)}>${ic.share}</span><span class="ico">${ic.newtab}</span><span class="ico">${ic.tabs}</span></div>${shotB(dev)}`;
+  // iPhone, kompakte Leiste unten (Standard)
+  const left=v27()?`<span ${T(tapMenu)}>${ic.page}</span>`:`<span class="ico">${ic.back}</span>`;
+  const right=v27()?`<span class="ico">${ic.tabs}</span>`:`<span ${T(tapMenu)}>${ic.more}</span>`;
+  return `${shotB(dev)}<div class="bar bottom" style="padding:8px 8px 14px">${left}${url}${right}</div>`}
+function pageMenu(dev){
+  const items=v27()?[["Teilen",ic.share,1],["Zu Lesezeichen hinzufügen",ic.book],["Zu Favoriten hinzufügen",ic.star],["Auf der Seite suchen",ic.find],["Reader anzeigen",ic.book]]
+                   :[["Teilen",ic.share,1],["Lesezeichen hinzufügen",ic.book],["Zu Favoriten",ic.star],["Neuer Tab",ic.newtab],["Auf der Seite suchen",ic.find]];
+  const pos=v27()?"left:8px":"right:8px";
+  return safari(dev)+`<div class="dim" style="background:rgba(0,0,0,.18)"></div><div class="ctx" style="${pos}">${items.map(([n,i,on])=>`<div class="row${on?" tapin":""}" ${on?TAP:""}>${on?`<b>${n}</b>`:n} ${i}</div>`).join("")}</div>`}
 function shareSheet(dev){
   return safari(dev)+`<div class="dim"></div><div class="sheet">
    <div class="sheethead"><img src="${ICON}" alt=""><div><b>Pfad</b><br><span style="color:#8e8e93">${URL_TXT}</span></div></div>
    <div class="apps"><span></span><span></span><span></span><span></span><span></span></div>
-   <div class="grp"><div class="row">Kopieren ${ic.copy}</div><div class="row">Zur Leseliste hinzufügen ${ic.book}</div><div class="row">Zu Favoriten ${ic.star}</div>
-   <div class="row tapin" role="button" tabindex="0" onclick="next()" onkeydown="if(event.key==='Enter')next()"><b>Zum Home-Bildschirm</b> ${ic.plus}</div></div></div>`}
+   <div class="grp"><div class="row">Kopieren ${ic.copy}</div><div class="row">Zur Leseliste hinzufügen ${ic.book}</div><div class="row">Zu Favoriten hinzufügen ${ic.star}</div>
+   <div class="row tapin" ${TAP}><b>Zum Home-Bildschirm</b> ${ic.plus}</div><div class="row" style="color:#8e8e93">Mehr anzeigen …</div></div></div>`}
 function addDialog(){
-  return `<div class="dialog"><div class="head"><a>Abbrechen</a><span>Zum Home-Bildschirm</span><a class="b tapin" role="button" tabindex="0" onclick="next()" onkeydown="if(event.key==='Enter')next()" style="padding:2px 6px">Hinzufügen</a></div>
+  return `<div class="dialog"><div class="head"><a>Abbrechen</a><span>Zum Home-Bildschirm</span><a class="b tapin" ${TAP} style="padding:2px 6px">Hinzufügen</a></div>
    <div class="card2"><img src="${ICON}" alt=""><div class="f"><div>Pfad</div><span style="color:#8e8e93">https://${URL_TXT}/</span></div></div>
    <div class="switchrow"><span>Als Web-App öffnen</span><span class="sw" aria-label="an"></span></div>
    <p style="margin:10px 16px;color:#8e8e93">Ein Symbol wird zu deinem Home-Bildschirm hinzugefügt.</p></div>`}
+function chrome(dev,{tapUrl,tapMenu}={}){
+  return `<div class="bar top" style="background:#fff"><span class="ico">${ic.home}</span><div ${T(tapUrl,"url")}>${URL_TXT}</div><span class="ico">${ic.tabs}</span><span ${T(tapMenu)}>${ic.dots}</span></div>${shotB(dev)}`}
 function chromeMenu(dev){
   return chrome(dev)+`<div class="dim" style="background:rgba(0,0,0,.12)"></div><div class="menu">
-   <div class="row">${ic.newtab} Neuer Tab</div><div class="row">${ic.hist} Verlauf</div><hr>
-   <div class="row">${ic.star} Lesezeichen</div>
-   <div class="row tapin" role="button" tabindex="0" onclick="next()" onkeydown="if(event.key==='Enter')next()" style="margin:0 6px">${ic.phone} <b>App installieren</b></div>
-   <div class="row">${ic.share} Teilen …</div><hr><div class="row">Einstellungen</div></div>`}
+   <div class="iconrow"><span>${ic.back}</span><span>${ic.fwd}</span><span>${ic.star}</span><span>${ic.down}</span><span>${ic.info}</span><span>${ic.reload}</span></div><hr>
+   <div class="row">${ic.newtab} Neuer Tab</div><div class="row">${ic.hist} Verlauf</div><div class="row">${ic.down} Downloads</div><div class="row">${ic.star} Lesezeichen</div><hr>
+   <div class="row">${ic.share} Teilen …</div><div class="row">${ic.find} Auf Seite suchen</div>
+   <div class="row tapin" ${TAP} style="margin:0 6px">${ic.phone} <b>App installieren</b></div>
+   <div class="row">Desktopversion</div><hr><div class="row">Einstellungen</div></div>`}
 function installDialog(dev){
   return chrome(dev)+`<div class="dim"></div><div class="adialog"><div class="t">App installieren</div>
    <div class="app"><img src="${ICON}" alt=""><div><b>Pfad</b><br><span style="color:#5f6368">${URL_TXT}</span></div></div>
-   <div class="acts"><span>Abbrechen</span><span class="tapin" role="button" tabindex="0" onclick="next()" onkeydown="if(event.key==='Enter')next()" style="padding:2px 8px">Installieren</span></div></div>`}
+   <div class="acts"><span>Abbrechen</span><span class="tapin" ${TAP} style="padding:2px 8px">Installieren</span></div></div>`}
+function placeDialog(){
+  return `<div class="status" style="color:#fff"><span>9:41</span><span>100 %</span></div><div class="home" style="filter:brightness(.7)"></div><div class="adialog" style="top:auto;bottom:6%"><div class="t">Zum Startbildschirm hinzufügen</div>
+   <div class="app"><img src="${ICON}" alt=""><div><b>Pfad</b><br><span style="color:#5f6368">Berühren und halten, um es manuell zu platzieren</span></div></div>
+   <div class="acts"><span>Abbrechen</span><span class="tapin" ${TAP} style="padding:2px 8px">Automatisch hinzufügen</span></div></div>`}
 function homeScreen(dev){
   const n=dev==="ipad"?14:10, at=dev==="ipad"?8:6;let h="";
-  for(let i=0;i<n;i++)h+= i===at?`<div><img class="tapin" role="button" tabindex="0" aria-label="Pfad öffnen" onclick="next()" onkeydown="if(event.key==='Enter')next()" src="${ICON}" alt="Pfad">Pfad</div>`:`<div><span></span>&nbsp;</div>`;
+  for(let i=0;i<n;i++)h+= i===at?`<div><img class="tapin" ${TAP} aria-label="Pfad öffnen" src="${ICON}" alt="Pfad">Pfad</div>`:`<div><span></span>&nbsp;</div>`;
   return `<div class="status"><span>9:41</span><span>100 %</span></div><div class="home">${h}</div>`}
 
 // Schritte
 function steps(dev){
   const ios=dev!=="android", B=BOX[dev], kid={x:dev==="ipad"?106:16,y:140,w:dev==="ipad"?608:(dev==="iphone"?358:380),h:62};
-  const install=ios?[
-   {t:"Safari öffnen",scr:safari(dev,{tapUrl:true}),
-    p:[`Öffne <b>Safari</b>. Andere Browser funktionieren auf ${NAME[dev]} nicht zuverlässig.`,`Tippe in die Adresszeile und gib diese Adresse ein:`],addr:true},
-   {t:"Auf „Teilen“ tippen",scr:safari(dev,{tapShare:true}),
-    p:[dev==="ipad"?`Das Teilen-Symbol (Quadrat mit Pfeil) ist <b>oben rechts</b> neben der Adresse.`:`Das Teilen-Symbol (Quadrat mit Pfeil) ist <b>unten in der Leiste</b>.`],
-    tip:`Siehst du kein Teilen-Symbol? Bei neuerem iOS tippst du zuerst auf <b>„···“</b> und dann auf „Teilen“.`},
-   {t:"„Zum Home-Bildschirm“ wählen",scr:shareSheet(dev),
-    p:[`Im Menü findest du <b>„Zum Home-Bildschirm“</b>. Eventuell musst du dafür etwas nach unten wischen.`]},
-   {t:"Hinzufügen",scr:addDialog(),
-    p:[`Der Name „Pfad“ ist schon eingetragen.`,`Ist der Schalter <b>„Als Web-App öffnen“</b> zu sehen, lass ihn an. Tippe dann auf <b>„Hinzufügen“</b>.`]},
-   {t:"Pfad über das Symbol starten",scr:homeScreen(dev),
+  const OS=dev==="ipad"?"iPadOS":"iOS";
+  const open={t:"Safari öffnen",scr:safari(dev,{tapUrl:true}),ver:true,
+    p:[`Öffne <b>Safari</b>. Andere Browser funktionieren auf ${NAME[dev]} nicht zuverlässig.`,`Tippe in die Adresszeile und gib diese Adresse ein:`],addr:true};
+  const sheet={t:"„Zum Home-Bildschirm“ wählen",scr:shareSheet(dev),ver:true,
+    p:[`Tippe auf <b>„Zum Home-Bildschirm“</b>.`],tip:`Nicht zu sehen? Wische im Menü nach oben oder tippe auf <b>„Mehr anzeigen“</b>.`};
+  const add={t:"Hinzufügen",scr:addDialog(),
+    p:[`Der Name „Pfad“ ist schon eingetragen.`,`Der Schalter <b>„Als Web-App öffnen“</b> ist an. Lass ihn an. Tippe dann oben rechts auf <b>„Hinzufügen“</b>.`]};
+  const home={t:"Pfad über das Symbol starten",scr:homeScreen(dev),
     p:[`Auf deinem Home-Bildschirm ist jetzt das Pfad-Symbol. Schließe Safari und starte Pfad <b>ab jetzt nur noch über dieses Symbol</b>.`],
-    warn:`<b>Wichtig auf ${NAME[dev]}</b>Das Symbol hat einen eigenen Speicher. Was du im Safari-Tab einträgst, siehst du in der App nicht. Löschst du das Symbol, sind alle Daten weg. Vorher immer sichern.`}
-  ]:[
+    warn:`<b>Wichtig auf ${NAME[dev]}</b>Das Symbol hat einen eigenen Speicher. Was du im Safari-Tab einträgst, siehst du in der App nicht. Löschst du das Symbol, sind alle Daten weg. Vorher immer sichern.`};
+  const install=dev==="iphone"?[open,
+   {t:v27()?"Seitenmenü öffnen":"Menü „···“ öffnen",scr:safari(dev,{tapMenu:true}),ver:true,
+    p:[v27()?`Tippe unten <b>links neben der Adresse</b> auf das Seitenmenü (drei Striche, der untere ist kürzer).`:`Tippe unten <b>rechts neben der Adresse</b> auf <b>„···“</b>.`],
+    tip:v27()?`Es geht auch so: Adresszeile gedrückt halten, dann „Teilen“.`:`Ist die Adresszeile bei dir oben? Dann ist „···“ oben rechts.`},
+   {t:"„Teilen“ wählen",scr:pageMenu(dev),ver:true,p:[`Tippe im Menü auf <b>„Teilen“</b>.`]},
+   sheet,add,home]
+  :dev==="ipad"?[open,
+   {t:"Auf „Teilen“ tippen",scr:safari(dev,{tapShare:true}),ver:true,
+    p:[`Tippe <b>oben rechts</b> neben der Adresse auf das Teilen-Symbol (Quadrat mit Pfeil nach oben).`],
+    tip:v27()?`Kein Teilen-Symbol zu sehen? Tippe links neben der Adresse auf das Seitenmenü (drei Striche) und dann auf „Teilen“.`:`Kein Teilen-Symbol zu sehen? Tippe neben der Adresse auf „···“ und dann auf „Teilen“.`},
+   sheet,add,home]
+  :[
    {t:"Chrome öffnen",scr:chrome(dev,{tapUrl:true}),
     p:[`Öffne <b>Chrome</b>.`,`Tippe in die Adresszeile und gib diese Adresse ein:`],addr:true},
    {t:"Menü öffnen",scr:chrome(dev,{tapMenu:true}),
-    p:[`Tippe oben rechts auf die <b>drei Punkte ⋮</b>.`]},
+    p:[`Tippe oben rechts auf die <b>drei Punkte ⋮</b>.`],tip:`Ist die Adresszeile bei dir unten? Dann sind die drei Punkte unten rechts.`},
    {t:"„App installieren“ wählen",scr:chromeMenu(dev),
-    p:[`Wähle <b>„App installieren“</b>.`],tip:`Heißt es bei dir „Zum Startbildschirm hinzufügen“? Dann nimm das.`},
-   {t:"Installieren",scr:installDialog(dev),
-    p:[`Bestätige mit <b>„Installieren“</b>.`]},
+    p:[`Scrolle im Menü etwas nach unten. Tippe auf <b>„App installieren“</b>.`],
+    tip:`Steht dort „Installieren und Verknüpfung erstellen“ oder „Zum Startbildschirm hinzufügen“? Dann nimm das. Oft fragt Chrome auch selbst unten am Bildschirmrand, ob du Pfad installieren willst.`},
+   {t:"Installieren",scr:installDialog(dev),p:[`Bestätige mit <b>„Installieren“</b>.`]},
+   {t:"Auf den Startbildschirm legen",scr:placeDialog(),
+    p:[`Tippe auf <b>„Automatisch hinzufügen“</b>. Du kannst das Symbol auch gedrückt halten und selbst platzieren.`],tip:`Kommt diese Frage nicht, liegt Pfad schon auf dem Startbildschirm oder in der App-Übersicht.`},
    {t:"Pfad über das Symbol starten",scr:homeScreen(dev),
-    p:[`Auf deinem Startbildschirm ist jetzt das Pfad-Symbol. Starte Pfad ab jetzt über dieses Symbol.`],
+    p:[`Auf deinem Startbildschirm ist jetzt das Pfad-Symbol. Starte Pfad ab jetzt über dieses Symbol. Pfad öffnet sich dann in einem eigenen Fenster ohne Adresszeile.`],
     warn:`<b>Gut zu wissen</b>Werden die Chrome-Daten gelöscht, sind auch die Pfad-Daten weg. Deshalb regelmäßig sichern.`}
   ];
   const start=[
@@ -316,6 +353,7 @@ function render(){
    <div class="text">
      <div class="count">Schritt ${S.step+1} von ${n} · ${NAME[S.dev]}</div>
      <h2>${s.t}</h2>
+     ${s.ver?`<div class="vers"><span>Deine Version:</span><button id="v27" aria-pressed="${v27()}" onclick="setIos('27')">${S.dev==="ipad"?"iPadOS":"iOS"} 27</button><button id="v26" aria-pressed="${!v27()}" onclick="setIos('26')">${S.dev==="ipad"?"iPadOS":"iOS"} 26</button><span>(Einstellungen → Allgemein → Info)</span></div>`:""}
      ${s.p.map(x=>`<p>${x}</p>`).join("")}
      ${s.addr?`<div class="addr"><code id="addr">${URL_TXT}</code><button class="btn ghost small" id="copyBtn" onclick="copyAddr()">Kopieren</button><a class="btn small" href="https://n-bru.github.io/pfad/" target="_blank" rel="noopener" style="text-decoration:none">Pfad öffnen</a></div><p class="small">Wichtig: Füge die Pfad-Seite selbst zum Home-Bildschirm hinzu, nicht diese Anleitung.</p>`:""}
      ${s.tip?`<div class="note tip">${s.tip}</div>`:""}
@@ -352,6 +390,7 @@ function doneV(){
    </div></div>`}
 function bindChecks(){document.querySelectorAll(".check input").forEach(c=>c.addEventListener("change",()=>{S.checks[c.dataset.k]=c.checked;save();
   const all=[...document.querySelectorAll(".check input")].every(x=>x.checked);document.getElementById("okMsg").textContent=all?"Alles erledigt. Bis zum Studientag!":"Am Studientag arbeiten wir nur mit dem fiktiven Fall."}))}
+function setIos(v){S.ios=v;render()}
 function next(){S.step++;render();scrollTop()}
 function prev(){S.step=Math.max(0,S.step-1);render();scrollTop()}
 function goTo(i){S.step=i;render();scrollTop()}
