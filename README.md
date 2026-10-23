@@ -7,5 +7,6 @@ Schulinterne Web-App zur alltagsnahen Verhaltensbeobachtung im Gemeinsamen Lerne
 - Austausch im Team optional über verschlüsselte Dateien im Schul-OneDrive.
 
 Installation auf iPad/iPhone: Adresse in Safari öffnen → Teilen → „Zum Home-Bildschirm“.
+Schritt-für-Schritt-Anleitung für iPad, iPhone und Android: https://n-bru.github.io/pfad/einrichten.html
 
 Prototyp. Einsatz mit echten Fällen erst nach Freigabe durch Schulleitung und Datenschutzbeauftragte:n.
