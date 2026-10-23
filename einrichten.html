@@ -358,7 +358,7 @@ function steps(dev){
    {t:"Sicherung speichern",scr:appShot(dev,"sichern",B.sichern),tap:"„Sicherung speichern“",
     p:[`Pfad speichert jede Eingabe sofort auf dem Gerät. Für den Notfall brauchst du trotzdem eine Sicherung.`,`Tippe in den Einstellungen auf <b>„Sicherung speichern“</b>.`]},
    {t:"Passwort festlegen",scr:appShot(dev,"pw",B.pw),tap:"„OK“",
-    p:[`Beim ersten Mal legst du ein Passwort fest (mindestens 8 Zeichen). Die Datei bleibt auf deinem Dienstgerät, z. B. in „Dateien“ → „Auf meinem iPad“.`,`Sichere <b>spätestens alle 5 Tage</b> und vor jedem Gerätewechsel. Pfad erinnert dich nach 5 Tagen.`],
+    p:[`Beim ersten Mal legst du ein Passwort fest (mindestens 8 Zeichen). Danach zeigt Pfad, wohin die Datei gehört: „In Dateien sichern“ → „Auf meinem iPad“ bzw. „iPhone“ → Ordner „Pfad“. Später ersetzt du dort einfach die alte Datei.`,`Sichere <b>spätestens alle 5 Tage</b> und vor jedem Gerätewechsel. Pfad erinnert dich nach 5 Tagen.`],
     warn:`<b>Passwort gut merken</b>Es lässt sich nicht wiederherstellen. Ohne Passwort ist die Sicherung verloren.`}
   ];
   return {install,start};
