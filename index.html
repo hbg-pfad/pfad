@@ -66,7 +66,7 @@ textarea{min-height:76px;resize:vertical}
 .tip summary{cursor:pointer;color:var(--acc);font-weight:600}
 .dentry{border-top:1px solid var(--line);padding:10px 0}.dentry:first-of-type{border-top:none}
 .cat{display:inline-block;border-radius:6px;padding:1px 7px;font-size:.78rem;font-weight:700;background:var(--soft);color:var(--muted)}
-.cat.c-Erfolg{background:var(--ups);color:var(--up)}.cat.c-Vorfall{background:var(--downs);color:var(--down)}.cat.c-Elternkontakt,.cat.c-Gespräch{background:var(--accs);color:var(--acc)}.cat.c-Absprache{background:var(--news);color:var(--new)}
+.cat.c-Notiz{background:var(--accs);color:var(--chart1)}.cat.c-Erfolg{background:var(--ups);color:var(--up)}.cat.c-Vorfall{background:var(--downs);color:var(--down)}.cat.c-Elternkontakt,.cat.c-Gespräch{background:var(--accs);color:var(--acc)}.cat.c-Absprache{background:var(--news);color:var(--new)}
 .catpick{display:flex;flex-wrap:wrap;gap:6px}.catpick button{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 11px;font-size:.88rem;font-weight:600}.catpick button.on{border-color:var(--acc);background:var(--accs);color:var(--acc)}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:5}
 nav button{flex:1;max-width:160px;background:none;border:none;padding:9px 0 10px;color:var(--muted);font-size:.78rem;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -528,7 +528,7 @@ function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getM
   let best="";for(const r of db.raster){const [a,b]=rTime(r,wd),st=hm(a),en=hm(b);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
 function startRate(kidId){const k=kidById(kidId);if(!k.goals.length)return;
   const cs=currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
-  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:""},count:0,ctxOpen:true};renderRate()}
+  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:true};renderRate()}
 function renderRate(){
   const o=$("#overlay");if(!rs){o.innerHTML="";return}
   const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur,t=today();
@@ -550,6 +550,7 @@ function renderRate(){
   ${sc(g)==="2"?"":`<div class="ends"><span>${sc(g)==="5"?1:0} = ${esc(g.a0)}</span><span>${esc(g.a10)} = ${sc(g)==="5"?5:10}</span></div>`}
   <label>Kommentar <span class="sub">(optional)</span></label>
   <textarea id="note" placeholder="Was war los? Was hat geholfen? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
+  <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" id="pin" style="width:auto" ${c.pin?"checked":""} onchange="rs.cur.pin=this.checked"> Im Verlauf markieren <span class="sub" style="font-weight:400">(erscheint als Markierung im Graphen)</span></label>
   <div class="foot duo"><button class="btn ${c.na?"na-on":""}" onclick="rs.cur.na=!rs.cur.na;if(rs.cur.na)rs.cur.value=null;renderRate()">${c.na?"✓ Heute nicht gesehen":"Heute nicht gesehen"}</button>
   <button class="btn pri" ${c.value==null&&!c.na?"disabled":""} onclick="nextRate()">${rs.i<k.goals.length-1?"Weiter":"Speichern"}</button></div>
   </div></div>`;
@@ -562,9 +563,9 @@ function renderRate(){
 }
 function markRuler(){const g=kidById(rs.kid).goals[rs.i],v=rs.cur.value;$("#big").textContent=dv(g,v);document.querySelectorAll("#ruler button").forEach(b=>{const i=+b.dataset.v;b.className=i===v?"sel":sc(g)!=="2"&&i<v?"lit":"";b.setAttribute("aria-checked",i===v)})}
 function nextRate(){const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur;
-  g.entries.push({id:uid(),date:rs.date,slot:rs.slot,subj:rs.subj,value:c.na?null:c.value,note:c.note.trim(),rater:db.me||"",ts:Date.now()});
+  g.entries.push({id:uid(),date:rs.date,slot:rs.slot,subj:rs.subj,value:c.na?null:c.value,note:c.note.trim(),...(c.pin?{pin:true}:{}),rater:db.me||"",ts:Date.now()});
   save();rs.count++;
-  if(rs.i<k.goals.length-1){rs.i++;rs.ctxOpen=false;rs.cur={value:null,na:false,note:""};fb("small");renderRate();$(".goalTitle")?.classList.add("anim")}
+  if(rs.i<k.goals.length-1){rs.i++;rs.ctxOpen=false;rs.cur={value:null,na:false,note:"",pin:false};fb("small");renderRate();$(".goalTitle")?.classList.add("anim")}
   else{const n=rs.count;lastCtx={slot:rs.slot,subj:rs.subj,day:today(),ts:Date.now()};rs=null;$("#overlay").innerHTML="";render();celebrate(k,n)}}
 let lastCtx=null;
 async function closeRate(){if(rs.count&&!await ask("Bewerten beenden? Bereits gespeicherte Einschätzungen bleiben erhalten.",{ok:"Beenden"}))return;rs=null;$("#overlay").innerHTML="";render()}
@@ -651,7 +652,7 @@ function talkV(){
 }
 
 /* ===== Analyse ===== */
-const CATCOL={Erfolg:"--up",Vorfall:"--down",Gespräch:"--acc",Elternkontakt:"--acc",Absprache:"--new",Beobachtung:"--muted"};
+const CATCOL={Notiz:"--chart1",Erfolg:"--up",Vorfall:"--down",Gespräch:"--acc",Elternkontakt:"--acc",Absprache:"--new",Beobachtung:"--muted"};
 function chart(g,k){
   const e=sortE(g.entries).slice(-30);if(!e.length)return '<p class="muted">Noch keine Einschätzungen.</p>';
   const W=innerWidth<600?420:600,H=236,L=26,R=8,T=30,B=26;
@@ -666,7 +667,8 @@ function chart(g,k){
     else s+=`<circle cx="${X(i)}" cy="${Y(x.value)}" r="4.5" fill="var(--chart1)" stroke="var(--card)" stroke-width="1.5"><title>${dDE(x.date)} ${esc(x.subj)}: ${esc(dv(g,x.value))}</title></circle>`});
   // Tagebucheinträge im Zeitraum als nummerierte Markierungen
   const xDate=d=>{const i=e.findIndex(x=>x.date>=d);if(i<0)return d===e[e.length-1].date?X(e.length-1):null;if(e[i].date===d)return X(i);return i===0?null:(X(i-1)+X(i))/2};
-  const marks=sortD(k?.diary).reverse().map(d=>({d,x:xDate(d.date)})).filter(m=>m.x!=null),used={};
+  const pins=g.entries.filter(x=>x.pin).map(x=>({id:x.id,date:x.date,ts:x.ts,cat:"Notiz",text:x.note||"(ohne Kommentar)",subj:x.subj,rater:x.rater,edited:x.edited,_e:1}));
+  const marks=sortD([...(k?.diary||[]),...pins]).reverse().map(d=>({d,x:xDate(d.date)})).filter(m=>m.x!=null),used={};
   marks.forEach((m,n)=>{const col=`var(${CATCOL[m.d.cat]||"--muted"})`,key=Math.round(m.x),off=(used[key]=(used[key]||0)+1)-1,cx=Math.min(W-9,Math.max(L+9,m.x+off*15));
     s+=`<line x1="${m.x}" x2="${m.x}" y1="${T-4}" y2="${H-B}" stroke="${col}" stroke-width="1" opacity=".45"/>
     <g style="cursor:pointer" onclick="const el=document.getElementById('dn${n+1}');el.scrollIntoView({block:'center'});el.animate([{background:'var(--accs)'},{background:'transparent'}],1200)"><circle cx="${cx}" cy="${T-14}" r="8" fill="${col}"/><text x="${cx}" y="${T-10.5}" font-size="10" font-weight="700" text-anchor="middle" fill="var(--card)">${n+1}</text><title>${dDE(m.d.date)} ${esc(m.d.cat)}: ${esc(m.d.text)}</title></g>`});
@@ -674,7 +676,7 @@ function chart(g,k){
   const step=Math.max(1,Math.ceil(e.length/6));
   e.forEach((x,i)=>{if(i%step===0||i===e.length-1)s+=`<text x="${X(i)}" y="${H-7}" font-size="11" text-anchor="${i===e.length-1?"end":i===0?"start":"middle"}" fill="var(--muted)">${dDE(x.date)}</text>`});
   s+="</svg>"+(e.some(x=>x.value==null)?'<p class="muted small">○ auf der Grundlinie = nicht beobachtet</p>':"");
-  if(marks.length)s+=`<h2 style="margin:14px 0 4px;font-size:1rem">Tagebuch im Zeitraum</h2>`+marks.map((m,n)=>`<div class="dentry" id="dn${n+1}" style="display:flex;gap:10px"><span style="flex:none;width:20px;height:20px;border-radius:50%;background:var(${CATCOL[m.d.cat]||"--muted"});color:var(--card);font-size:.75rem;font-weight:700;display:grid;place-items:center;margin-top:2px">${n+1}</span><div class="grow">${dItem(m.d).replace('<div class="dentry">','<div>')}<button class="btn ghost small noprint" style="padding:2px 0" onclick="editDiary('${k.id}','${m.d.id}')">bearbeiten</button></div></div>`).join("");
+  if(marks.length)s+=`<h2 style="margin:14px 0 4px;font-size:1rem">Notizen im Zeitraum</h2>`+marks.map((m,n)=>`<div class="dentry" id="dn${n+1}" style="display:flex;gap:10px"><span style="flex:none;width:20px;height:20px;border-radius:50%;background:var(${CATCOL[m.d.cat]||"--muted"});color:var(--card);font-size:.75rem;font-weight:700;display:grid;place-items:center;margin-top:2px">${n+1}</span><div class="grow">${dItem(m.d).replace('<div class="dentry">','<div>')}<button class="btn ghost small noprint" style="padding:2px 0" onclick="${m.d._e?`editEntry('${m.d.id}')`:`editDiary('${k.id}','${m.d.id}')`}">bearbeiten</button></div></div>`).join("");
   return s;
 }
 function groupTable(g,key,label){
@@ -733,10 +735,11 @@ function entryEditV(k,g){
   <div class="two" style="margin-top:8px"><div><div class="sub">Stunde</div><select onchange="ee.slot=this.value"><option value="">Ohne Stunde</option>${SLOTS_ALL().map(x=>`<option ${x===ee.slot?"selected":""}>${x}</option>`).join("")}</select></div>
   <div><div class="sub">Fach</div><select onchange="ee.subj=this.value"><option value="">Ohne Fach</option>${db.subjects.map(x=>`<option ${x===ee.subj?"selected":""}>${esc(x)}</option>`).join("")}</select></div></div>
   <div class="sub" style="margin-top:8px">Kommentar</div><textarea oninput="ee.note=this.value">${esc(ee.note)}</textarea>
+  <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" style="width:auto" ${ee.pin?"checked":""} onchange="ee.pin=this.checked"> Im Verlauf markieren</label>
   <p class="row" style="margin-top:10px"><button class="btn pri" onclick="saveEntry('${k.id}','${g.id}')">Speichern</button><button class="btn ghost" onclick="ee=null;render()">Abbrechen</button></p></div>`;
 }
 function saveEntry(kid,gid){const g=goalById(kidById(kid),gid),e=g.entries.find(x=>x.id===ee.id);
-  Object.assign(e,{date:ee.date,value:ee.value,slot:ee.slot,subj:ee.subj,note:(ee.note||"").trim(),edited:Date.now()});ee=null;save();toast("Gespeichert");render()}
+  Object.assign(e,{date:ee.date,value:ee.value,slot:ee.slot,subj:ee.subj,note:(ee.note||"").trim(),pin:!!ee.pin,edited:Date.now()});ee=null;save();toast("Gespeichert");render()}
 async function delEntry(kid,gid,id){if(!await ask("Einschätzung löschen?",{ok:"Löschen",danger:true}))return;const g=goalById(kidById(kid),gid);g.entries=g.entries.filter(e=>e.id!==id);tomb(kidById(kid),id);save();render()}
 function copyEval(){const t=$("#evt");t.select();(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast("Kopiert")).catch(()=>{document.execCommand("copy");toast("Kopiert")})}
 
