@@ -276,6 +276,7 @@ function render(){
   const a=$("#app");
   if(view.talk)a.innerHTML=talkV();
   else if(view.goal!==undefined)a.innerHTML=goalEditV();
+  else if(view.imp)a.innerHTML=importV();
   else if(view.kid)a.innerHTML=kidV();
   else a.innerHTML={heute:heuteV,klassen:klassenV,analyse:analyseV,profil:profilV}[view.tab]();
 }
@@ -356,7 +357,7 @@ function envHint(){if(sessionStorage.getItem("hideEnv"))return "";
   return ""}
 const ownCount=()=>db.kids.filter(k=>!k.demo).reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0)+(k.diary||[]).length,0);
 function backupHint(){const n=ownCount(),last=db.lastBackup||0,days=(Date.now()-last)/864e5;
-  if(n<5||days<7||(db.dirName&&hasId()))return "";
+  if(n<5||days<7)return "";
   return `<div class="card row"><div class="grow small"><b>Sicherung fällig.</b> ${last?`Letzte vor ${Math.floor(days)} Tagen.`:"Noch keine Sicherung."} Ohne Sicherung sind die Daten weg, wenn das Gerät verloren geht.</div><button class="btn pri" onclick="exportJSON()">Sichern</button></div>`}
 function heuteV(){
   const t=today(),wk=addDays(t,-6);
@@ -364,11 +365,9 @@ function heuteV(){
   const week=all.filter(e=>e.date>=wk).length,todayN=all.filter(e=>e.date===t).length;
   const kids=db.kids.filter(k=>k.goals.length);
   const dateLong=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${backupHint()}
+  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${invitesV()}${backupHint()}
   ${G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`}`+motivationV();
   if(!kids.length)return h+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button></p></div>`;
-  const uns=db.kids.filter(k=>unsaved(k)||SY()[k.id]?.rekey);
-  if(uns.length&&hasId())h+=`<div class="card row" style="border:2px solid var(--new)"><div class="grow small"><b>${uns.length} Fall/Fälle</b> mit neuen Einträgen noch nicht in OneDrive.</div>${db.dirName?`<button class="btn pri" onclick="syncAll()">Abgleichen</button>`:`<button class="btn" onclick="go({tab:'profil'})">Ansehen</button>`}</div>`;
   h+=`<h2>Wen bewertest du?</h2>`;
   for(const k of kids){
     const done=k.goals.filter(g=>g.entries.some(e=>e.date===t)).length;
@@ -405,7 +404,7 @@ async function addClass(){const c=((await askText("Name der neuen Klasse","z. B.
 function newCode(cls){let n=1,c;do{c=`${cls}-${String(n++).padStart(2,"0")}`}while(db.kids.some(k=>k.code.toLowerCase()===c.toLowerCase()));return c}
 async function addKid(){const code=$("#ncode").value.trim();if(!code)return toast("Bitte ein Kürzel eingeben.");
   if(looksLikeName(code)&&!await ask("Das Kürzel sieht nach einem Namen aus. Trotzdem speichern?",{ok:"Trotzdem speichern"}))return;
-  const k={id:uid(),code,cls:$("#ncls").value,goals:[],diary:[],ts:Date.now(),team:[db.me].filter(Boolean)};db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
+  const k={id:uid(),code,cls:$("#ncls").value,goals:[],diary:[],ts:Date.now()};db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
 
 /* ===== Kind ===== */
 function spark(g){
@@ -425,11 +424,12 @@ function kidV(){
     h+=`<div class="card"><div class="between"><div class="grow"><b>${esc(g.title)}</b><div class="muted small">${g.dir==="down"?"weniger davon":"mehr davon"} · ${n} Einschätzung${n===1?"":"en"}</div></div>${spark(g)}</div>
     <div class="between" style="margin-top:8px">${badge(t)}<span><button class="btn ghost" onclick="go({tab:'analyse',aKid:'${k.id}',aGoal:'${g.id}'})">Verlauf</button><button class="btn ghost" onclick="go({tab:'${view.tab}',kid:'${k.id}',goal:'${g.id}'})">Bearbeiten</button></span></div></div>`}
   h+=`<p><button class="btn block" onclick="go({tab:'${view.tab}',kid:'${k.id}',goal:''})">+ Verhalten</button></p>`+diaryV(k)+`
-  ${accessCard(k)}
+  <div class="card noprint row"><div class="grow small"><b>Mit Kolleg:in teilen</b><br><span class="muted">Verschlüsselte Datei nur mit diesem Kind.</span></div><button class="btn" onclick="shareKids('${k.id}')">Teilen</button></div>
+  ${srvKidCard(k)}
   <p class="noprint" style="margin-top:24px"><button class="btn ghost danger" onclick="delKid('${k.id}')">Kind und alle Einschätzungen löschen</button></p>`;
   return h;
 }
-async function delKid(id){if(!await ask("Kind mit allen Zielen, Einschätzungen und Tagebucheinträgen von diesem Gerät löschen? Dateien in OneDrive bleiben erhalten.",{ok:"Löschen",danger:true}))return;db.kids=db.kids.filter(k=>k.id!==id);delete (db.sync||{})[id];save();go({tab:"klassen"})}
+async function delKid(id){if(!await ask(`Kind mit allen Zielen, Einschätzungen und Tagebucheinträgen von diesem Gerät löschen? ${kidById(id)?.srv?"Auf dem Schulserver bleibt es für die anderen erhalten.":""}`,{ok:"Löschen",danger:true}))return;db.kids=db.kids.filter(k=>k.id!==id);save();go({tab:"klassen"})}
 
 /* ===== Verhalten bearbeiten ===== */
 let draft=null;
@@ -692,24 +692,35 @@ async function delEntry(kid,gid,id){if(!await ask("Einschätzung löschen?",{ok:
 function copyEval(){const t=$("#evt");t.select();(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast("Kopiert")).catch(()=>{document.execCommand("copy");toast("Kopiert")})}
 
 /* ===== Profil ===== */
-/* ===== OneDrive-Ablage: ein Team-Ordner, Zugriff pro Fall über persönliche Schlüssel =====
-   Jede Lehrkraft hat ein Schlüsselpaar (privater Teil mit eigenem Passwort geschützt).
-   Jeder Fall hat einen eigenen Schlüssel, der nur für die eingetragenen Lehrkräfte hinterlegt wird.
-   Jede Lehrkraft schreibt nur ihre eigene Datei pro Fall; die App führt alle zusammen. */
+/* ===== Datenmodell für Austausch: Änderungszeiten, Löschmarken, Zusammenführen =====
+   Jeder Eintrag hat eine feste id und eine Änderungszeit (ts/edited/upd). Gelöschte ids stehen in k.del.
+   Zusammengeführt wird pro Kind: Neues kommt dazu, bei gleicher id gewinnt die neuere Fassung.
+   Dieselbe Regel nutzt der Schulserver (server/pfad-server.mjs). */
 const tomb=(k,id)=>{(k.del??=[]).includes(id)||k.del.push(id);k.delTs=Date.now()};
 const ver=x=>x.edited||x.upd||x.ts||0;
-const SY=()=>db.sync??={};
 function kidVer(k){return Math.max(ver(k),...k.goals.map(ver),...k.goals.flatMap(g=>g.entries.map(ver)),...(k.diary||[]).map(ver),k.delTs||0)}
-const unsaved=k=>!k.demo&&kidVer(k)>(SY()[k.id]?.saved||0);
 function mergeList(a=[],b=[],del){const m=new Map(a.map(x=>[x.id,x]));for(const x of b){const y=m.get(x.id);if(!y||ver(x)>ver(y))m.set(x.id,x)}return [...m.values()].filter(x=>!del.has(x.id))}
 function mergeKid(k){const ex=kidById(k.id);
   if(!ex){db.kids.push(k);if(k.cls&&!db.classes.includes(k.cls))db.classes.push(k.cls);return 1}
   const del=new Set([...(ex.del||[]),...(k.del||[])]),before=JSON.stringify(ex);
-  if(ver(k)>ver(ex))Object.assign(ex,{code:k.code,cls:k.cls,team:k.team,upd:k.upd});
+  if(ver(k)>ver(ex))Object.assign(ex,{code:k.code,cls:k.cls,upd:k.upd});
+  if(k.team)ex.team=k.team;if(k.pending)ex.pending=k.pending;
   const eg=new Map(ex.goals.map(g=>[g.id,g]));
   ex.goals=mergeList(ex.goals,k.goals,del).map(g=>{const a=eg.get(g.id)?.entries||[],b=(k.goals.find(x=>x.id===g.id)||{}).entries||[];return {...g,entries:mergeList(a,b,del)}});
-  ex.diary=mergeList(ex.diary,k.diary,del);ex.del=[...del];if(ex.cls&&!db.classes.includes(ex.cls))db.classes.push(ex.cls);
+  ex.diary=mergeList(ex.diary,k.diary,del);ex.del=[...del];ex.delTs=Math.max(ex.delTs||0,k.delTs||0);if(ex.cls&&!db.classes.includes(ex.cls))db.classes.push(ex.cls);
   return before!==JSON.stringify(ex)?1:0}
+// Was brächte ein fremder Stand für dieses Kind Neues? (für die Auswahl beim Import)
+function diffKid(k){const ex=kidById(k.id);
+  const cnt=x=>({goals:x.goals.length,entries:x.goals.reduce((s,g)=>s+g.entries.length,0),diary:(x.diary||[]).length});
+  if(!ex)return {neu:true,...cnt(k)};
+  const ids=new Map([...ex.goals,...ex.goals.flatMap(g=>g.entries),...(ex.diary||[])].map(x=>[x.id,ver(x)])),del=new Set(ex.del||[]);
+  let entries=0,diary=0,goals=0,changed=0;
+  for(const g of k.goals){if(del.has(g.id))continue;if(!ids.has(g.id))goals++;else if(ver(g)>ids.get(g.id))changed++;
+    for(const e of g.entries){if(del.has(e.id))continue;if(!ids.has(e.id))entries++;else if(ver(e)>ids.get(e.id))changed++}}
+  for(const e of k.diary||[]){if(del.has(e.id))continue;if(!ids.has(e.id))diary++;else if(ver(e)>ids.get(e.id))changed++}
+  const dels=(k.del||[]).filter(id=>ids.has(id)).length;
+  return {neu:false,goals,entries,diary,changed,dels,leer:!(goals+entries+diary+changed+dels)}}
+/* ===== Verschlüsselung (Sicherungen und geteilte Stände) ===== */
 const b64=u=>{let s="";new Uint8Array(u).forEach(c=>s+=String.fromCharCode(c));return btoa(s)},unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const enc=x=>new TextEncoder().encode(typeof x==="string"?x:JSON.stringify(x)),dec=b=>new TextDecoder().decode(b);
 const rnd=n=>crypto.getRandomValues(new Uint8Array(n));
@@ -717,146 +728,99 @@ async function pwKey(pw,salt){const base=await crypto.subtle.importKey("raw",enc
   return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:310000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
 async function gcm(key,data){const iv=rnd(12);return {iv:b64(iv),ct:b64(await crypto.subtle.encrypt({name:"AES-GCM",iv},key,data))}}
 const ungcm=(key,o)=>crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(o.iv)},key,unb64(o.ct));
-const EC={name:"ECDH",namedCurve:"P-256"};
-// --- Persönlicher Zugang ---
-let MYKEY=null;
-const hasId=()=>!!db.id;
 async function idb(){return new Promise((ok,no)=>{const r=indexedDB.open("verlaufsbogen",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>ok(r.result);r.onerror=no})}
 async function idbGet(k){const d=await idb();return new Promise(ok=>{const r=d.transaction("h").objectStore("h").get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}
 async function idbSet(k,v){const d=await idb();return new Promise(ok=>{const t=d.transaction("h","readwrite");v==null?t.objectStore("h").delete(k):t.objectStore("h").put(v,k);t.oncomplete=ok})}
-async function createId(){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
-  const me=db.me?.trim();if(!me)return toast("Bitte zuerst dein Kürzel eintragen");
-  const pw=await askText(`Lege dein persönliches Passwort fest (mind. 8 Zeichen). Damit öffnest du alle deine Fälle, auch auf anderen Geräten. Es wird nirgends gespeichert.`,"Passwort","password");
-  if(!pw)return;if(pw.length<8)return toast("Mindestens 8 Zeichen");
-  if(await askText("Passwort wiederholen","Passwort","password")!==pw)return toast("Passwörter sind verschieden");
-  const kp=await crypto.subtle.generateKey(EC,true,["deriveKey"]),salt=rnd(16);
-  const priv=await gcm(await pwKey(pw,salt),enc(await crypto.subtle.exportKey("jwk",kp.privateKey)));
-  db.id={verlaufsbogen:"lehrkraft",kuerzel:me,name:db.myName||"",pub:await crypto.subtle.exportKey("jwk",kp.publicKey),priv:{salt:b64(salt),...priv},seit:today()};
-  (db.people??={})[me]={name:db.myName||"",pub:db.id.pub};
-  await keepKey(await crypto.subtle.importKey("jwk",await crypto.subtle.exportKey("jwk",kp.privateKey),EC,false,["deriveKey"]));
-  save();render();toast("Zugang eingerichtet");await saveIdFile()}
-async function keepKey(k){MYKEY=k;try{await idbSet("priv",k)}catch(e){}}
-async function unlock(){if(MYKEY)return MYKEY;try{MYKEY=await idbGet("priv")}catch(e){}if(MYKEY)return MYKEY;if(!db.id)return null;
-  for(;;){const pw=await askText(`Dein persönliches Passwort (${db.id.kuerzel})`,"Passwort","password");if(!pw)return null;
-    try{const jwk=JSON.parse(dec(await ungcm(await pwKey(pw,unb64(db.id.priv.salt)),db.id.priv)));await keepKey(await crypto.subtle.importKey("jwk",jwk,EC,false,["deriveKey"]));return MYKEY}catch(e){toast("Passwort falsch")}}}
-async function lockDevice(){MYKEY=null;await idbSet("priv",null);toast("Abgemeldet. Beim nächsten Abgleich fragt die App nach deinem Passwort.");render()}
-const idFile=()=>`${db.id.kuerzel.replace(/[^\w\-]/g,"_")}.lehrkraft.json`;
-async function saveIdFile(){await writeOut(idFile(),JSON.stringify(db.id))}
-// Zugang auf einem weiteren Gerät: eigene Lehrkraft-Datei laden
-function pickIdFile(){$("#idIn").click()}
-async function loadIdFile(inp){const f=inp.files[0];inp.value="";if(!f)return;let o;try{o=JSON.parse(await f.text())}catch(e){}
-  if(o?.verlaufsbogen!=="lehrkraft")return toast("Das ist keine Lehrkraft-Datei");
-  db.id=o;db.me=o.kuerzel;MYKEY=null;if(!await unlock()){db.id=null;return}
-  (db.people??={})[o.kuerzel]={name:o.name,pub:o.pub};save();render();toast("Zugang auf diesem Gerät eingerichtet")}
-// --- Fallschlüssel ---
-const CK=()=>db.ckeys??={};
-async function caseKey(k){if(!CK()[k.id]){CK()[k.id]=b64(rnd(32));save()}return crypto.subtle.importKey("raw",unb64(CK()[k.id]),"AES-GCM",false,["encrypt","decrypt"])}
-async function wrapFor(raw,pubJwk){const pub=await crypto.subtle.importKey("jwk",pubJwk,EC,false,[]),eph=await crypto.subtle.generateKey(EC,true,["deriveKey"]);
-  const kek=await crypto.subtle.deriveKey({name:"ECDH",public:pub},eph.privateKey,{name:"AES-GCM",length:256},false,["encrypt"]);
-  return {epk:await crypto.subtle.exportKey("jwk",eph.publicKey),...await gcm(kek,raw)}}
-async function unwrap(w){const epk=await crypto.subtle.importKey("jwk",w.epk,EC,false,[]);
-  const kek=await crypto.subtle.deriveKey({name:"ECDH",public:epk},MYKEY,{name:"AES-GCM",length:256},false,["decrypt"]);return new Uint8Array(await ungcm(kek,w))}
-const team=k=>k.team??=[db.me].filter(Boolean);
-const fileName=k=>`${k.code.replace(/[^\w\-äöüÄÖÜß]/g,"_")}_${db.me.replace(/[^\w\-]/g,"_")}.verlauf.json`;
-async function sealKid(k){const raw=unb64(CK()[k.id]||(await caseKey(k),CK()[k.id])),keys={},miss=[];
-  for(const t of team(k)){const p=db.people?.[t];if(p)keys[t]=await wrapFor(raw,p.pub);else miss.push(t)}
-  const body=await gcm(await caseKey(k),enc(k));
-  return [JSON.stringify({verlaufsbogen:"fall",v:2,fall:k.code,id:k.id,von:db.me,team:team(k),gespeichert:new Date().toISOString(),keys,...body}),miss]}
-// --- Ein- und Ausgabe: PC mit verbundenem Ordner, sonst Teilen/Download und Dateiauswahl ---
-const canDir=()=>"showDirectoryPicker" in window;
-async function linkDir(){try{const h=await showDirectoryPicker({id:"verlaufsbogen",mode:"readwrite"});await idbSet("dir",h);db.dirName=h.name;save();render();toast(`Verbunden: ${h.name}`)}catch(e){}}
-async function linkedDir(){if(!canDir()||!db.dirName)return null;let h;try{h=await idbGet("dir")}catch(e){}if(!h)return null;
-  if(await h.queryPermission({mode:"readwrite"})==="granted")return h;try{return await h.requestPermission({mode:"readwrite"})==="granted"?h:null}catch(e){return null}}
-async function writeOut(name,txt){const dir=await linkedDir();
-  if(dir){const w=await (await dir.getFileHandle(name,{create:true})).createWritable();await w.write(txt);await w.close();return "dir"}
-  const file=new File([txt],name,{type:"application/json"});
-  if(matchMedia("(pointer:coarse)").matches&&navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file]});return "share"}catch(e){if(e.name==="AbortError")return null}}
-  download(name,txt,"application/json");return "download"}
-async function removeOut(name){const dir=await linkedDir();if(dir)try{await dir.removeEntry(name)}catch(e){}}
-async function ready(){if(!crypto.subtle){toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");return false}
-  if(!hasId()){toast("Richte zuerst in den Einstellungen deinen Zugang ein");go({tab:"profil"});return false}return !!await unlock()}
-async function saveCase(id,quiet){const k=kidById(id);if(!await ready())return;
-  if(!team(k).includes(db.me))k.team=[db.me,...team(k)];
-  const [txt,miss]=await sealKid(k),how=await writeOut(fileName(k),txt);if(!how)return;
-  SY()[k.id]={...SY()[k.id],saved:Date.now()};save();if(!quiet){render();
-  toast(how==="dir"?`Gespeichert: ${fileName(k)}`:"Speichere die Datei im OneDrive-Ordner „Pfad“");
-  if(miss.length)toast(`Für ${miss.join(", ")} fehlt noch der Zugang. Erst nach deren Einrichtung und einem Abgleich können sie den Fall öffnen.`)}}
-function pickAll(){$("#caseIn").click()}
-async function loadPicked(inp){const fs=[...inp.files];inp.value="";const r=await readAll(fs.map(f=>({name:f.name,text:()=>f.text()})));if(!r)return;render();
-  toast(`${r.n} Fall-Datei${r.n===1?"":"en"} gelesen${r.ch?`, ${r.ch} aktualisiert`:", nichts Neues"}${r.people?`, ${r.people} neue Kolleg:innen`:""}`)}
-async function readAll(files){if(!await ready())return;
-  let n=0,ch=0,locked=0,people=0;const cases=[];
-  for(const f of files){let o;try{o=JSON.parse(await f.text())}catch(e){continue}
-    if(o.verlaufsbogen==="lehrkraft"){const p=(db.people??={})[o.kuerzel];if(!p||JSON.stringify(p.pub)!==JSON.stringify(o.pub)){db.people[o.kuerzel]={name:o.name,pub:o.pub};people++}}
-    else if(o.verlaufsbogen==="fall")cases.push(o)}
-  cases.sort((a,b)=>(a.gespeichert||"").localeCompare(b.gespeichert||""));
-  for(const o of cases){const w=o.keys?.[db.me];if(!w){locked++;continue}
-    try{const raw=await unwrap(w),key=await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]),k=JSON.parse(dec(await ungcm(key,o)));
-      if(!SY()[k.id]?.rekey)CK()[k.id]=b64(raw);
-      const ex=kidById(k.id),was=ex&&(unsaved(ex)||SY()[k.id]?.rekey);n++;ch+=mergeKid(k);if(!was)(SY()[k.id]??={}).saved=Date.now()}catch(e){locked++}}
-  // Wurde ich aus einem Fall entfernt (neueste Datei ohne mich), verschwindet er von diesem Gerät
-  const newest={};cases.forEach(o=>{if(o.id)newest[o.id]=o});let gone=0;
-  for(const [id,o] of Object.entries(newest))if(kidById(id)&&Array.isArray(o.team)&&!o.team.includes(db.me)){db.kids=db.kids.filter(k=>k.id!==id);delete CK()[id];delete SY()[id];gone++}
-  if(gone)setTimeout(()=>toast(`${gone} Fall/Fälle entfernt: Du bist dort nicht mehr eingetragen.`),1600);
-  save();return {n,ch,locked,people}}
-let SYNCING=false,LASTSYNC=0,AUTOT=null;
-// Automatischer Abgleich am PC: nur wenn Ordner-Zugriff und Schlüssel ohne Rückfrage verfügbar sind
-async function autoReady(){if(!hasId()||!db.dirName||!canDir()||!crypto.subtle)return null;let h;try{h=await idbGet("dir")}catch(e){}
-  if(!h||await h.queryPermission({mode:"readwrite"})!=="granted")return null;if(!MYKEY)try{MYKEY=await idbGet("priv")}catch(e){}return MYKEY?h:null}
-async function autoSync(){if(SYNCING||document.hidden||rs)return;if(!await autoReady()){AUTOSTATE="pausiert";return}await syncAll(true)}
-let AUTOSTATE="";
-window.autoSoon=()=>{if(SYNCING||!db.dirName)return;clearTimeout(AUTOT);AUTOT=setTimeout(autoSync,15000)};
-setInterval(autoSync,3*60000);document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-LASTSYNC>60000)autoSync()});
-setTimeout(autoSync,1500);
-async function syncAll(quiet){if(SYNCING)return;const dir=quiet?await autoReady():await linkedDir();if(!dir)return quiet?null:toast("Bitte zuerst den OneDrive-Ordner verbinden");if(!quiet&&!await ready())return;
-  SYNCING=true;try{
-  const files=[];for await(const [name,h] of dir.entries())if(h.kind==="file"&&name.endsWith(".json"))files.push({name,text:async()=>(await h.getFile()).text()});
-  if(!files.some(f=>f.name===idFile()))await saveIdFile();
-  const r=await readAll(files);if(!r)return;let w=0;
-  for(const k of db.kids.filter(k=>unsaved(k)||SY()[k.id]?.rekey)){await saveCase(k.id,true);if(SY()[k.id])SY()[k.id].rekey=false;w++}
-  LASTSYNC=Date.now();AUTOSTATE="an";save();
-  const typing=document.activeElement?.matches?.("input,textarea,select");if(!quiet||!typing)render();
-  if(!quiet)toast(`Abgleich fertig: ${r.n} Fall-Datei${r.n===1?"":"en"} gelesen${r.ch?`, ${r.ch} aktualisiert`:""}, ${w} gespeichert${r.people?`, ${r.people} neue Kolleg:innen`:""}`);
-  else if(r.ch)toast(`${r.ch} Fall/Fälle mit neuen Einträgen von Kolleg:innen`)}finally{SYNCING=false}}
-// --- Zugriff pro Fall verwalten ---
-async function addMember(kid,who){const k=kidById(kid);if(!who||team(k).includes(who))return;k.team=[...team(k),who];k.upd=Date.now();save();render();
-  toast(`${who} hat nach dem nächsten Speichern Zugriff`)}
-async function removeMember(kid,who){const k=kidById(kid);
-  if(!await ask(`${who} aus dem Fall ${k.code} entfernen? Die App erzeugt einen neuen Fallschlüssel. ${who} kann neue Einträge dann nicht mehr lesen.`,{ok:"Entfernen",danger:true}))return;
-  k.team=team(k).filter(x=>x!==who);k.upd=Date.now();CK()[k.id]=b64(rnd(32));(SY()[k.id]??={}).rekey=true;
-  await removeOut(`${k.code.replace(/[^\w\-äöüÄÖÜß]/g,"_")}_${who.replace(/[^\w\-]/g,"_")}.verlauf.json`);save();render();toast("Entfernt. Jetzt speichern bzw. abgleichen.")}
-function accessCard(k){if(k.demo)return "";const st=SY()[k.id]||{},others=Object.keys(db.people||{}).filter(p=>!team(k).includes(p)).sort();
-  return `<div class="card noprint"><div class="between"><div><b>Zugriff und OneDrive</b><div class="muted small">${st.saved?`Gespeichert ${dDE(iso(new Date(st.saved)))}`:"Noch nie gespeichert"}${unsaved(k)||st.rekey?" · <span style='color:var(--new);font-weight:700'>Änderungen nicht gespeichert</span>":""}</div></div>
-  <button class="btn ${unsaved(k)||st.rekey?"pri":"ghost"}" onclick="saveCase('${k.id}')">${db.dirName?"Speichern":"In OneDrive speichern"}</button></div>
-  <div class="sub" style="margin-top:10px">Nur diese Lehrkräfte können den Fall öffnen:</div>
-  <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:6px">${team(k).map(t=>`<span class="mem">${esc(t)}${db.people?.[t]?.name?` <span class="small">${esc(db.people[t].name)}</span>`:""}${db.people?.[t]?"":` <span title="Zugang fehlt noch">⚠️</span>`}${t!==db.me?`<button aria-label="${esc(t)} entfernen" onclick="removeMember('${k.id}','${esc(t)}')">✕</button>`:" <span class='small'>(du)</span>"}</span>`).join("")}</div>
-  ${others.length?`<select style="margin-top:8px" onchange="addMember('${k.id}',this.value)"><option value="">+ Kolleg:in hinzufügen …</option>${others.map(p=>`<option value="${esc(p)}">${esc(p)}${db.people[p].name?" – "+esc(db.people[p].name):""}</option>`).join("")}</select>`
-   :`<p class="muted small" style="margin:8px 0 0">Kolleg:innen erscheinen hier, sobald sie ihren Zugang eingerichtet haben und du abgeglichen hast.</p>`}</div>`}
-function syncCard(){const ks=db.kids.filter(k=>unsaved(k)||SY()[k.id]?.rekey);
-  const idPart=hasId()?`<p class="small" style="margin:6px 0">Zugang eingerichtet für <b>${esc(db.id.kuerzel)}</b>${db.id.name?` (${esc(db.id.name)})`:""}. <button class="btn ghost small" onclick="lockDevice()">Auf diesem Gerät abmelden</button> <button class="btn ghost small" onclick="saveIdFile()">Zugangsdatei speichern</button></p>`
-   :`<label>Dein Name für Kolleg:innen <span class="sub">(optional, z. B. „Müller“)</span></label><input value="${esc(db.myName||"")}" onchange="db.myName=this.value.trim();save()">
-     <p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn pri" onclick="createId()">Zugang einrichten</button><button class="btn ghost" onclick="pickIdFile()">Ich habe schon einen Zugang</button></p>
-     <p class="muted small">Einmalig pro Lehrkraft. Auf weiteren Geräten „Ich habe schon einen Zugang“ wählen und die Datei „${esc(db.me||"Kürzel")}.lehrkraft.json“ aus dem Ordner laden.</p>`;
-  return `<div class="card"><h2 style="margin-top:0">OneDrive-Ablage</h2>
-  <div class="sub">Alle Fälle liegen verschlüsselt im gemeinsamen Ordner „Pfad“. Öffnen kann einen Fall nur, wer beim Kind unter „Zugriff“ eingetragen ist.</div>
-  ${idPart}
-  ${hasId()?(canDir()?`<p class="row" style="flex-wrap:wrap;margin-top:10px">${db.dirName?`<button class="btn pri" onclick="syncAll()">Jetzt abgleichen</button>`:""}<button class="btn ${db.dirName?"ghost":"pri"}" onclick="linkDir()">${db.dirName?"Anderen Ordner wählen":"OneDrive-Ordner verbinden"}</button></p>
-     <p class="muted small">${db.dirName?`Verbunden mit „${esc(db.dirName)}“. ${AUTOSTATE==="an"?`Gleicht automatisch ab (beim Öffnen, nach Änderungen, alle 3 Minuten)${LASTSYNC?`, zuletzt ${new Date(LASTSYNC).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})} Uhr`:""}.`:"Automatischer Abgleich pausiert: einmal „Jetzt abgleichen“ tippen, dann läuft er wieder."}`:"Wähle den Ordner „Pfad“ in deinem synchronisierten OneDrive (Chrome oder Edge)."}</p>`
-    :`<p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn pri" onclick="pickAll()">Aus OneDrive laden</button></p><p class="muted small">Durchsuchen → OneDrive → Ordner „Pfad“ → Auswählen → Alle auswählen. Speichern geht beim Kind.</p>`):""}
-  ${ks.length?`<p class="small" style="font-weight:700;color:var(--new)">Nicht gespeichert: ${ks.map(k=>esc(k.code)).join(", ")}</p>`:""}
-  <input type="file" id="caseIn" multiple accept=".json,application/json" hidden onchange="loadPicked(this)"><input type="file" id="idIn" accept=".json,application/json" hidden onchange="loadIdFile(this)"></div>`}
+async function askNewPw(msg){const pw=await askText(msg,"Passwort (mind. 8 Zeichen)","password");if(!pw)return null;if(pw.length<8){toast("Mindestens 8 Zeichen");return null}
+  if(await askText("Passwort wiederholen","Passwort","password")!==pw){toast("Passwörter sind verschieden");return null}return pw}
+// Eigene Sicherung: Passwort einmal festlegen; der daraus abgeleitete Schlüssel bleibt nicht auslesbar auf dem Gerät
+async function backupKey(){let k=null;try{k=await idbGet("bkey")}catch(e){}if(k&&db.bsalt)return {key:k,salt:db.bsalt};
+  const pw=await askNewPw("Lege ein Passwort für deine Sicherungen fest. Du brauchst es, um eine Sicherung auf einem anderen Gerät zu laden.");if(!pw)return null;
+  const salt=b64(rnd(16));k=await pwKey(pw,unb64(salt));
+  if(await ask("Passwort auf diesem Gerät merken? Dann geht die wöchentliche Sicherung mit einem Tipp.",{ok:"Merken",cancel:"Jedes Mal fragen"})){db.bsalt=salt;try{await idbSet("bkey",k)}catch(e){}save()}
+  return {key:k,salt}}
+async function forgetBackupPw(){await idbSet("bkey",null);delete db.bsalt;save();render();toast("Sicherungs-Passwort vergessen")}
+async function sealFile(art,payload,keyInfo){const body=await gcm(keyInfo.key,enc(payload));
+  return JSON.stringify({pfad:3,art,von:db.me||"",erstellt:new Date().toISOString(),anzahl:payload.kids.length,salt:keyInfo.salt,...body})}
+async function openFile(o){
+  if(o.pfad===3||(o.verlaufsbogen==="sicherung"&&o.salt)){for(;;){const pw=await askText(o.art==="teilen"?`Passwort für den geteilten Stand${o.von?` von ${o.von}`:""}`:"Passwort der Sicherung","Passwort","password");if(!pw)return null;
+    try{const k=await pwKey(pw,unb64(o.salt));if(o.pfad===3)return JSON.parse(dec(await ungcm(k,o)));
+      const raw=new Uint8Array(await ungcm(k,o.wrapped));return JSON.parse(dec(await ungcm(await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]),o)))}catch(e){toast("Passwort falsch")}}}
+  if(o.kids)return o; // alte, unverschlüsselte Sicherung
+  throw new Error("format")}
+async function giveFile(name,txt){const file=new File([txt],name,{type:"application/json"});
+  if(matchMedia("(pointer:coarse)").matches&&navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file]});return true}catch(e){if(e.name==="AbortError")return false}}
+  download(name,txt,"application/json");return true}
+/* ===== Schulserver (vorbereitet, Schnittstelle siehe server/README.md) =====
+   Die App arbeitet immer lokal. Ist ein Server eingetragen und erreichbar (Schul-WLAN), gleicht sie ab:
+   eigene Änderungen an freigegebenen Kindern hoch, Änderungen der Kolleg:innen herunter. Offline bleibt alles
+   im Zwischenspeicher auf dem Gerät und geht beim nächsten Kontakt raus. Freigabe pro Kind per Einladung (Kürzel). */
+const SV=()=>db.srv;
+const srvOn=()=>!!db.srv?.token;
+let SRVBUSY=false,SRVT=null,SRVREACH=null;
+async function api(path,body,timeout=4000){const s=SV(),c=new AbortController(),t=setTimeout(()=>c.abort(),timeout);
+  try{const r=await fetch(s.url.replace(/\/$/,"")+path,{method:body?"POST":"GET",headers:{"Content-Type":"application/json",...(s.token?{Authorization:"Bearer "+s.token}:{})},body:body?JSON.stringify(body):undefined,signal:c.signal});
+    const j=await r.json().catch(()=>({}));if(r.status===401&&s.token){s.token="";save();render();toast("Anmeldung am Schulserver abgelaufen. Bitte neu anmelden.")}if(!r.ok)throw Object.assign(new Error(j.fehler||r.status),{status:r.status});return j}
+  finally{clearTimeout(t)}}
+const mixedBlocked=u=>location.protocol==="https:"&&/^http:/i.test(u);
+async function srvConnect(){const url=$("#srvUrl").value.trim().replace(/\/$/,""),me=$("#srvMe").value.trim(),pw=$("#srvPw").value;
+  if(!/^https?:\/\//.test(url))return toast("Adresse mit http:// oder https:// eingeben");if(!me||!pw)return toast("Kürzel und Passwort eingeben");
+  if(mixedBlocked(url))return toast("Diese App läuft über https. Der Server braucht dann auch https, oder die App wird direkt vom Schulserver geöffnet.");
+  db.srv={url,token:"",rev:0,pushed:{},invites:[],people:[],last:0};
+  try{const r=await api("/api/login",{kuerzel:me,passwort:pw});Object.assign(db.srv,{token:r.token,me:r.kuerzel,name:r.name||""});db.me=r.kuerzel;save();toast("Mit dem Schulserver verbunden");await srvSync(true)}
+  catch(e){toast(e.name==="AbortError"||e.message==="Failed to fetch"?"Server nicht erreichbar":"Anmeldung fehlgeschlagen");db.srv={url,token:""};save()}render()}
+async function srvLogout(){if(!await ask("Vom Schulserver abmelden? Die Daten bleiben auf diesem Gerät.",{ok:"Abmelden"}))return;const u=db.srv?.url;db.srv={url:u,token:""};save();render()}
+const toPush=()=>db.kids.filter(k=>k.srv&&kidVer(k)>(SV().pushed[k.id]||0));
+async function srvSync(loud){if(!srvOn()||SRVBUSY)return;SRVBUSY=true;
+  try{const push=toPush().map(k=>structuredClone(k)),sent=Object.fromEntries(push.map(k=>[k.id,kidVer(k)]));
+    const r=await api("/api/sync",{since:SV().rev||0,push},8000);SRVREACH=true;
+    Object.assign(SV().pushed,sent);let ch=0;
+    for(const k of r.kids||[]){const ex=kidById(k.id),dirty=ex&&kidVer(ex)>(SV().pushed[k.id]||0);ch+=mergeKid({...k,srv:true});const nk=kidById(k.id);nk.srv=true;if(!dirty)SV().pushed[k.id]=kidVer(nk)}
+    let gone=0;for(const id of r.removed||[]){const k=kidById(id);if(k?.srv){db.kids=db.kids.filter(x=>x.id!==id);delete SV().pushed[id];gone++}}
+    Object.assign(SV(),{rev:r.rev,invites:r.invites||[],people:r.people||[],last:Date.now()});save();
+    const typing=document.activeElement?.matches?.("input,textarea,select");if(loud||!typing)render();
+    if(ch&&!loud)toast(`${ch} Kind${ch===1?"":"er"} mit neuen Einträgen von Kolleg:innen`);if(gone)toast(`${gone} Freigabe${gone===1?"":"n"} beendet, Kind von diesem Gerät entfernt`);
+    if(loud)toast("Abgleich fertig")}
+  catch(e){SRVREACH=false;if(loud)toast(e.status?`Server meldet: ${e.message}`:"Schulserver nicht erreichbar. Deine Änderungen bleiben auf dem Gerät und werden später übertragen.");if(loud)render()}
+  finally{SRVBUSY=false}}
+window.autoSoon=()=>{if(!srvOn()||SRVBUSY)return;clearTimeout(SRVT);SRVT=setTimeout(()=>srvSync(),5000)};
+setInterval(()=>srvSync(),60000);addEventListener("online",()=>srvSync());document.addEventListener("visibilitychange",()=>{if(!document.hidden)srvSync()});setTimeout(()=>srvSync(),1200);
+async function srvShare(kid){const k=kidById(kid);if(!await ask(`${k.code} auf dem Schulserver freigeben? Danach kannst du Kolleg:innen per Kürzel einladen.`,{ok:"Freigeben"}))return;
+  k.srv=true;k.team=[SV().me];k.upd=Date.now();save();await srvSync(true)}
+async function srvInvite(kid){const k=kidById(kid),who=(await askText(`Kolleg:in zu ${k.code} einladen. Kürzel eingeben:`,"z. B. MU")||"").trim();if(!who)return;
+  try{await api(`/api/faelle/${encodeURIComponent(kid)}/einladen`,{kuerzel:who});toast(`Einladung an ${who} verschickt`);await srvSync()}catch(e){toast(e.status?`Nicht möglich: ${e.message}`:"Schulserver nicht erreichbar")}render()}
+async function srvRemove(kid,who){const k=kidById(kid);if(!await ask(`${who} aus ${k.code} entfernen? ${who} sieht das Kind danach nicht mehr.`,{ok:"Entfernen",danger:true}))return;
+  try{await api(`/api/faelle/${encodeURIComponent(kid)}/entfernen`,{kuerzel:who});await srvSync()}catch(e){toast(e.status?`Nicht möglich: ${e.message}`:"Schulserver nicht erreichbar")}render()}
+async function srvAnswer(id,yes){try{await api(`/api/einladungen/${encodeURIComponent(id)}/${yes?"annehmen":"ablehnen"}`,{});await srvSync(true)}catch(e){toast(e.status?`Nicht möglich: ${e.message}`:"Schulserver nicht erreichbar")}}
+function invitesV(){if(!srvOn()||!SV().invites?.length)return "";
+  return SV().invites.map(i=>`<div class="card row" style="border:2px solid var(--acc)"><div class="grow small"><b>${esc(i.von)}</b> lädt dich zu <b>${esc(i.code)}</b>${i.cls?` (${esc(i.cls)})`:""} ein.</div><button class="btn ghost" onclick="srvAnswer('${esc(i.id)}',false)">Ablehnen</button><button class="btn pri" onclick="srvAnswer('${esc(i.id)}',true)">Annehmen</button></div>`).join("")}
+function srvStatus(){if(!srvOn())return "";const n=toPush().length,t=SV().last?new Date(SV().last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"";
+  return SRVREACH===false?`Schulserver nicht erreichbar${n?`, ${n} Kind${n===1?"":"er"} warten auf Übertragung`:""}. Alles ist auf dem Gerät gespeichert.`:`Verbunden${t?`, zuletzt abgeglichen ${t} Uhr`:""}${n?`, ${n} Änderung${n===1?"":"en"} ausstehend`:""}.`}
+function srvKidCard(k){if(k.demo||!srvOn())return "";
+  if(!k.srv)return `<div class="card noprint row"><div class="grow small"><b>Schulserver</b><br><span class="muted">Nur auf diesem Gerät.</span></div><button class="btn" onclick="srvShare('${k.id}')">Freigeben</button></div>`;
+  const pend=(k.pending||[]);
+  return `<div class="card noprint"><b>Freigegeben für</b><div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${(k.team||[]).map(t=>`<span class="mem">${esc(t)}${t===SV().me?" <span class='small'>(du)</span>":`<button aria-label="${esc(t)} entfernen" onclick="srvRemove('${k.id}','${esc(t)}')">✕</button>`}</span>`).join("")}${pend.map(t=>`<span class="mem" style="opacity:.6">${esc(t)} <span class="small">eingeladen</span></span>`).join("")}</div>
+  <p style="margin:10px 0 0"><button class="btn" onclick="srvInvite('${k.id}')">+ Kolleg:in einladen</button></p><p class="muted small" style="margin:6px 0 0">${srvStatus()}</p></div>`}
+function srvCard(){const s=db.srv||{};
+  if(srvOn())return `<div class="card"><h2 style="margin-top:0">Schulserver</h2><p class="small">Angemeldet als <b>${esc(s.me)}</b> bei ${esc(s.url)}.</p><p class="muted small">${srvStatus()}</p>
+    <p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="srvSync(true)">Jetzt abgleichen</button><button class="btn ghost" onclick="srvLogout()">Abmelden</button></p>
+    <p class="muted small">Abgeglichen werden nur Kinder, die du beim Kind freigegeben hast. Alles andere bleibt nur auf diesem Gerät.</p></div>`;
+  return `<details class="card"><summary style="font-weight:800;font-size:1.1rem">Schulserver <span class="muted small" style="font-weight:400">(in Vorbereitung)</span></summary>
+    <p class="muted small">Sobald ein Pfad-Server im Schulnetz läuft, trägst du hier Adresse, Kürzel und Passwort ein. Dann gleicht die App im Schul-WLAN automatisch ab.</p>
+    <label>Adresse</label><input id="srvUrl" placeholder="z. B. https://pfad.schule.local" value="${esc(s.url||"")}">
+    <div class="two"><div><label>Kürzel</label><input id="srvMe" value="${esc(db.me||"")}"></div><div><label>Passwort</label><input id="srvPw" type="password"></div></div>
+    <p><button class="btn" onclick="srvConnect()">Verbinden</button></p></details>`}
 function setR(i,j,v){db.raster[i][j]=v;if(j>2&&!v)db.raster[i].length=3;save();render()}
 function addR(){const l=db.raster.at(-1),n=(parseInt(l[0])||db.raster.length)+1;db.raster.push([n+".",l[2],l[2]]);save();render()}
 function profilV(){
   const n=db.kids.reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0),0);
   return `<h1>Einstellungen</h1>
   <div class="card"><label style="margin-top:0">Dein Kürzel</label><div class="sub">Wird bei jeder Einschätzung gespeichert. Hilfreich, wenn ihr Daten im Team zusammenführt.</div>
-  ${hasId()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, weil dein Zugang daran hängt.</div>`:`<input value="${esc(db.me)}" placeholder="z. B. MU" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">`}
+  ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`<input value="${esc(db.me)}" placeholder="z. B. MU" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">`}
   <label>Fächer</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
   <input value="${esc(db.subjects.join(", "))}" onchange="db.subjects=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')">
   <label>Klassen</label><div class="sub">Mit Komma getrennt.</div>
   <input value="${esc(db.classes.join(", "))}" onchange="db.classes=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')"></div>
-  ${syncCard()}
   <div class="card"><h2 style="margin-top:0">Stundenraster</h2><div class="sub">Damit beim Bewerten die laufende Stunde vorausgewählt ist.</div>
   <div class="rast"><span></span><span class="sub">Beginn</span><span class="sub">Ende</span>${db.raster.map((r,i)=>`<b>${esc(r[0])}</b><input type="time" value="${r[1]}" onchange="setR(${i},1,this.value)"><input type="time" value="${r[2]}" onchange="setR(${i},2,this.value)">`).join("")}</div>
   <details style="margin-top:10px"${db.raster.some(r=>r[3])?" open":""}><summary class="small" style="font-weight:700">Abweichende Zeiten Di und Fr</summary><div class="sub">Leer lassen, wenn gleich.</div>
@@ -871,49 +835,69 @@ function profilV(){
   <p class="muted small">Es gibt nur ein Ziel pro Woche, keine Punkte und keine Abzeichen. Belohnt wird Regelmäßigkeit, nicht Menge. Wochen ohne jeden Eintrag (Ferien, Krankheit) unterbrechen die Reihe nicht.</p>`
   :`<p class="muted small">Ausgeschaltet: Nach dem Speichern erscheint nur eine kurze Bestätigung.</p>`}</div>
   <div class="card"><h2 style="margin-top:0">Daten</h2><p class="muted">${db.kids.length} Kinder · ${n} Einschätzungen auf diesem Gerät</p>
-  <p class="row" style="flex-wrap:wrap"><button class="btn" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="$('#imp').click()">Sicherung laden</button></p>
+  <p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Datei laden</button></p>
   <input type="file" id="imp" accept=".json,application/json" hidden onchange="importJSON(this)">
-  <p class="muted small">Speichere regelmäßig eine Sicherung im Schul-OneDrive. Wird der Browserspeicher gelöscht, sind die Daten sonst weg. Sicherungen von Kolleg:innen kannst du laden und zusammenführen.</p>
+  <p class="muted small">${db.lastBackup?`Letzte Sicherung: ${dDEy(iso(new Date(db.lastBackup)))}. `:""}Sicherung: alle deine Kinder, nur für dich, etwa einmal pro Woche. Teilen: nur ausgewählte Kinder, für eine Kollegin oder einen Kollegen. Beim Laden wählst du pro Kind, was du ergänzt.</p>
+  ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}
   <p><button class="btn" onclick="demo()">Fiktiven Beispielfall laden</button></p>
   <p><button class="btn ghost danger" onclick="wipe()">Alle Daten auf diesem Gerät löschen</button></p></div>
+  ${srvCard()}
   <div class="card"><h2 style="margin-top:0">Datenschutz</h2>
-  <p>Die Daten liegen in diesem Browser auf diesem Gerät. In OneDrive landen sie nur verschlüsselt. Öffnen kann einen Fall nur, wer beim Kind unter „Zugriff“ eingetragen ist. Es gibt keinen eigenen Server.</p>
+  <p>Die Daten liegen in diesem Browser auf diesem Gerät. Sie verlassen es nur als verschlüsselte Datei, wenn du sicherst oder teilst${srvOn()?", oder für freigegebene Kinder an euren Schulserver":""}.</p>
   <p>Lege Kinder nur mit Kürzel an. Schreibe in Kommentare keine Namen.</p>
-  <p>Sicherungen sind verschlüsselt: mit deinem Zugang oder, ohne Zugang, mit einem eigenen Passwort. Speichere sie trotzdem nur auf dienstlichem Speicher.</p><p>Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Nutze deshalb nur dienstliche Geräte mit Code-Sperre.</p>
+  <p>Sicherungen und geteilte Stände sind mit Passwort verschlüsselt. Speichere sie trotzdem nur auf dienstlichem Speicher.</p><p>Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Nutze deshalb nur dienstliche Geräte mit Code-Sperre.</p>
   <p>Vor dem Einsatz mit echten Fällen: Absprache mit Schulleitung und Datenschutzbeauftragten.</p></div>
   <p class="muted small" style="text-align:center">Pfad · schulinterner Prototyp</p>`;
 }
 function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
-async function sealBackup(obj){if(!crypto.subtle)throw new Error("nocrypto");const key=crypto.getRandomValues(new Uint8Array(32)),body=await gcm(await crypto.subtle.importKey("raw",key,"AES-GCM",false,["encrypt"]),enc(obj));
-  if(hasId())return {verlaufsbogen:"sicherung",fuer:db.id.kuerzel,keys:{[db.id.kuerzel]:await wrapFor(key,db.id.pub)},...body};
-  const pw=await askText("Passwort für diese Sicherung (mind. 8 Zeichen). Ohne Passwort lässt sie sich nicht wieder laden.","Passwort","password");
-  if(!pw)return null;if(pw.length<8){toast("Mindestens 8 Zeichen");return null}
-  if(await askText("Passwort wiederholen","Passwort","password")!==pw){toast("Passwörter sind verschieden");return null}
-  const salt=rnd(16);return {verlaufsbogen:"sicherung",salt:b64(salt),wrapped:await gcm(await pwKey(pw,salt),key),...body}}
-async function openBackup(o){let key;
-  if(o.keys){if(!hasId()||!o.keys[db.me]){toast(`Diese Sicherung gehört zum Zugang ${o.fuer}. Richte zuerst diesen Zugang ein.`);return null}if(!await unlock())return null;key=await unwrap(o.keys[db.me])}
-  else for(;;){const pw=await askText("Passwort der Sicherung","Passwort","password");if(!pw)return null;try{key=new Uint8Array(await ungcm(await pwKey(pw,unb64(o.salt)),o.wrapped));break}catch(e){toast("Passwort falsch")}}
-  return JSON.parse(dec(await ungcm(await crypto.subtle.importKey("raw",key,"AES-GCM",false,["decrypt"]),o)))}
-async function exportJSON(){const {sync,ckeys,id,...rest}=db,name=`pfad-sicherung-${today()}.json`;let sealed;
-  try{sealed=await sealBackup(rest)}catch(e){return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.")}if(!sealed)return;const txt=JSON.stringify(sealed);
-  const file=new File([txt],name,{type:"application/json"});let done=false;
-  if(matchMedia("(pointer:coarse)").matches&&navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file]});done=true}catch(e){if(e.name==="AbortError")return}}
-  if(!done)download(name,txt,"application/json");db.lastBackup=Date.now();save();render();toast("Sicherung erstellt. Lege sie in deinem Schul-OneDrive ab.")}
-function importJSON(inp){const f=inp.files[0];if(!f)return;inp.value="";f.text().then(async t=>{let d;try{d=JSON.parse(t)}catch(e){return toast("Datei nicht lesbar")}
-  if(d.verlaufsbogen==="sicherung"){try{d=await openBackup(d)}catch(e){return toast("Sicherung nicht lesbar")}if(!d)return}
-  if(!d.kids)return toast("Keine gültige Sicherung");
-  const merge=!db.kids.length||await ask("Sollen die Daten aus der Sicherung zu den vorhandenen dazukommen?",{ok:"Zusammenführen",cancel:"Ersetzen"});
-  if(!merge&&!await ask("Vorhandene Daten wirklich ersetzen? Sie gehen dabei verloren.",{ok:"Ersetzen",danger:true}))return;
-  if(merge){for(const k of d.kids){const ex=kidById(k.id);if(!ex){db.kids.push(k);continue}
-    const dids=new Set((ex.diary??=[]).map(e=>e.id));(k.diary||[]).forEach(e=>dids.has(e.id)||ex.diary.push(e));
-    for(const g of k.goals){const eg=goalById(ex,g.id);if(!eg){ex.goals.push(g);continue}const ids=new Set(eg.entries.map(e=>e.id));g.entries.forEach(e=>ids.has(e.id)||eg.entries.push(e))}}
-    (d.classes||[]).forEach(c=>db.classes.includes(c)||db.classes.push(c))}
-  else db={...d,me:db.me||d.me||""};
-  save();toast("Sicherung geladen");go({tab:"klassen"})})}
+/* ===== Sicherung, Teilen, Import mit Auswahl ===== */
+const realKid=k=>!k.demo;
+async function exportJSON(){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
+  const ki=await backupKey();if(!ki)return;
+  const {srv,bsalt,...rest}=db,payload={...rest,kids:db.kids.filter(realKid)};
+  if(!await giveFile(`pfad-sicherung-${db.me||"ohne"}-${today()}.json`,await sealFile("sicherung",payload,ki)))return;
+  db.lastBackup=Date.now();save();render();toast("Sicherung erstellt. Lege sie auf deinem Dienstgerät bzw. im Schul-OneDrive ab.")}
+// Stand einzelner Kinder für Kolleg:innen
+async function shareKids(pre){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
+  const ks=db.kids.filter(realKid).sort((a,b)=>a.code.localeCompare(b.code));if(!ks.length)return toast("Noch keine Kinder angelegt");
+  const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Welche Kinder möchtest du teilen?</p><p class="small muted" style="margin:0 0 10px">Geteilt wird alles zu diesen Kindern: Verhalten, Einschätzungen, Tagebuch.</p>
+    <div style="max-height:46vh;overflow:auto">${ks.map(k=>`<label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" value="${k.id}" ${pre===k.id||(!pre&&ks.length===1)?"checked":""}> ${esc(k.code)} <span class="muted small" style="font-weight:400">${esc(k.cls||"")}</span></label>`).join("")}</div>
+    <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Weiter</button></div>`,
+    (el,done)=>{el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done([...el.querySelectorAll("input:checked")].map(i=>i.value))});
+  if(!sel||!sel.length)return;
+  const pw=await askNewPw("Passwort für diesen Stand festlegen. Sag es der Kollegin oder dem Kollegen mündlich, nicht per Mail.");if(!pw)return;
+  const salt=b64(rnd(16)),kids=sel.map(kidById);
+  const name=`pfad-${kids.length===1?kids[0].code.replace(/[^\w\-]/g,"_"):kids.length+"-kinder"}-von-${(db.me||"ohne").replace(/[^\w\-]/g,"_")}-${today()}.json`;
+  if(await giveFile(name,await sealFile("teilen",{kids,classes:[...new Set(kids.map(k=>k.cls).filter(Boolean))]},{key:await pwKey(pw,unb64(salt)),salt})))toast(`Stand von ${kids.length} Kind${kids.length===1?"":"ern"} erstellt`)}
+// Import: erst ansehen und auswählen, dann ergänzen
+let IMP=null;
+function importJSON(inp){const f=inp.files[0];if(!f)return;inp.value="";f.text().then(async t=>{let o,d;try{o=JSON.parse(t)}catch(e){return toast("Datei nicht lesbar")}
+  if(!crypto.subtle&&(o.pfad||o.salt))return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
+  try{d=await openFile(o)}catch(e){return toast("Keine Pfad-Datei")}if(!d)return;if(!Array.isArray(d.kids))return toast("Keine Pfad-Datei");
+  const kids=d.kids.filter(realKid);
+  IMP={art:o.art||"sicherung",von:o.von||d.me||"",erstellt:o.erstellt||"",d,kids,sel:new Set(kids.filter(k=>{const x=diffKid(k);return x.neu||!x.leer}).map(k=>k.id)),settings:!db.kids.length&&(o.art||"sicherung")==="sicherung"};
+  go({tab:"profil",imp:true})})}
+function importV(){if(!IMP){view={tab:"profil"};return profilV()}
+  const rows=IMP.kids.map(k=>{const x=diffKid(k),on=IMP.sel.has(k.id);
+    const what=x.neu?`neu · ${x.goals} Verhalten · ${x.entries} Einschätzung${x.entries===1?"":"en"} · ${x.diary} Tagebuch`
+      :x.leer?"nichts Neues":[x.goals&&`${x.goals} Verhalten`,x.entries&&`+${x.entries} Einschätzung${x.entries===1?"":"en"}`,x.diary&&`+${x.diary} Tagebuch`,x.changed&&`${x.changed} geändert`,x.dels&&`${x.dels} gelöscht`].filter(Boolean).join(" · ");
+    return `<label class="card row" style="margin:8px 0;align-items:flex-start;${x.leer?"opacity:.6":""}"><input type="checkbox" style="width:auto;margin-top:4px" ${on?"checked":""} ${x.leer?"disabled":""} onchange="this.checked?IMP.sel.add('${k.id}'):IMP.sel.delete('${k.id}');render()">
+      <span class="grow"><b>${esc(k.code)}</b> <span class="muted small">${esc(k.cls||"")}</span><br><span class="small ${x.neu?"":"muted"}" style="${x.neu?"color:var(--up);font-weight:700":""}">${x.neu?"":"vorhanden: "}${what}</span></span></label>`}).join("");
+  return `<button class="btn ghost" onclick="IMP=null;go({tab:'profil'})">‹ Abbrechen</button>
+  <h1>${IMP.art==="teilen"?"Geteilten Stand übernehmen":"Sicherung laden"}</h1>
+  <p class="muted">${IMP.von?`Von ${esc(IMP.von)}`:""}${IMP.erstellt?` · erstellt ${dDEy(IMP.erstellt.slice(0,10))}`:""} · ${IMP.kids.length} Kind${IMP.kids.length===1?"":"er"}</p>
+  <p class="small">Wähle, welche Kinder du übernimmst. Bei vorhandenen Kindern wird <b>ergänzt</b>: Neues kommt dazu, deine eigenen Einträge bleiben erhalten. Bei gleichen Einträgen gilt die neuere Fassung.</p>
+  ${IMP.kids.length>1?`<p class="row"><button class="btn ghost small" onclick="IMP.kids.forEach(k=>diffKid(k).leer||IMP.sel.add(k.id));render()">Alle auswählen</button><button class="btn ghost small" onclick="IMP.sel.clear();render()">Keine</button></p>`:""}
+  ${rows}
+  ${IMP.art==="sicherung"?`<label class="row" style="margin:12px 0;font-weight:600"><input type="checkbox" style="width:auto" ${IMP.settings?"checked":""} onchange="IMP.settings=this.checked"> Auch Einstellungen übernehmen (Fächer, Stundenraster, Wochenziel)</label>`:""}
+  <p><button class="btn pri block" ${IMP.sel.size||IMP.settings?"":"disabled"} onclick="applyImport()">${IMP.sel.size?`${IMP.sel.size} Kind${IMP.sel.size===1?"":"er"} übernehmen`:"Übernehmen"}</button></p>`}
+function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=mergeKid(structuredClone(k))}
+  if(IMP.settings){const d=IMP.d;for(const f of ["subjects","raster","game"])if(d[f])db[f]=d[f];if(!db.me&&d.me)db.me=d.me;(d.classes||[]).forEach(c=>db.classes.includes(c)||db.classes.push(c))}
+  const m=IMP.sel.size;IMP=null;save();toast(m?`${m} Kind${m===1?"":"er"} übernommen${n<m?` (${m-n} ohne Änderung)`:""}`:"Einstellungen übernommen");go({tab:"klassen"})}
 function exportCSV(kid,gid){const k=kidById(kid),g=goalById(k,gid);
   const rows=[["Kürzel","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value??"nicht beobachtet",e.note,e.rater]));
   download(`verlauf-${k.code}-${today()}.csv`,"﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
-async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,id:db.id,people:db.people,myName:db.myName,dirName:db.dirName,classes:[],kids:[]};save();go({tab:"heute"})}
+async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,classes:[],kids:[]};save();go({tab:"heute"})}
 function demo(){
   if(db.kids.some(k=>k.demo))return toast("Beispielfall ist schon da");
   if(!db.classes.includes("7B"))db.classes.push("7B");
