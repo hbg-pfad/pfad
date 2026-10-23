@@ -356,7 +356,7 @@ function envHint(){if(sessionStorage.getItem("hideEnv"))return "";
   return ""}
 const ownCount=()=>db.kids.filter(k=>!k.demo).reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0)+(k.diary||[]).length,0);
 function backupHint(){const n=ownCount(),last=db.lastBackup||0,days=(Date.now()-last)/864e5;
-  if(n<5||days<14||(db.dirName&&hasId()))return "";
+  if(n<5||days<7||(db.dirName&&hasId()))return "";
   return `<div class="card row"><div class="grow small"><b>Sicherung fällig.</b> ${last?`Letzte vor ${Math.floor(days)} Tagen.`:"Noch keine Sicherung."} Ohne Sicherung sind die Daten weg, wenn das Gerät verloren geht.</div><button class="btn pri" onclick="exportJSON()">Sichern</button></div>`}
 function heuteV(){
   const t=today(),wk=addDays(t,-6);
