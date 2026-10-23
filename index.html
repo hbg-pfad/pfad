@@ -980,7 +980,7 @@ function profilV(){
   <div class="card row"><div class="grow"><b>Anleitung</b><br><span class="small muted">In 8 Schritten erklärt, wie Pfad funktioniert.</span></div><button class="btn" onclick="openHelp()">Öffnen</button></div>
   <div class="card"><label style="margin-top:0">Dein Kürzel</label><div class="sub">Wird bei jeder Einschätzung gespeichert. Hilfreich, wenn ihr Daten im Team zusammenführt.</div>
   ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`${mtip("me")}<input class="${mk("me")}" value="${esc(db.me)}" placeholder="z. B. MU" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">`}
-  <label>Fächer</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
+  <label>Alle Fächer deiner Schule</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
   <input value="${esc(db.subjects.join(", "))}" onchange="db.subjects=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')">
   <label>Klassen</label><div class="sub">Mit Komma getrennt.</div>
   <input value="${esc(db.classes.join(", "))}" onchange="db.classes=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')"></div>
