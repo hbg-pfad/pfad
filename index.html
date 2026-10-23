@@ -1006,9 +1006,28 @@ function download(name,text,type){const a=document.createElement("a");a.href=URL
 const realKid=k=>!k.demo;
 async function exportJSON(){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
   const ki=await backupKey();if(!ki)return;
+  if(!await backupTip(!!db.backupTip))return;
   const {srv,bsalt,...rest}=db,payload={...rest,kids:db.kids.filter(realKid)};
-  if(!await giveFile(`pfad-sicherung-${db.me||"ohne"}-${today()}.json`,await sealFile("sicherung",payload,ki)))return;
-  db.lastBackup=Date.now();save();render();toast("Sicherung erstellt. Sie liegt jetzt auf deinem Dienstgerät (z. B. in „Dateien“ → „Auf meinem iPad“).")}
+  if(!await giveFile(backupName(),await sealFile("sicherung",payload,ki)))return;
+  db.lastBackup=Date.now();db.backupTip=1;save();render();toast(isIOS?"Sicherung erstellt. Sie liegt in „Dateien“ → „Auf meinem "+(/iPad/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Mac/.test(navigator.userAgent)?"iPad":"iPhone")+"“.":"Sicherung erstellt.")}
+// Fester Dateiname, damit jede neue Sicherung die alte ersetzt
+const backupName=()=>`pfad-sicherung-${(db.me||"ohne").replace(/[^\w-]/g,"")}.json`;
+// Vor jeder Sicherung: beim ersten Mal wohin die Datei gehört, danach wie sie die alte ersetzt
+async function backupTip(again){const touch=matchMedia("(pointer:coarse)").matches,dev=/iPad/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Mac/.test(navigator.userAgent)?"iPad":"iPhone";
+  const ok=html=>dlg(html+`<div class="duo"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">${again?"Weiter":"Verstanden"}</button></div>`,(el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"));el.querySelector('[data-a="1"]').focus()}).then(v=>v===true);
+  if(again){const steps=isIOS?[`<b>„In Dateien sichern“</b> → <b>„Auf meinem ${dev}“</b> → Ordner <b>„Pfad“</b>.`,`<b>„Sichern“</b> und dann <b>„Ersetzen“</b> tippen.`]
+      :touch?[`Wieder im Ordner <b>„Pfad“</b> speichern.`,`Fragt das Gerät nach, die alte Datei <b>ersetzen</b>.`]
+      :[`Die Datei landet in <b>„Downloads“</b>.`,`Verschiebe sie in deinen Ordner <b>„Pfad“</b> und <b>ersetze</b> dort die alte Datei.`];
+    return ok(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Alte Sicherung ersetzen</p>
+    <p class="small" style="margin:0 0 8px">Speichere die neue Sicherung an derselben Stelle wie die letzte (<b>${esc(backupName())}</b>):</p>
+    <ol class="small" style="padding-left:20px;margin:0 0 14px">${steps.map(x=>`<li style="margin:6px 0">${x}</li>`).join("")}</ol>`)}
+  const steps=isIOS?[`Gleich öffnet sich das Teilen-Fenster. Tippe dort auf <b>„In Dateien sichern“</b>.`,`Wähle <b>„Auf meinem ${dev}“</b>. Lege beim ersten Mal einen Ordner <b>„Pfad“</b> an und öffne ihn.`,`Tippe auf <b>„Sichern“</b>. Bei späteren Sicherungen wählst du wieder diesen Ordner.`]
+    :touch?[`Gleich öffnet sich das Teilen-Fenster. Wähle dort <b>„Dateien“</b> bzw. <b>„In Dateien speichern“</b>.`,`Speichere die Datei auf dem Gerät, am besten in einem Ordner <b>„Pfad“</b>.`]
+    :[`Die Datei landet im Ordner <b>„Downloads“</b>.`,`Verschiebe sie in einen eigenen Ordner <b>„Pfad“</b> auf deinem Dienstgerät.`];
+  return ok(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Wohin mit der Sicherung?</p>
+  <p class="small" style="margin:0 0 8px">Die Sicherung ist eine Datei. Sie muss in den Dateien auf deinem Dienstgerät liegen, sonst hilft sie im Notfall nicht.</p>
+  <ol class="small" style="padding-left:20px;margin:0 0 8px">${steps.map(x=>`<li style="margin:6px 0">${x}</li>`).join("")}</ol>
+  <p class="small muted" style="margin:0 0 14px">Nicht per Mail, AirDrop, Messenger oder in eine Cloud schicken. Bei jeder weiteren Sicherung ersetzt du einfach diese Datei.</p>`)}
 // Stand einzelner Kinder für Kolleg:innen
 async function shareKids(pre){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
   const ks=db.kids.filter(realKid).sort((a,b)=>a.code.localeCompare(b.code));if(!ks.length)return toast("Noch keine Kinder angelegt");
