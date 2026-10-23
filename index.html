@@ -386,8 +386,8 @@ function envHint(){if(sessionStorage.getItem("hideEnv"))return "";
   return ""}
 const ownCount=()=>db.kids.filter(k=>!k.demo).reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0)+(k.diary||[]).length,0);
 function backupHint(){const n=ownCount(),last=db.lastBackup||0,days=(Date.now()-last)/864e5;
-  if(n<5||days<7)return "";
-  return `<div class="card row"><div class="grow small"><b>Sicherung fällig.</b> ${last?`Letzte vor ${Math.floor(days)} Tagen.`:"Noch keine Sicherung."} Ohne Sicherung sind die Daten weg, wenn das Gerät verloren geht.</div><button class="btn pri" onclick="exportJSON()">Sichern</button></div>`}
+  if(n<5||days<5)return "";
+  return `<div class="card row"><div class="grow small"><b>Sicherung fällig.</b> ${last?`Letzte vor ${Math.floor(days)} Tagen.`:"Noch keine Sicherung."} Ohne Sicherung sind die Daten weg, wenn das Gerät verloren geht, das App-Symbol gelöscht oder der Browserspeicher geleert wird.</div><button class="btn pri" onclick="exportJSON()">Sichern</button></div>`}
 function heuteV(){
   const t=today(),wk=addDays(t,-6);
   const all=db.kids.flatMap(k=>k.goals.flatMap(g=>g.entries));
@@ -415,7 +415,7 @@ const HELP=[
  {t:"3. Nach der Stunde bewerten",p:"Auf „Heute“ tippst du beim Kind auf „Bewerten“.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
  {t:"4. Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
  {t:"5. Verlauf ansehen",p:"Unter „Verlauf“ siehst du jedes Verhalten als Kurve mit Ziel und Förderbeginn.",l:["Die App sagt in Worten, ob es eher besser, stabil oder eher schwieriger wird.","Der Text für die Evaluation im Förderplan lässt sich kopieren.","Das Gesprächsblatt für Kind und Eltern druckst du auf einer Seite aus."]},
- {t:"6. Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Einmal pro Woche: Einstellungen → „Sicherung speichern“. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder teilen“ und nur die Kinder auswählen, um die es geht.","Eine geteilte Datei lädst du über „Datei laden“. Neues kommt dazu, deine Einträge bleiben."]},
+ {t:"6. Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Spätestens alle 5 Tage: Einstellungen → „Sicherung speichern“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder teilen“ und nur die Kinder auswählen, um die es geht.","Eine geteilte Datei lädst du über „Datei laden“. Neues kommt dazu, deine Einträge bleiben."]},
  {t:"7. Sicher arbeiten",p:"Ein paar Regeln, damit die Daten geschützt bleiben.",l:["Nur auf dem Dienstgerät mit Gerätecode und automatischer Sperre.","Auf iPad und iPhone: In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Mit iOS 27 liegt „Teilen“ im Seitenmenü links neben der Adresse.","Das Symbol nicht löschen, ohne vorher zu sichern. Sonst sind die Daten weg."]}];
 function openHelp(){db.seenHelp=1;save();go({...view,help:0,back:view.tab})}
 function helpV(){const i=view.help,h=HELP[i],last=i===HELP.length-1;
@@ -789,7 +789,7 @@ async function askNewPw(msg){const pw=await askText(msg,"Passwort (mind. 8 Zeich
 async function backupKey(){let k=null;try{k=await idbGet("bkey")}catch(e){}if(k&&db.bsalt)return {key:k,salt:db.bsalt};
   const pw=await askNewPw("Lege ein Passwort für deine Sicherungen fest. Du brauchst es, um eine Sicherung auf einem anderen Gerät zu laden.");if(!pw)return null;
   const salt=b64(rnd(16));k=await pwKey(pw,unb64(salt));
-  if(await ask("Passwort auf diesem Gerät merken? Dann geht die wöchentliche Sicherung mit einem Tipp.",{ok:"Merken",cancel:"Jedes Mal fragen"})){db.bsalt=salt;try{await idbSet("bkey",k)}catch(e){}save()}
+  if(await ask("Passwort auf diesem Gerät merken? Dann geht jede Sicherung mit einem Tipp.",{ok:"Merken",cancel:"Jedes Mal fragen"})){db.bsalt=salt;try{await idbSet("bkey",k)}catch(e){}save()}
   return {key:k,salt}}
 async function forgetBackupPw(){await idbSet("bkey",null);delete db.bsalt;save();render();toast("Sicherungs-Passwort vergessen")}
 async function sealFile(art,payload,keyInfo){const body=await gcm(keyInfo.key,enc(payload));
@@ -900,7 +900,7 @@ function profilV(){
   <div class="card"><h2 style="margin-top:0">Daten</h2><p class="muted">${db.kids.length} Kinder · ${n} Einschätzungen auf diesem Gerät</p>
   <p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Datei laden</button></p>
   <input type="file" id="imp" accept=".json,application/json" hidden onchange="importJSON(this)">
-  <p class="muted small">${db.lastBackup?`Letzte Sicherung: ${dDEy(iso(new Date(db.lastBackup)))}. `:""}Sicherung: alle deine Kinder, nur für dich, etwa einmal pro Woche. Teilen: nur ausgewählte Kinder, für eine Kollegin oder einen Kollegen. Beim Laden wählst du pro Kind, was du ergänzt.</p>
+  <p class="muted small">${db.lastBackup?`Letzte Sicherung: ${dDEy(iso(new Date(db.lastBackup)))}. `:""}Sicherung: alle deine Kinder, nur für dich, spätestens alle 5 Tage. Teilen: nur ausgewählte Kinder, für eine Kollegin oder einen Kollegen. Beim Laden wählst du pro Kind, was du ergänzt.</p>
   ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}
   <p><button class="btn" onclick="demo()">Fiktiven Beispielfall laden</button></p>
   <p><button class="btn ghost danger" onclick="wipe()">Alle Daten auf diesem Gerät löschen</button></p></div>
