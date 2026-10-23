@@ -209,6 +209,28 @@ input.sw:checked{background:var(--acc)}input.sw:checked::after{left:23px}
 .ctxline span{float:right;color:var(--acc)}
 .ruler.s5{grid-template-columns:repeat(5,1fr);gap:8px}.ruler.s5 button{height:64px;font-size:1.4rem}
 .ruler.s2{grid-template-columns:1fr 1fr;gap:10px}.ruler.s2 button{height:72px;font-size:1.05rem;padding:0 6px;white-space:normal}
+/* Einrichtung: rot markiert, wo man tippen soll */
+.mark{outline:4px solid #e0201b!important;outline-offset:3px;animation:markp 1.6s ease-out infinite}
+@keyframes markp{0%{box-shadow:0 0 0 0 rgba(224,32,27,.55)}70%{box-shadow:0 0 0 14px rgba(224,32,27,0)}100%{box-shadow:0 0 0 0 rgba(224,32,27,0)}}
+.marktip{color:#d01c17;font-weight:800;margin:12px 0 8px;display:flex;gap:8px;align-items:center}
+.marktip::before{content:"↓";font-size:1.2rem;line-height:1;flex:none}
+@media (prefers-color-scheme:dark){.marktip,.setup .do{color:#ff6b61!important}}
+.setup{list-style:none;padding:0;margin:14px 0;display:grid;gap:10px}
+.setup li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:12px 14px}
+.setup li.now{border:2.5px solid #e0201b}
+.setup .n{width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--ink);display:grid;place-items:center;font-weight:800;flex:none}
+.setup li.now .n{background:#e0201b;color:#fff}
+.setup .do{display:block;color:#d01c17;font-weight:800;font-size:1.08rem}
+.setup .wo{display:block;color:var(--muted);font-size:.92rem;margin-top:2px}
+.sym{display:inline-grid;place-items:center;vertical-align:-6px;width:26px;height:26px;border-radius:8px;background:var(--soft);color:var(--ink);margin-left:2px}
+.sym svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chk{list-style:none;padding:0;margin:8px 0 12px;display:grid;gap:4px}.chk li.ok{color:var(--muted);text-decoration:line-through}
+.pointer{position:fixed;z-index:20;display:flex;flex-direction:column;align-items:center;gap:0;color:#e0201b;font-weight:800;font-size:.95rem;pointer-events:none;animation:bob 1.2s ease-in-out infinite;text-shadow:0 0 6px var(--bg)}
+.pointer svg{width:44px;height:44px;stroke:#e0201b;stroke-width:3.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.pointer.down{bottom:calc(4px + env(safe-area-inset-bottom,0px))}.pointer.up{top:calc(4px + env(safe-area-inset-top,0px));animation-name:bobup}
+.pointer.left{left:8px}.pointer.right{right:8px}
+@keyframes bob{50%{transform:translateY(7px)}}@keyframes bobup{50%{transform:translateY(-7px)}}
+@media (prefers-reduced-motion:reduce){.mark,.pointer{animation:none}}
 </style>
 </head>
 <body>
@@ -301,13 +323,15 @@ function renderNav(){$("#nav").innerHTML=[["heute","Heute"],["klassen","Kinder"]
 function go(v){view=v;render();window.scrollTo(0,0)}
 function render(){
   renderNav();
-  const a=$("#app");
-  if(view.talk)a.innerHTML=talkV();
+  const a=$("#app"),inst=setupMode();$("#nav").style.display=inst?"none":"";
+  if(inst)a.innerHTML=installV();
+  else if(view.talk)a.innerHTML=talkV();
   else if(view.goal!==undefined)a.innerHTML=goalEditV();
   else if(view.imp)a.innerHTML=importV();
   else if(view.help!==undefined)a.innerHTML=helpV();
   else if(view.kid)a.innerHTML=kidV();
   else a.innerHTML={heute:heuteV,klassen:klassenV,analyse:analyseV,profil:profilV}[view.tab]();
+  if(view.mark)requestAnimationFrame(()=>$("#app .mark")?.scrollIntoView({block:"center",behavior:"smooth"}));
 }
 
 
@@ -382,8 +406,73 @@ if(isWeb&&"serviceWorker" in navigator)navigator.serviceWorker.register("sw.js")
 function envHint(){if(sessionStorage.getItem("hideEnv"))return "";
   const x=`<button class="btn ghost small" onclick="sessionStorage.setItem('hideEnv',1);render()">Ausblenden</button>`;
   if(!isWeb)return `<div class="card" style="border:2px solid var(--new)"><b>Achtung: Vorschau-Modus</b><p class="small" style="margin:6px 0">Die App läuft gerade als Datei (z. B. in der Vorschau der Dateien-App). Dort kann das Gerät die Daten jederzeit löschen. Öffne sie über die Internetadresse eurer Schule und speichere regelmäßig eine Sicherung.</p>${x}</div>`;
-  if(isIOS&&!standalone)return `<div class="card"><b>Tipp: Als App installieren</b><p class="small" style="margin:6px 0">Tippe in Safari auf „Teilen“ <span aria-hidden="true">⬆︎</span> und dann „Zum Home-Bildschirm“. Mit iOS 27 findest du „Teilen“ im Seitenmenü links neben der Adresse (drei Striche), mit iOS 26 unter „···“. Dann startet Pfad wie eine App, funktioniert offline und Safari löscht die Daten nicht nach einigen Wochen ohne Nutzung. <a href="einrichten.html">Anleitung Schritt für Schritt</a></p>${x}</div>`;
+  if(isIOS&&!standalone)return `<div class="card"><b>Tipp: Als App installieren</b><p class="small" style="margin:6px 0">Tippe in Safari auf „Teilen“ <span aria-hidden="true">⬆︎</span> und dann „Zum Home-Bildschirm“. Mit iOS 27 findest du „Teilen“ im Seitenmenü links neben der Adresse (drei Striche), mit iOS 26 unter „···“. Dann startet Pfad wie eine App, funktioniert offline und Safari löscht die Daten nicht nach einigen Wochen ohne Nutzung.</p><p class="row" style="margin:0;flex-wrap:wrap"><button class="btn pri small" onclick="sessionStorage.removeItem('browse');render()">Einrichtung zeigen</button>${x}</p></div>`;
   return ""}
+
+/* ===== Einrichtung im Browser-Tab: Pfad auf den Home-Bildschirm legen (keine zweite Seite nötig) ===== */
+const isAndroid=/Android/.test(navigator.userAgent);
+const DEV=isIOS?(/iPad/.test(navigator.userAgent)||navigator.platform==="MacIntel"?"ipad":"iphone"):isAndroid?"android":"";
+let IOSV=(()=>{const v=+(navigator.userAgent.match(/Version\/(\d+)/)||[])[1]||0;return v&&v<27?"26":"27"})();
+let INSTALL_EVT=null,INSTALLED=false;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();INSTALL_EVT=e;if(setupMode())render()});
+addEventListener("appinstalled",()=>{INSTALL_EVT=null;INSTALLED=true;if(setupMode())render()});
+async function doInstall(){if(!INSTALL_EVT)return;INSTALL_EVT.prompt();const r=await INSTALL_EVT.userChoice.catch(()=>({}));INSTALL_EVT=null;if(r.outcome==="accepted")INSTALLED=true;render()}
+const setupMode=()=>isWeb&&!standalone&&!!DEV&&!sessionStorage.getItem("browse");
+const SYM={
+ share:'<svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4M7 11H5v9h14v-9h-2"/></svg>',
+ page:'<svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg>',
+ more:'<svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg>',
+ dots:'<svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="18" r="1.2"/></svg>',
+ plus:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg>'};
+const sym=k=>`<span class="sym" aria-hidden="true">${SYM[k]}</span>`;
+function pointer(cls){const up=cls.includes("up"),arr=`<svg viewBox="0 0 24 24"><path d="${up?"M12 20V4M5 11l7-7 7 7":"M12 4v16M5 13l7 7 7-7"}"/></svg>`;
+  return `<div class="pointer ${cls}" aria-hidden="true">${up?arr+"hier":"hier"+arr}</div>`}
+function installV(){
+  const ios=DEV!=="android",v27=IOSV==="27",home=ios?"Home-Bildschirm":"Startbildschirm";
+  let st,ptr="";
+  if(DEV==="android"){
+    st=INSTALLED?[]:INSTALL_EVT?[["„Pfad installieren“","den roten Knopf hier unten"],["„Installieren“","im Fenster, das sich öffnet"]]
+     :[["die drei Punkte"+sym("dots"),"oben rechts in Chrome"],["„App installieren“","im Menü etwas weiter unten. Heißt es bei dir „Zum Startbildschirm hinzufügen“, nimm das."],["„Installieren“","danach auf „Automatisch hinzufügen“"]];
+    if(!INSTALL_EVT&&!INSTALLED)ptr=pointer("up right");
+  }else{
+    st=DEV==="ipad"?[["das Teilen-Symbol"+sym("share"),`oben rechts neben der Adresse. Nicht zu sehen? Links neben der Adresse auf das Seitenmenü${sym("page")} und dann auf „Teilen“.`]]
+     :v27?[["das Seitenmenü"+sym("page"),"unten links neben der Adresse (drei Striche)"],["„Teilen“"+sym("share"),"oben im Menü"]]
+     :[["„···“"+sym("more"),"unten rechts neben der Adresse. Bei älteren iOS-Versionen tippst du direkt unten in der Leiste auf das Teilen-Symbol."],["„Teilen“"+sym("share"),"im Menü"]];
+    st.push(["„Zum Home-Bildschirm“"+sym("plus"),"Nicht zu sehen? Im Menü nach oben wischen oder „Mehr anzeigen“ tippen."],
+            ["„Hinzufügen“","oben rechts. Den Schalter „Als Web-App öffnen“ lässt du an."]);
+    ptr=pointer(DEV==="ipad"?"up right":v27?"down left":"down right");
+  }
+  st.push(["das neue Pfad-Symbol",`auf dem ${home}. Ab jetzt startest du Pfad nur noch dort. ${ios?"Safari":"Chrome"} kannst du schließen.`]);
+  const cur=0;
+  return `<h1>Pfad einrichten</h1>
+  <p>Lege Pfad einmal auf den ${home}. Dann startet Pfad wie eine App, läuft ohne Internet und deine Daten bleiben auf dem Gerät.</p>
+  ${DEV==="iphone"?`<p class="row small" style="gap:6px;flex-wrap:wrap"><span class="muted">Dein iOS:</span><button class="chip ${v27?"on":""}" onclick="IOSV='27';render()">iOS 27</button><button class="chip ${v27?"":"on"}" onclick="IOSV='26';render()">iOS 26 oder älter</button></p>`:""}
+  ${INSTALLED?`<div class="card" style="border:2px solid var(--up)"><b>Installiert.</b> Öffne Pfad jetzt über das neue Symbol auf dem Startbildschirm.</div>`:""}
+  <ol class="setup">${st.map(([tap,wo],i)=>`<li class="${i===cur?"now":""}"><span class="n">${i+1}</span><div><span class="do">Tippe auf ${tap}</span><span class="wo">${wo}</span></div></li>`).join("")}</ol>
+  ${INSTALL_EVT?`<button class="btn pri block mark" style="width:100%;padding:16px;font-size:1.1rem" onclick="doInstall()">Pfad installieren</button>`:""}
+  <div class="card" style="border-left:6px solid var(--new);margin-top:16px"><b>Wichtig</b><p class="small" style="margin:6px 0 0">${ios?"Trag hier im Safari-Tab nichts ein. Das Symbol hat einen eigenen Speicher. Was du im Tab einträgst, siehst du in der App nicht.":"Werden die Chrome-Daten gelöscht, sind auch die Pfad-Daten weg. Deshalb später regelmäßig sichern."}</p></div>
+  <p class="small muted">Danach führt dich Pfad durch drei kurze Schritte: Kürzel, Beispielfall, Sicherung.</p>
+  <p><button class="btn ghost small" onclick="sessionStorage.setItem('browse',1);render()">Nur ansehen, ohne Einrichtung</button></p>
+  ${ptr}`}
+
+/* ===== Einrichtung nach dem ersten Start: drei Schritte, rot markiert ===== */
+const SETUP=[
+ {k:"me",t:"Dein Kürzel eintragen",done:()=>!!db.me,tip:"Trag hier dein Lehrkraft-Kürzel ein."},
+ {k:"demo",t:"Fiktiven Beispielfall laden",done:()=>db.kids.length>0,tip:"Tippe auf „Fiktiven Beispielfall laden“."},
+ {k:"backup",t:"Erste Sicherung speichern",done:()=>!!db.lastBackup,tip:"Tippe auf „Sicherung speichern“ und lege ein Passwort fest."}];
+const setupOpen=()=>isWeb&&!db.setupDone&&!(DEV&&!standalone)?SETUP.filter(s=>!s.done()):[];
+function setupCard(){const open=setupOpen();if(!open.length)return "";const nx=open[0];
+  return `<div class="card" style="border:2px solid var(--line)"><b>Einrichtung: noch ${open.length} von ${SETUP.length} Schritten</b>
+  <ul class="chk">${SETUP.map(s=>`<li class="${s.done()?"ok":""}">${s.done()?"✓":"○"} ${s.t}</li>`).join("")}</ul>
+  <div class="marktip">Tippe auf „${nx.t}“.</div>
+  <p class="row" style="margin:0;flex-wrap:wrap"><button class="btn pri mark" onclick="go({tab:'profil',mark:'${nx.k}'})">${nx.t}</button><span class="grow"></span><button class="btn ghost small" onclick="db.setupDone=1;save();render()">Später</button></p></div>`}
+function markFor(k){if(view.tab!=="profil"||!view.mark)return null;
+  const s=SETUP.find(x=>x.k===view.mark);
+  if(s&&s.done()){const nx=SETUP.find(x=>!x.done());view.mark=nx?nx.k:null;
+    if(!nx){db.setupDone=1;save();setTimeout(()=>toast("Einrichtung abgeschlossen. Viel Erfolg mit Pfad!"),2600)}}
+  return view.mark===k?SETUP.find(x=>x.k===k).tip:null}
+const mk=k=>markFor(k)?` mark`:"";
+const mtip=k=>{const t=markFor(k);return t?`<div class="marktip">${t}</div>`:""};
 const ownCount=()=>db.kids.filter(k=>!k.demo).reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0)+(k.diary||[]).length,0);
 function backupHint(){const n=ownCount(),last=db.lastBackup||0,days=(Date.now()-last)/864e5;
   if(n<5||days<5)return "";
@@ -394,7 +483,7 @@ function heuteV(){
   const week=all.filter(e=>e.date>=wk).length,todayN=all.filter(e=>e.date===t).length;
   const kids=db.kids.filter(k=>k.goals.length);
   const dateLong=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${invitesV()}${backupHint()}${db.seenHelp||db.kids.some(k=>!k.demo)?"":`<div class="card row" style="border:2px solid var(--acc)"><div class="grow"><b>Neu hier?</b><br><span class="small muted">Die Anleitung zeigt dir in 8 kurzen Schritten, wie Pfad funktioniert.</span></div><button class="btn pri" onclick="openHelp()">Anleitung</button></div>`}
+  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${setupCard()}${invitesV()}${backupHint()}${db.seenHelp||db.kids.some(k=>!k.demo)||setupOpen().length?"":`<div class="card row" style="border:2px solid var(--acc)"><div class="grow"><b>Neu hier?</b><br><span class="small muted">Die Anleitung zeigt dir in 8 kurzen Schritten, wie Pfad funktioniert.</span></div><button class="btn pri" onclick="openHelp()">Anleitung</button></div>`}
   ${G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`}`+motivationV();
   if(!kids.length)return h+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button><button class="btn" onclick="openHelp()">Anleitung ansehen</button></p></div>`;
   h+=`<h2>Wen bewertest du?</h2>`;
@@ -890,7 +979,7 @@ function profilV(){
   return `<h1>Einstellungen</h1>
   <div class="card row"><div class="grow"><b>Anleitung</b><br><span class="small muted">In 8 Schritten erklärt, wie Pfad funktioniert.</span></div><button class="btn" onclick="openHelp()">Öffnen</button></div>
   <div class="card"><label style="margin-top:0">Dein Kürzel</label><div class="sub">Wird bei jeder Einschätzung gespeichert. Hilfreich, wenn ihr Daten im Team zusammenführt.</div>
-  ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`<input value="${esc(db.me)}" placeholder="z. B. MU" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">`}
+  ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`${mtip("me")}<input class="${mk("me")}" value="${esc(db.me)}" placeholder="z. B. MU" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">`}
   <label>Fächer</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
   <input value="${esc(db.subjects.join(", "))}" onchange="db.subjects=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')">
   <label>Klassen</label><div class="sub">Mit Komma getrennt.</div>
@@ -898,11 +987,11 @@ function profilV(){
   ${rasterV()}
   ${gameV()}
   <div class="card"><h2 style="margin-top:0">Daten</h2><p class="muted">${db.kids.length} Kinder · ${n} Einschätzungen auf diesem Gerät</p>
-  <p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Datei laden</button></p>
+  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Datei laden</button></p>
   <input type="file" id="imp" accept=".json,application/json" hidden onchange="importJSON(this)">
   <p class="muted small">${db.lastBackup?`Letzte Sicherung: ${dDEy(iso(new Date(db.lastBackup)))}. `:""}Sicherung: alle deine Kinder, nur für dich, spätestens alle 5 Tage. Teilen: nur ausgewählte Kinder, für eine Kollegin oder einen Kollegen. Beim Laden wählst du pro Kind, was du ergänzt.</p>
   ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}
-  <p><button class="btn" onclick="demo()">Fiktiven Beispielfall laden</button></p>
+  ${mtip("demo")}<p><button class="btn${mk("demo")}" onclick="demo()">Fiktiven Beispielfall laden</button></p>
   <p><button class="btn ghost danger" onclick="wipe()">Alle Daten auf diesem Gerät löschen</button></p></div>
   ${srvCard()}
   <div class="card"><h2 style="margin-top:0">Datenschutz</h2>
@@ -976,7 +1065,7 @@ function demo(){
     g2.entries.push({id:uid(),date:d,slot:sl,subj:s,value:v2[i]==null?null:Math.max(0,v2[i]-adj),note:i===13?"Mit Wochenplan deutlich schneller gestartet.":"",rater:"MU",ts,gen:true});i++}d=addDays(d,1)}
   const diary=[[-25,"Beobachtung","Mathe","Kommt nach der Pause oft unruhig in die Stunde. Erste 10 Minuten am schwierigsten."],[-20,"Gespräch","","Kurzes Gespräch nach der Stunde: wünscht sich einen Platz weiter vorne."],[-14,"Absprache","","Mit Klassenleitung: Sitzplatz vorne, Wochenplan mit Startsignal. Ab heute Förderung."],[-9,"Elternkontakt","","Telefonat mit der Mutter: zu Hause läuft es ähnlich, Unterstützung bei Wochenplan zugesagt."],[-4,"Erfolg","Mathe","Hat heute als Erste:r angefangen und das stolz gezeigt."],[-2,"Vorfall","Deutsch","Streit in der Gruppenarbeit, Auszeit nötig. Danach wieder gut eingestiegen."]]
     .map(([o,cat,subj,text],i)=>({id:uid(),date:addDays(t,o),cat,subj,text,rater:"MU",ts:new Date(addDays(t,o)+"T15:00").getTime()+i,gen:true}));
-  db.kids.push({id:uid(),code:"DEMO-7B",icon:"🦉",cls:"7B",demo:true,goals:[g1,g2],diary});save();toast("Beispielfall geladen");go({tab:"klassen"})}
+  db.kids.push({id:uid(),code:"DEMO-7B",icon:"🦉",cls:"7B",demo:true,goals:[g1,g2],diary});save();toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
 
 load();render();
 </script>
