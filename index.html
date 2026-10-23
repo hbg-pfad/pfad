@@ -113,7 +113,6 @@ h1{font-size:1.9rem;font-weight:800}
 .badge{border-radius:10px}
 .stat div{background:var(--card);border:1.5px solid var(--line);border-radius:20px}
 .stat b{font-size:1.6rem;color:var(--acc)}
-nav{border-top:none;margin:0 12px 10px;left:0;right:0;border-radius:24px;box-shadow:0 8px 24px rgba(80,50,30,.15);bottom:0}
 nav button.on{color:var(--acc)}
 .goalTitle{font-size:1.75rem}
 .big{font-size:3.4rem;color:var(--acc)}
@@ -181,7 +180,17 @@ h1::before{content:"";width:14px;height:14px;border-radius:5px;background:var(--
  .talk .tbot .tg p{margin:3px 0}#overlay,.toast,.cele,.conf,nav{display:none!important}}
 .talk .btn.ghost{white-space:nowrap}
 
-.rast{display:grid;grid-template-columns:28px 1fr 1fr;gap:6px;align-items:center;margin-top:6px}.rast input{min-width:0}
+.rast{display:grid;grid-template-columns:28px 1fr 1fr;gap:6px;align-items:center;margin-top:6px}.rast input{min-width:0}.rast.r4{grid-template-columns:28px 1fr 1fr 34px}.rast input.dev{border-color:var(--acc);background:var(--accs)}
+.rast .x{border:none;background:none;color:var(--muted);font-size:1rem;padding:6px}.pick.days5{grid-template-columns:1.6fr repeat(5,1fr)}
+.swr{display:flex;align-items:center;gap:12px;margin:10px 0;font-weight:600;cursor:pointer}.swr .sub{display:block;font-weight:400;margin-top:2px}
+input.sw{appearance:none;-webkit-appearance:none;width:50px!important;min-width:50px;height:30px;border-radius:15px;background:var(--line);border:none;position:relative;margin:0;padding:0;transition:background .15s;flex:none}
+input.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+input.sw:checked{background:var(--acc)}input.sw:checked::after{left:23px}
+.gopts{display:grid;gap:8px}.gopts button{text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:11px 13px;font:inherit}
+.gopts button b{display:block}.gopts button span{display:block;font-size:.85rem;color:var(--muted);margin-top:2px}.gopts button.on{border:2px solid var(--acc);background:var(--accs)}
+.dots{display:flex;justify-content:center;gap:8px;margin:12px 0}.dots button{width:10px;height:10px;border-radius:50%;border:none;padding:0;background:var(--line)}.dots .on{background:var(--acc);width:24px;border-radius:5px}
+.help ul{padding-left:20px;margin:10px 0 0}.help li{margin:8px 0}.help p{font-size:1.05rem}
+.stepr{margin:12px 0 4px;gap:10px}.stepr button{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:700}.stepr button:disabled{opacity:.35}.stepr b{min-width:22px;text-align:center;font-size:1.2rem}
 .mem{display:inline-flex;gap:6px;align-items:center;background:var(--accs);color:var(--ink);border-radius:999px;padding:6px 6px 6px 12px;font-weight:700}.mem .small{font-weight:400;color:var(--muted)}
 .mem button{border:none;background:var(--card);color:var(--down);border-radius:999px;width:26px;height:26px;font-weight:800;cursor:pointer}
 .ctx{background:var(--soft);border-radius:18px;padding:10px;display:grid;gap:8px}
@@ -208,11 +217,14 @@ const KEY="verlaufsbogen-v2";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
 const SUBJECTS=["Deutsch","Mathe","Englisch","Franz.","Spanisch","Latein","Türkisch","GL","NW","Bio","Chemie","Physik","WAW","Technik","HW","Info","Kunst","Musik","Sport","D&G","Rel. ev.","Rel. kath.","PP","FUF"];
-// Stundenraster HBG (Schulkonferenz 11.02.2020): Name, Beginn, Ende, abweichend Di/Fr
-const RASTER=[["0.","08:00","08:20"],["1.","08:20","09:28"],["2.","09:35","10:42"],["3.","11:10","12:18"],["4.","12:25","13:32"],["5.","14:35","15:42","14:00","15:07"]];
+// Stundenraster HBG (Schulkonferenz 11.02.2020): Name, Beginn, Ende, optional {Wochentag:[Beginn,Ende]} für abweichende Tage
+const RASTER=[["0.","08:00","08:20"],["1.","08:20","09:28"],["2.","09:35","10:42"],["3.","11:10","12:18"],["4.","12:25","13:32"],["5.","14:35","15:42"]];
+const OLD_RASTER=JSON.stringify([...RASTER.slice(0,5),["5.","14:35","15:42","14:00","15:07"]]);
 let db;
 function load(){try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!db||!db.kids)db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[]};
-  if(JSON.stringify(db.subjects)===JSON.stringify(OLD_SUBJECTS))db.subjects=SUBJECTS.slice();db.raster??=RASTER.map(r=>r.slice())}
+  if(JSON.stringify(db.subjects)===JSON.stringify(OLD_SUBJECTS))db.subjects=SUBJECTS.slice();db.raster??=RASTER.map(r=>r.slice());
+  if(JSON.stringify(db.raster)===OLD_RASTER)db.raster=RASTER.map(r=>r.slice());
+  db.raster.forEach(r=>{if(typeof r[3]==="string"||typeof r[4]==="string"){const d=[r[3]||"",r[4]||""];r.length=3;r[3]={2:d,5:d.slice()}}})}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast("Speichern nicht möglich. Bitte exportieren.")}window.autoSoon?.()}
 /* ===== Helfer ===== */
 const $=s=>document.querySelector(s);
@@ -277,6 +289,7 @@ function render(){
   if(view.talk)a.innerHTML=talkV();
   else if(view.goal!==undefined)a.innerHTML=goalEditV();
   else if(view.imp)a.innerHTML=importV();
+  else if(view.help!==undefined)a.innerHTML=helpV();
   else if(view.kid)a.innerHTML=kidV();
   else a.innerHTML={heute:heuteV,klassen:klassenV,analyse:analyseV,profil:profilV}[view.tab]();
 }
@@ -365,9 +378,9 @@ function heuteV(){
   const week=all.filter(e=>e.date>=wk).length,todayN=all.filter(e=>e.date===t).length;
   const kids=db.kids.filter(k=>k.goals.length);
   const dateLong=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${invitesV()}${backupHint()}
+  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${invitesV()}${backupHint()}${db.seenHelp||db.kids.some(k=>!k.demo)?"":`<div class="card row" style="border:2px solid var(--acc)"><div class="grow"><b>Neu hier?</b><br><span class="small muted">Die Anleitung zeigt dir in 8 kurzen Schritten, wie Pfad funktioniert.</span></div><button class="btn pri" onclick="openHelp()">Anleitung</button></div>`}
   ${G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`}`+motivationV();
-  if(!kids.length)return h+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button></p></div>`;
+  if(!kids.length)return h+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button><button class="btn" onclick="openHelp()">Anleitung ansehen</button></p></div>`;
   h+=`<h2>Wen bewertest du?</h2>`;
   for(const k of kids){
     const done=k.goals.filter(g=>g.entries.some(e=>e.date===t)).length;
@@ -377,6 +390,25 @@ function heuteV(){
   }
   return h+`<p class="muted small">Tipp: Direkt nach der Stunde bewerten. Das dauert pro Ziel nur wenige Sekunden.</p>`;
 }
+
+/* ===== Anleitung ===== */
+const HELP=[
+ {t:"Willkommen bei Pfad",p:"Mit Pfad schätzt du das Verhalten einzelner Kinder direkt nach der Stunde ein. Das dauert wenige Sekunden. Mit der Zeit siehst du, ob sich etwas verbessert, und hast Belege für Förderplan und Gespräche.",l:["Alles bleibt auf deinem Gerät.","Kinder haben nur ein Kürzel, keinen Namen.","Unten wechselst du zwischen Heute, Kinder, Verlauf und Einstellungen."]},
+ {t:"1. Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen: Die App schlägt ein Kürzel vor, z. B. 8A-01.","Keine Namen oder Initialen eintragen.","Welches Kürzel zu welchem Kind gehört, steht nur in der Förderakte."]},
+ {t:"2. Verhalten festlegen",p:"Pro Kind legst du ein bis drei Verhalten fest, die du beobachten willst.",l:["So formulieren, dass man es sehen kann: „Ruft ohne Melden in die Klasse“ statt „ist unruhig“.","Richtung wählen: Soll es weniger oder mehr werden?","Skala wählen: 0 bis 10, 1 bis 5 oder ja/nein."]},
+ {t:"3. Nach der Stunde bewerten",p:"Auf „Heute“ tippst du beim Kind auf „Bewerten“.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
+ {t:"4. Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
+ {t:"5. Verlauf ansehen",p:"Unter „Verlauf“ siehst du jedes Verhalten als Kurve mit Ziel und Förderbeginn.",l:["Die App sagt in Worten, ob es eher besser, stabil oder eher schwieriger wird.","Der Text für die Evaluation im Förderplan lässt sich kopieren.","Das Gesprächsblatt für Kind und Eltern druckst du auf einer Seite aus."]},
+ {t:"6. Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Einmal pro Woche: Einstellungen → „Sicherung speichern“. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder teilen“ und nur die Kinder auswählen, um die es geht.","Eine geteilte Datei lädst du über „Datei laden“. Neues kommt dazu, deine Einträge bleiben."]},
+ {t:"7. Sicher arbeiten",p:"Ein paar Regeln, damit die Daten geschützt bleiben.",l:["Nur auf dem Dienstgerät mit Gerätecode und automatischer Sperre.","Auf iPad und iPhone: In Safari öffnen → Teilen → „Zum Home-Bildschirm“.","Das Symbol nicht löschen, ohne vorher zu sichern. Sonst sind die Daten weg."]}];
+function openHelp(){db.seenHelp=1;save();go({...view,help:0,back:view.tab})}
+function helpV(){const i=view.help,h=HELP[i],last=i===HELP.length-1;
+  return `<div class="between"><button class="btn ghost" onclick="go({tab:view.back||'heute'})">‹ Schließen</button><span class="muted small">${i+1} von ${HELP.length}</span></div>
+  <div class="dots">${HELP.map((_,j)=>`<button class="${j===i?"on":""}" aria-label="Schritt ${j+1}" onclick="view.help=${j};render()"></button>`).join("")}</div>
+  <div class="card help"><h2 style="margin-top:0;font-size:1.45rem">${h.t}</h2><p>${h.p}</p><ul>${h.l.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+  ${last?`<p class="small">Am besten probierst du es einmal mit dem fiktiven Beispielfall aus. Du kannst ihn danach beim Kind wieder löschen.</p>
+  <p class="row"><button class="btn ghost" onclick="view.help--;render()">Zurück</button><span class="grow"></span>${db.kids.some(k=>k.demo)?"":`<button class="btn" onclick="demo()">Beispielfall laden</button>`}<button class="btn pri" onclick="go({tab:'heute'})">Los geht's</button></p>`
+  :`<p class="row">${i?`<button class="btn ghost" onclick="view.help--;render()">Zurück</button>`:""}<span class="grow"></span><button class="btn pri" onclick="view.help++;render();scrollTo(0,0)">Weiter</button></p>`}`}
 
 /* ===== Klassen ===== */
 function klassenV(){
@@ -475,8 +507,9 @@ let rs=null;
 const slotName=r=>r[0].replace(/\.$/,"")+". Std.";
 const SLOTS_ALL=()=>[...db.raster.map(slotName),"Pause"];
 const hm=t=>{const[a,b]=t.split(":");return +a*60+ +b};
-function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getMinutes(),difr=wd===2||wd===5;if(wd===0||wd===6)return "";
-  let best="";for(const r of db.raster){const st=hm(difr&&r[3]?r[3]:r[1]),en=hm(difr&&r[4]?r[4]:r[2]);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
+const rTime=(r,wd)=>{const d=r[3]?.[wd];return [d?.[0]||r[1],d?.[1]||r[2]]};
+function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getMinutes();if(wd===0||wd===6)return "";
+  let best="";for(const r of db.raster){const [a,b]=rTime(r,wd),st=hm(a),en=hm(b);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
 function startRate(kidId){const k=kidById(kidId);if(!k.goals.length)return;
   const cs=currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
   rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:""},count:0,ctxOpen:true};renderRate()}
@@ -810,30 +843,41 @@ function srvCard(){const s=db.srv||{};
     <label>Adresse</label><input id="srvUrl" placeholder="z. B. https://pfad.schule.local" value="${esc(s.url||"")}">
     <div class="two"><div><label>Kürzel</label><input id="srvMe" value="${esc(db.me||"")}"></div><div><label>Passwort</label><input id="srvPw" type="password"></div></div>
     <p><button class="btn" onclick="srvConnect()">Verbinden</button></p></details>`}
-function setR(i,j,v){db.raster[i][j]=v;if(j>2&&!v)db.raster[i].length=3;save();render()}
+let RDAY=0;const WDN=["","Mo","Di","Mi","Do","Fr"];
+function setR(i,j,v){db.raster[i][j]=v;save();render()}
+function setRD(i,wd,j,v){const r=db.raster[i];r[3]??={};const d=r[3][wd]??=["",""];d[j]=v===r[j+1]?"":v;if(!d[0]&&!d[1])delete r[3][wd];if(!Object.keys(r[3]).length)r.length=3;save();render()}
+function clrRD(i,wd){const r=db.raster[i];if(r[3]){delete r[3][wd];if(!Object.keys(r[3]).length)r.length=3}save();render()}
+const hasRD=wd=>db.raster.some(r=>r[3]?.[wd]);
+function rasterV(){const wd=RDAY;
+  return `<div class="card"><h2 style="margin-top:0">Stundenraster</h2><div class="sub">Damit beim Bewerten die laufende Stunde vorausgewählt ist.</div>
+  <div class="pick days5" style="margin-top:10px"><button class="${wd?"":"on"}" onclick="RDAY=0;render()">Alle Tage</button>${WDN.slice(1).map((n,d)=>`<button class="${wd===d+1?"on":""}" onclick="RDAY=${d+1};render()">${n}${hasRD(d+1)?" •":""}</button>`).join("")}</div>
+  <div class="sub" style="margin-top:8px">${wd?`Abweichende Zeiten am ${["","Montag","Dienstag","Mittwoch","Donnerstag","Freitag"][wd]}. Was du nicht änderst, gilt wie an allen Tagen.`:"Gilt für jeden Schultag. Weicht ein Tag ab, wähle ihn oben aus."}</div>
+  <div class="rast${wd?" r4":""}"><span></span><span class="sub">Beginn</span><span class="sub">Ende</span>${wd?"<span></span>":""}${db.raster.map((r,i)=>{if(!wd)return `<b>${esc(r[0])}</b><input type="time" value="${r[1]}" onchange="setR(${i},1,this.value)"><input type="time" value="${r[2]}" onchange="setR(${i},2,this.value)">`;
+    const [a,b]=rTime(r,wd),dv=r[3]?.[wd];return `<b>${esc(r[0])}</b><input type="time" class="${dv?.[0]?"dev":""}" value="${a}" onchange="setRD(${i},${wd},0,this.value)"><input type="time" class="${dv?.[1]?"dev":""}" value="${b}" onchange="setRD(${i},${wd},1,this.value)">${dv?`<button class="x" aria-label="Zurücksetzen" onclick="clrRD(${i},${wd})">✕</button>`:"<span></span>"}`}).join("")}</div>
+  ${wd?"":`<p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn ghost" onclick="addR()">+ Stunde</button>${db.raster.length>1?`<button class="btn ghost" onclick="db.raster.pop();save();render()">Letzte entfernen</button>`:""}<button class="btn ghost" onclick="db.raster=RASTER.map(r=>r.slice());save();render()">HBG-Raster</button></p>`}
+  <p class="muted small">Jetzt vorausgewählt: <b>${currentSlot()||"keine Stunde"}</b> (in Pausen bleibt die Stunde davor ausgewählt)</p></div>`}
+function gameV(){const g=G(),T=GOALTYPES[g.type],max=g.type==="days"?5:10;
+  return `<div class="card"><h2 style="margin-top:0">Wochenziel</h2>
+  <label class="swr"><span class="grow">Wochenziel und Feedback anzeigen<span class="sub">Ring auf „Heute“ und kurzer Haken nach dem Speichern</span></span><input type="checkbox" class="sw" ${g.on?"checked":""} onchange="G().on=this.checked;save();render()"></label>
+  ${g.on?`<div class="sub" style="margin:14px 0 6px;font-weight:700">Was ist dein Ziel?</div>
+  <div class="gopts">${Object.entries(GOALTYPES).map(([key,x])=>`<button class="${g.type===key?"on":""}" onclick="G().type='${key}';G().n=GOALTYPES['${key}'].def;save();render()"><b>${x.t}</b><span>${x.d(g.type===key?g.n:x.def)}</span></button>`).join("")}</div>
+  ${g.type==="good"?"":`<div class="row stepr"><span class="grow">${g.type==="days"?"Schultage pro Woche":"Einschätzungen pro Kind und Woche"}</span><button aria-label="weniger" ${g.n<=1?"disabled":""} onclick="G().n=Math.max(1,G().n-1);save();render()">−</button><b>${g.n}</b><button aria-label="mehr" ${g.n>=max?"disabled":""} onclick="G().n=Math.min(${max},G().n+1);save();render()">+</button></div>`}
+  <label class="swr"><span class="grow">Ton beim Speichern</span><input type="checkbox" class="sw" ${g.sound?"checked":""} onchange="G().sound=this.checked;save();if(this.checked)fb('big')"></label>
+  <p class="muted small" style="margin-bottom:0">Nur ein Ziel pro Woche, keine Punkte, keine Abzeichen. Wochen ganz ohne Einträge (Ferien, Krankheit) unterbrechen die Reihe nicht.</p>`
+  :`<p class="muted small" style="margin-bottom:0">Ausgeschaltet: Nach dem Speichern erscheint nur eine kurze Bestätigung.</p>`}</div>`}
 function addR(){const l=db.raster.at(-1),n=(parseInt(l[0])||db.raster.length)+1;db.raster.push([n+".",l[2],l[2]]);save();render()}
 function profilV(){
   const n=db.kids.reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0),0);
   return `<h1>Einstellungen</h1>
+  <div class="card row"><div class="grow"><b>Anleitung</b><br><span class="small muted">In 8 Schritten erklärt, wie Pfad funktioniert.</span></div><button class="btn" onclick="openHelp()">Öffnen</button></div>
   <div class="card"><label style="margin-top:0">Dein Kürzel</label><div class="sub">Wird bei jeder Einschätzung gespeichert. Hilfreich, wenn ihr Daten im Team zusammenführt.</div>
   ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`<input value="${esc(db.me)}" placeholder="z. B. MU" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">`}
   <label>Fächer</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
   <input value="${esc(db.subjects.join(", "))}" onchange="db.subjects=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')">
   <label>Klassen</label><div class="sub">Mit Komma getrennt.</div>
   <input value="${esc(db.classes.join(", "))}" onchange="db.classes=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')"></div>
-  <div class="card"><h2 style="margin-top:0">Stundenraster</h2><div class="sub">Damit beim Bewerten die laufende Stunde vorausgewählt ist.</div>
-  <div class="rast"><span></span><span class="sub">Beginn</span><span class="sub">Ende</span>${db.raster.map((r,i)=>`<b>${esc(r[0])}</b><input type="time" value="${r[1]}" onchange="setR(${i},1,this.value)"><input type="time" value="${r[2]}" onchange="setR(${i},2,this.value)">`).join("")}</div>
-  <details style="margin-top:10px"${db.raster.some(r=>r[3])?" open":""}><summary class="small" style="font-weight:700">Abweichende Zeiten Di und Fr</summary><div class="sub">Leer lassen, wenn gleich.</div>
-  <div class="rast">${db.raster.map((r,i)=>`<b>${esc(r[0])}</b><input type="time" value="${r[3]||""}" onchange="setR(${i},3,this.value)"><input type="time" value="${r[4]||""}" onchange="setR(${i},4,this.value)">`).join("")}</div></details>
-  <p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn ghost" onclick="addR()">+ Stunde</button>${db.raster.length>1?`<button class="btn ghost" onclick="db.raster.pop();save();render()">Letzte entfernen</button>`:""}<button class="btn ghost" onclick="db.raster=RASTER.map(r=>r.slice());save();render()">HBG-Raster</button></p>
-  <p class="muted small">Jetzt vorausgewählt: <b>${currentSlot()||"keine Stunde"}</b> (in Pausen bleibt die Stunde davor ausgewählt)</p></div>
-  <div class="card"><h2 style="margin-top:0">Wochenziel</h2>
-  <label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" ${G().on?"checked":""} onchange="G().on=this.checked;save();render()"> Wochenziel und Feedback anzeigen</label>
-  ${G().on?`${Object.entries(GOALTYPES).map(([key,x])=>`<label class="row" style="margin:8px 0;font-weight:600;align-items:flex-start"><input type="radio" name="gt" style="width:auto;margin-top:4px" ${G().type===key?"checked":""} onchange="G().type='${key}';G().n=GOALTYPES['${key}'].def;save();render()"><span>${x.t}<br><span class="muted small" style="font-weight:400">${x.d(G().type===key?G().n:x.def)}</span></span></label>`).join("")}
-  ${G().type==="good"?"":`<label>Wie oft?</label><input type="number" min="1" max="${G().type==="days"?5:10}" inputmode="numeric" value="${G().n}" onchange="G().n=Math.max(1,Math.min(${G().type==="days"?5:10},+this.value||1));save();render()">`}
-  <label class="row" style="margin:12px 0 6px;font-weight:600"><input type="checkbox" style="width:auto" ${G().sound?"checked":""} onchange="G().sound=this.checked;save();if(this.checked)fb('big')"> Ton beim Speichern</label>
-  <p class="muted small">Es gibt nur ein Ziel pro Woche, keine Punkte und keine Abzeichen. Belohnt wird Regelmäßigkeit, nicht Menge. Wochen ohne jeden Eintrag (Ferien, Krankheit) unterbrechen die Reihe nicht.</p>`
-  :`<p class="muted small">Ausgeschaltet: Nach dem Speichern erscheint nur eine kurze Bestätigung.</p>`}</div>
+  ${rasterV()}
+  ${gameV()}
   <div class="card"><h2 style="margin-top:0">Daten</h2><p class="muted">${db.kids.length} Kinder · ${n} Einschätzungen auf diesem Gerät</p>
   <p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Datei laden</button></p>
   <input type="file" id="imp" accept=".json,application/json" hidden onchange="importJSON(this)">
