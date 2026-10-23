@@ -329,7 +329,7 @@ function steps(dev){
    {t:"Sicherung speichern",scr:appShot(dev,"sichern",B.sichern),
     p:[`Pfad speichert jede Eingabe sofort auf dem Gerät. Für den Notfall brauchst du trotzdem eine Sicherung.`,`Tippe in den Einstellungen auf <b>„Sicherung speichern“</b>.`]},
    {t:"Passwort festlegen",scr:appShot(dev,"pw",null),
-    p:[`Beim ersten Mal legst du ein Passwort fest (mindestens 8 Zeichen). Lege die Datei dann im dienstlichen OneDrive ab.`,`Sichere etwa <b>einmal pro Woche</b> und vor jedem Gerätewechsel. Pfad erinnert dich nach 7 Tagen.`],
+    p:[`Beim ersten Mal legst du ein Passwort fest (mindestens 8 Zeichen). Die Datei bleibt auf deinem Dienstgerät, z. B. in „Dateien“ → „Auf meinem iPad“.`,`Sichere <b>spätestens alle 5 Tage</b> und vor jedem Gerätewechsel. Pfad erinnert dich nach 5 Tagen.`],
     warn:`<b>Passwort gut merken</b>Es lässt sich nicht wiederherstellen. Ohne Passwort ist die Sicherung verloren.`}
   ];
   return {install,start};
@@ -381,7 +381,7 @@ function doneV(){
    </div>
    <div class="panel">
      <h2>Wenn etwas hakt</h2>
-     <details><summary>Pfad warnt vor dem „Vorschau-Modus“</summary><p>Du hast Pfad aus OneDrive oder „Dateien“ geöffnet. Dort können Daten jederzeit verschwinden. Installiere Pfad über die Adresse ${URL_TXT}.</p></details>
+     <details><summary>Pfad warnt vor dem „Vorschau-Modus“</summary><p>Du hast Pfad als Datei geöffnet, z. B. aus der Dateien-App. Dort können Daten jederzeit verschwinden. Installiere Pfad über die Adresse ${URL_TXT}.</p></details>
      <details><summary>Meine Einträge sind weg (iPad, iPhone)</summary><p>Prüfe, ob du im Safari-Tab statt über das Symbol arbeitest. Sonst die letzte Sicherung über Einstellungen → „Datei laden“ einspielen.</p></details>
      <details><summary>„Zum Home-Bildschirm“ oder „App installieren“ fehlt</summary><p>Auf iPad und iPhone nur Safari nutzen. Bei verwalteten Dienstgeräten kann die Funktion gesperrt sein. Sprich dann Nick an.</p></details>
      <details><summary>Ich habe ein neues Gerät</summary><p>Auf dem alten Gerät sichern. Auf dem neuen Pfad installieren, dann Einstellungen → „Datei laden“ → Passwort.</p></details>

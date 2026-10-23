@@ -381,7 +381,7 @@ try{navigator.storage?.persist?.().then(p=>{PERSIST=p})}catch(e){}let PERSIST=nu
 if(isWeb&&"serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 function envHint(){if(sessionStorage.getItem("hideEnv"))return "";
   const x=`<button class="btn ghost small" onclick="sessionStorage.setItem('hideEnv',1);render()">Ausblenden</button>`;
-  if(!isWeb)return `<div class="card" style="border:2px solid var(--new)"><b>Achtung: Vorschau-Modus</b><p class="small" style="margin:6px 0">Die App läuft gerade als Datei (z. B. in der OneDrive- oder Dateien-Vorschau). Dort kann das Gerät die Daten jederzeit löschen. Öffne sie über die Internetadresse eurer Schule und speichere regelmäßig eine Sicherung.</p>${x}</div>`;
+  if(!isWeb)return `<div class="card" style="border:2px solid var(--new)"><b>Achtung: Vorschau-Modus</b><p class="small" style="margin:6px 0">Die App läuft gerade als Datei (z. B. in der Vorschau der Dateien-App). Dort kann das Gerät die Daten jederzeit löschen. Öffne sie über die Internetadresse eurer Schule und speichere regelmäßig eine Sicherung.</p>${x}</div>`;
   if(isIOS&&!standalone)return `<div class="card"><b>Tipp: Als App installieren</b><p class="small" style="margin:6px 0">Tippe in Safari auf „Teilen“ <span aria-hidden="true">⬆︎</span> und dann „Zum Home-Bildschirm“. Mit iOS 27 findest du „Teilen“ im Seitenmenü links neben der Adresse (drei Striche), mit iOS 26 unter „···“. <a href="einrichten.html">Schritt für Schritt</a> Dann startet Pfad wie eine App, funktioniert offline und Safari löscht die Daten nicht nach einigen Wochen ohne Nutzung.</p>${x}</div>`;
   return ""}
 const ownCount=()=>db.kids.filter(k=>!k.demo).reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0)+(k.diary||[]).length,0);
@@ -919,7 +919,7 @@ async function exportJSON(){if(!crypto.subtle)return toast("Verschlüsselung in 
   const ki=await backupKey();if(!ki)return;
   const {srv,bsalt,...rest}=db,payload={...rest,kids:db.kids.filter(realKid)};
   if(!await giveFile(`pfad-sicherung-${db.me||"ohne"}-${today()}.json`,await sealFile("sicherung",payload,ki)))return;
-  db.lastBackup=Date.now();save();render();toast("Sicherung erstellt. Lege sie auf deinem Dienstgerät bzw. im Schul-OneDrive ab.")}
+  db.lastBackup=Date.now();save();render();toast("Sicherung erstellt. Sie liegt jetzt auf deinem Dienstgerät (z. B. in „Dateien“ → „Auf meinem iPad“).")}
 // Stand einzelner Kinder für Kolleg:innen
 async function shareKids(pre){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
   const ks=db.kids.filter(realKid).sort((a,b)=>a.code.localeCompare(b.code));if(!ks.length)return toast("Noch keine Kinder angelegt");
