@@ -159,7 +159,8 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
 /* Kopf: Gerätewahl + durchgehender Fortschritt */
 .topbar{display:flex;flex-direction:column;gap:14px}
 .seg{display:inline-flex;background:var(--soft);border-radius:999px;padding:4px;gap:4px;align-self:flex-start;max-width:100%}
-.seg button{border:0;background:transparent;color:var(--ink);font-weight:700;padding:8px 18px;border-radius:999px}
+.seg button{border:0;background:transparent;color:var(--ink);font-weight:700;padding:8px 16px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+.seg svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
 .seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 1px 3px rgba(43,36,32,.18);color:var(--acc)}
 .proglbl{display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:6px}
 .track{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
@@ -198,9 +199,9 @@ footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padd
 
   <div class="topbar">
     <div class="seg" role="group" aria-label="Gerät wählen">
-      <button id="p-ipad" data-dev="ipad" aria-pressed="false">iPad</button>
-      <button id="p-iphone" data-dev="iphone" aria-pressed="false">iPhone</button>
-      <button id="p-android" data-dev="android" aria-pressed="false">Android</button>
+      <button id="p-ipad" data-dev="ipad" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2.5" width="16" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>iPad</button>
+      <button id="p-iphone" data-dev="iphone" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>iPhone</button>
+      <button id="p-android" data-dev="android" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><circle cx="12" cy="5" r=".7"/></svg>Android</button>
     </div>
     <div class="prog" id="prog" aria-live="polite"></div>
   </div>
