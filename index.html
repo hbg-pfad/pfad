@@ -120,6 +120,11 @@ nav button.on{color:var(--acc)}
 h1{display:flex;align-items:center;gap:10px}
 h1::before{content:"";width:14px;height:14px;border-radius:5px;background:var(--acc);transform:rotate(45deg);flex:none}
 .kcard{border-left:7px solid var(--kc)}
+.kic{display:inline-grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--kc) 22%,var(--card));font-size:1.2rem;line-height:1}
+.kic.big{width:52px;height:52px;font-size:1.8rem}.kic.add{color:var(--muted);font-weight:700;border:2px dashed var(--line);background:none}
+.icbtn{border:none;background:none;padding:0}.icpick{border:2px solid var(--line);--kc:var(--acc)}
+.icgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:50vh;overflow:auto}.icgrid button{font-size:1.6rem;padding:6px 0;border:1.5px solid var(--line);border-radius:12px;background:var(--card)}
+.icgrid .used{opacity:.35}.icgrid .on{border:2px solid var(--acc);background:var(--accs)}
 .kdot{width:14px;height:14px;border-radius:50%;background:var(--kc);display:inline-block;flex:none}
 .trend{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;font-weight:700;white-space:nowrap;color:var(--muted)}
 .trend i{width:9px;height:9px;border-radius:50%;background:currentColor}
@@ -272,6 +277,17 @@ function kidTrend(k){
 }
 const ARROW={besser:"↗",schlechter:"↘",stabil:"→",gemischt:"↕",neu:"…"};
 const badge=t=>`<span class="trend t-${t.k}"><i></i>${t.t}</span>`;
+// Neutrale Symbole: nichts, was auf Hobby, Herkunft, Religion oder Aussehen eines Kindes schließen lässt
+const ICONS=["🦊","🐢","🦉","🐝","🐬","🦋","🐙","🦒","🐧","🦔","🐳","🦜","🐌","🐞","🦁","🐼","🐨","🦓","🦩","🐸","🐠","🦀","🐘","🦭","🐿","🌻","🌵","🍀","🌲","🍄","🌈","⭐","🌙","🚀","⛵","🎈","🪁","🔑","🧭","💎","🍐","🍋","🍉","🫐","🥕","🍒"];
+function freeIcon(){const used=new Set(db.kids.map(k=>k.icon)),free=ICONS.filter(i=>!used.has(i));const pool=free.length?free:ICONS;return pool[Math.floor(Math.random()*pool.length)]}
+const kidIcon=(k,big)=>k.icon?`<span class="kic${big?" big":""}" style="--kc:${kidColor(k)}" aria-hidden="true">${esc(k.icon)}</span>`:`<span class="kdot" style="--kc:${kidColor(k)}${big?";width:22px;height:22px":""}"></span>`;
+async function pickIcon(cur){const used=new Set(db.kids.map(k=>k.icon));
+  return dlg(`<p style="font-weight:700;margin:0 0 4px">Symbol wählen</p><p class="small muted" style="margin:0 0 10px">Bitte zufällig wählen, nicht passend zum Kind. Grau = schon vergeben.</p>
+  <div class="icgrid">${ICONS.map(i=>`<button data-i="${i}" class="${i===cur?"on":""}${used.has(i)&&i!==cur?" used":""}">${i}</button>`).join("")}</div>
+  <div class="duo" style="margin-top:12px"><button class="btn" data-a="0">Abbrechen</button><button class="btn" data-a="r">Zufällig</button></div>`,
+  (el,done)=>{el.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>done(b.dataset.i));el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="r"]').onclick=()=>done(freeIcon())})}
+async function setKidIcon(id){const k=kidById(id),i=await pickIcon(k.icon);if(!i)return;k.icon=i;k.upd=Date.now();save();render()}
+async function newKidIcon(){const b=$("#nicon"),i=await pickIcon(b.dataset.i);if(i){b.dataset.i=i;b.textContent=i}}
 const kidColor=k=>{let h=0;for(const c of k.id+k.code)h=(h*31+c.charCodeAt(0))%360;return `hsl(${h} 55% 60%)`};
 
 /* ===== Navigation ===== */
@@ -384,7 +400,7 @@ function heuteV(){
   h+=`<h2>Wen bewertest du?</h2>`;
   for(const k of kids){
     const done=k.goals.filter(g=>g.entries.some(e=>e.date===t)).length;
-    h+=`<div class="card row kcard" style="--kc:${kidColor(k)}"><div class="grow"><div class="code">${esc(k.code)}</div>
+    h+=`<div class="card row kcard" style="--kc:${kidColor(k)}">${kidIcon(k)}<div class="grow"><div class="code">${esc(k.code)}</div>
     <div class="muted small">${k.cls?esc(k.cls)+" · ":""}${done===k.goals.length?"✓ heute erledigt":`heute ${done} von ${k.goals.length} Verhalten`}</div></div>
     <button class="btn ghost" onclick="openDiary('${k.id}')">Notiz</button><button class="btn ${done===k.goals.length?"":"pri"}" onclick="startRate('${k.id}')">Bewerten</button></div>`;
   }
@@ -394,7 +410,7 @@ function heuteV(){
 /* ===== Anleitung ===== */
 const HELP=[
  {t:"Willkommen bei Pfad",p:"Mit Pfad schätzt du das Verhalten einzelner Kinder direkt nach der Stunde ein. Das dauert wenige Sekunden. Mit der Zeit siehst du, ob sich etwas verbessert, und hast Belege für Förderplan und Gespräche.",l:["Alles bleibt auf deinem Gerät.","Kinder haben nur ein Kürzel, keinen Namen.","Unten wechselst du zwischen Heute, Kinder, Verlauf und Einstellungen."]},
- {t:"1. Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen: Die App schlägt ein Kürzel vor, z. B. 8A-01.","Keine Namen oder Initialen eintragen.","Welches Kürzel zu welchem Kind gehört, steht nur in der Förderakte."]},
+ {t:"1. Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen: Die App schlägt ein Kürzel vor, z. B. 8A-01, und ein zufälliges Symbol wie 🦊 zum schnellen Wiedererkennen.","Keine Namen oder Initialen eintragen.","Welches Kürzel zu welchem Kind gehört, steht nur in der Förderakte."]},
  {t:"2. Verhalten festlegen",p:"Pro Kind legst du ein bis drei Verhalten fest, die du beobachten willst.",l:["So formulieren, dass man es sehen kann: „Ruft ohne Melden in die Klasse“ statt „ist unruhig“.","Richtung wählen: Soll es weniger oder mehr werden?","Skala wählen: 0 bis 10, 1 bis 5 oder ja/nein."]},
  {t:"3. Nach der Stunde bewerten",p:"Auf „Heute“ tippst du beim Kind auf „Bewerten“.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
  {t:"4. Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
@@ -420,13 +436,13 @@ function klassenV(){
   ${db.classes.map(c=>`<option value="${esc(c)}" ${f===c?"selected":""}>Klasse ${esc(c)} (${count(c)})</option>`).join("")}
   ${count("")?`<option value="" ${f===""?"selected":""}>ohne Klasse (${count("")})</option>`:""}</select>
   <button class="btn noprint" onclick="addClass()">Neue Klasse</button></div>`;
-  if(view.adding)h+=`<div class="card"><label style="margin-top:0">Kürzel</label><input id="ncode" value="${f&&f!=="alle"?newCode(f):""}" placeholder="z. B. 8A-01" oninput="this.dataset.auto='';$('#nw').hidden=!looksLikeName(this.value)" data-auto="1">
-  <div class="sub" style="margin-top:4px">Klasse und laufende Nummer, keine Namen oder Initialen. Die Zuordnung steht nur in der Förderakte.</div>
+  if(view.adding)h+=`<div class="card"><div style="display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center"><label style="margin-top:0">Symbol</label><label style="margin-top:0">Kürzel</label><button id="nicon" class="kic big icpick" data-i="${view.newIcon||(view.newIcon=freeIcon())}" onclick="newKidIcon()" aria-label="Symbol ändern">${view.newIcon}</button><div><input id="ncode" value="${f&&f!=="alle"?newCode(f):""}" placeholder="z. B. 8A-01" oninput="this.dataset.auto='';$('#nw').hidden=!looksLikeName(this.value)" data-auto="1"></div></div>
+  <div class="sub" style="margin-top:4px">Symbol zum schnellen Wiedererkennen, zufällig gewählt. Kürzel: Klasse und laufende Nummer, keine Namen oder Initialen. Die Zuordnung steht nur in der Förderakte.</div>
   <p id="nw" class="small" style="color:var(--down)" hidden>Das sieht nach einem Namen aus. Bitte ein Kürzel verwenden.</p>
   <label>Klasse</label><select id="ncls" onchange="const i=$('#ncode');if(this.value&&(i.dataset.auto||!i.value)){i.value=newCode(this.value);i.dataset.auto='1'}"><option value="">Ohne Klasse</option>${db.classes.map(c=>`<option ${c===f?"selected":""}>${esc(c)}</option>`).join("")}</select>
   <p style="margin-top:12px" class="row"><button class="btn pri" onclick="addKid()">Anlegen</button><button class="btn ghost" onclick="view.adding=false;render()">Abbrechen</button></p></div>`;
   if(!list.length&&!view.adding)h+=`<p class="muted">Hier ist noch niemand. Lege unten ein Kind mit Kürzel an.</p>`;
-  for(const k of list)h+=`<div class="card tap row kcard" style="--kc:${kidColor(k)}" onclick="go({tab:'klassen',kid:'${k.id}'})">
+  for(const k of list)h+=`<div class="card tap row kcard" style="--kc:${kidColor(k)}" onclick="go({tab:'klassen',kid:'${k.id}'})">${kidIcon(k)}
   <div class="grow"><div class="code">${esc(k.code)} ${k.demo?'<span class="tag">fiktiv</span>':""}</div><div class="muted small">${k.cls?esc(k.cls)+" · ":""}${k.goals.length} ${k.goals.length===1?"Verhalten":"Verhalten"}</div></div>${badge(kidTrend(k))}</div>`;
   if(!view.adding)h+=`<p style="margin-top:14px"><button class="btn block noprint" onclick="view.adding=true;render();$('#ncode').focus()">+ Kind anlegen</button></p>`;
   h+=`<p class="muted small" style="text-align:center">Nur Kürzel verwenden, keine Namen.</p>`;
@@ -436,7 +452,7 @@ async function addClass(){const c=((await askText("Name der neuen Klasse","z. B.
 function newCode(cls){let n=1,c;do{c=`${cls}-${String(n++).padStart(2,"0")}`}while(db.kids.some(k=>k.code.toLowerCase()===c.toLowerCase()));return c}
 async function addKid(){const code=$("#ncode").value.trim();if(!code)return toast("Bitte ein Kürzel eingeben.");
   if(looksLikeName(code)&&!await ask("Das Kürzel sieht nach einem Namen aus. Trotzdem speichern?",{ok:"Trotzdem speichern"}))return;
-  const k={id:uid(),code,cls:$("#ncls").value,goals:[],diary:[],ts:Date.now()};db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
+  const k={id:uid(),code,icon:$("#nicon").dataset.i,cls:$("#ncls").value,goals:[],diary:[],ts:Date.now()};delete view.newIcon;db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
 
 /* ===== Kind ===== */
 function spark(g){
@@ -447,7 +463,7 @@ function spark(g){
 function kidV(){
   const k=kidById(view.kid);if(!k){view={tab:"klassen"};return klassenV()}
   let h=`<button class="btn ghost noprint" onclick="go({tab:'${view.tab}'})">‹ Zurück</button>
-  <div class="row" style="margin:6px 0 4px"><span class="kdot" style="--kc:${kidColor(k)};width:22px;height:22px"></span><div class="grow"><div class="code" style="font-size:1.4rem">${esc(k.code)}</div>
+  <div class="row" style="margin:6px 0 4px"><button class="icbtn" aria-label="Symbol ändern" onclick="setKidIcon('${k.id}')">${k.icon?kidIcon(k,1):`<span class="kic big add" style="--kc:${kidColor(k)}">+</span>`}</button><div class="grow"><div class="code" style="font-size:1.4rem">${esc(k.code)}</div>
   <select class="chip" style="margin-top:4px;width:auto" onchange="Object.assign(kidById('${k.id}'),{cls:this.value,upd:Date.now()});save();render()"><option value="">Ohne Klasse</option>${db.classes.map(c=>`<option ${c===k.cls?"selected":""}>${esc(c)}</option>`).join("")}</select></div>${badge(kidTrend(k))}</div>
   ${k.goals.length?`<div class="duo" style="margin:14px 0;grid-template-columns:1fr 1fr"><button class="btn pri" onclick="startRate('${k.id}')">Jetzt bewerten</button><button class="btn" onclick="go({tab:'${view.tab}',kid:'${k.id}',talk:true})">Gesprächsblatt</button></div>`:""}
   <h2>Verhalten</h2>`;
@@ -519,7 +535,7 @@ function renderRate(){
   const days=[...Array(7)].map((_,i)=>addDays(t,-i));
   const dayLbl=d=>d===t?"Heute":d===addDays(t,-1)?"Gestern":new Date(d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"numeric"});
   o.innerHTML=`<div class="rate" role="dialog" aria-label="Bewerten"><div class="inner">
-  <div class="between"><button class="btn ghost" style="font-size:1.3rem" aria-label="Schließen" onclick="closeRate()">✕</button><div class="row"><span class="kdot" style="--kc:${kidColor(k)}"></span><span class="code">${esc(k.code)}</span></div><span style="width:40px"></span></div>
+  <div class="between"><button class="btn ghost" style="font-size:1.3rem" aria-label="Schließen" onclick="closeRate()">✕</button><div class="row">${kidIcon(k)}<span class="code">${esc(k.code)}</span></div><span style="width:40px"></span></div>
   <div class="step">${k.goals.length>1?`Verhalten ${rs.i+1} von ${k.goals.length}`:"&nbsp;"}</div>
   ${rs.ctxOpen?`<div class="ctx ${rs.date!==t?"past":""}">
    <div class="pick days">${days.slice(0,2).map(d=>`<button class="${d===rs.date?"on":""}" onclick="rs.date='${d}';renderRate()">${dayLbl(d)}</button>`).join("")}<select class="${days.slice(2).includes(rs.date)?"on":""}" onchange="rs.date=this.value;renderRate()"><option value="">früher …</option>${days.slice(2).map(d=>`<option value="${d}" ${d===rs.date?"selected":""}>${dayLbl(d)}</option>`).join("")}</select></div>
@@ -608,7 +624,7 @@ function talkV(){
    <button class="btn pri" onclick="print()">Drucken</button></span></div>
   <p class="muted" style="margin:0">Gespräch am ${dDEy(today())} · ${RANGES[r][0]}${from?` (seit ${dDEy(from)})`:""}</p>
   <h1 style="margin-bottom:4px">So läuft es gerade</h1>
-  <p style="font-size:1.05rem">Name: <span style="display:inline-block;min-width:200px;border-bottom:1.5px solid var(--line)">&nbsp;</span> <span class="muted small noprint">(${esc(k.code)}, Name nur auf dem Ausdruck von Hand)</span></p>`;
+  <p style="font-size:1.05rem">${k.icon?`<span class="kic big" style="--kc:${kidColor(k)};vertical-align:middle;margin-right:8px">${esc(k.icon)}</span>`:""}Name: <span style="display:inline-block;min-width:200px;border-bottom:1.5px solid var(--line)">&nbsp;</span> <span class="muted small noprint">(${esc(k.code)}, Name nur auf dem Ausdruck von Hand)</span></p>`;
   if(!k.goals.length)h+=`<p class="muted">Für dieses Kind ist noch kein Verhalten angelegt.</p>`;
   h+=`<div class="tgs n${Math.min(3,k.goals.length)}">`;
   for(const g of k.goals){
@@ -689,7 +705,7 @@ function analyseV(){
   const k=kidById(view.aKid)||kids[0],g=goalById(k,view.aGoal)||k.goals[0];
   const s=summary(k,g),notes=sortE(g.entries).filter(e=>e.note).slice(-6).reverse();
   return `<h1>Verlauf</h1>
-  <div class="two noprint"><select onchange="go({tab:'analyse',aKid:this.value})">${kids.map(x=>`<option value="${x.id}" ${x.id===k.id?"selected":""}>${esc(x.code)}</option>`).join("")}</select>
+  <div class="two noprint"><select onchange="go({tab:'analyse',aKid:this.value})">${kids.map(x=>`<option value="${x.id}" ${x.id===k.id?"selected":""}>${x.icon?esc(x.icon)+" ":""}${esc(x.code)}</option>`).join("")}</select>
   <select onchange="go({tab:'analyse',aKid:'${k.id}',aGoal:this.value})">${k.goals.map(x=>`<option value="${x.id}" ${x.id===g.id?"selected":""}>${esc(x.title)}</option>`).join("")}</select></div>
   <div class="card" style="margin-top:12px"><div class="between"><div><b>${esc(g.title)}</b><div class="muted small">${esc(k.code)} · ${g.dir==="down"?"weniger davon":"mehr davon"}</div></div>${badge(trend(g))}</div>
   ${chart(g,k)}</div>
@@ -736,7 +752,7 @@ function mergeList(a=[],b=[],del){const m=new Map(a.map(x=>[x.id,x]));for(const 
 function mergeKid(k){const ex=kidById(k.id);
   if(!ex){db.kids.push(k);if(k.cls&&!db.classes.includes(k.cls))db.classes.push(k.cls);return 1}
   const del=new Set([...(ex.del||[]),...(k.del||[])]),before=JSON.stringify(ex);
-  if(ver(k)>ver(ex))Object.assign(ex,{code:k.code,cls:k.cls,upd:k.upd});
+  if(ver(k)>ver(ex))Object.assign(ex,{code:k.code,cls:k.cls,upd:k.upd,...(k.icon?{icon:k.icon}:{})});
   if(k.team)ex.team=k.team;if(k.pending)ex.pending=k.pending;
   const eg=new Map(ex.goals.map(g=>[g.id,g]));
   ex.goals=mergeList(ex.goals,k.goals,del).map(g=>{const a=eg.get(g.id)?.entries||[],b=(k.goals.find(x=>x.id===g.id)||{}).entries||[];return {...g,entries:mergeList(a,b,del)}});
@@ -957,7 +973,7 @@ function demo(){
     g2.entries.push({id:uid(),date:d,slot:sl,subj:s,value:v2[i]==null?null:Math.max(0,v2[i]-adj),note:i===13?"Mit Wochenplan deutlich schneller gestartet.":"",rater:"MU",ts,gen:true});i++}d=addDays(d,1)}
   const diary=[[-25,"Beobachtung","Mathe","Kommt nach der Pause oft unruhig in die Stunde. Erste 10 Minuten am schwierigsten."],[-20,"Gespräch","","Kurzes Gespräch nach der Stunde: wünscht sich einen Platz weiter vorne."],[-14,"Absprache","","Mit Klassenleitung: Sitzplatz vorne, Wochenplan mit Startsignal. Ab heute Förderung."],[-9,"Elternkontakt","","Telefonat mit der Mutter: zu Hause läuft es ähnlich, Unterstützung bei Wochenplan zugesagt."],[-4,"Erfolg","Mathe","Hat heute als Erste:r angefangen und das stolz gezeigt."],[-2,"Vorfall","Deutsch","Streit in der Gruppenarbeit, Auszeit nötig. Danach wieder gut eingestiegen."]]
     .map(([o,cat,subj,text],i)=>({id:uid(),date:addDays(t,o),cat,subj,text,rater:"MU",ts:new Date(addDays(t,o)+"T15:00").getTime()+i,gen:true}));
-  db.kids.push({id:uid(),code:"DEMO-7B",cls:"7B",demo:true,goals:[g1,g2],diary});save();toast("Beispielfall geladen");go({tab:"klassen"})}
+  db.kids.push({id:uid(),code:"DEMO-7B",icon:"🦉",cls:"7B",demo:true,goals:[g1,g2],diary});save();toast("Beispielfall geladen");go({tab:"klassen"})}
 
 load();render();
 </script>

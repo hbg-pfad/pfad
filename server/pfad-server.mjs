@@ -23,7 +23,7 @@ if(cmd==="liste"){for(const [k,u] of Object.entries(D.users))console.log(k,u.nam
 const ver=x=>x.edited||x.upd||x.ts||0;
 function mergeList(a=[],b=[],del){const m=new Map(a.map(x=>[x.id,x]));for(const x of b){const y=m.get(x.id);if(!y||ver(x)>ver(y))m.set(x.id,x)}return [...m.values()].filter(x=>!del.has(x.id))}
 function mergeDoc(ex,k){const del=new Set([...(ex.del||[]),...(k.del||[])]),out={...ex};
-  if(ver(k)>ver(ex))Object.assign(out,{code:k.code,cls:k.cls,upd:k.upd});
+  if(ver(k)>ver(ex))Object.assign(out,{code:k.code,cls:k.cls,upd:k.upd,...(k.icon?{icon:k.icon}:{})});
   const eg=new Map((ex.goals||[]).map(g=>[g.id,g]));
   out.goals=mergeList(ex.goals,k.goals,del).map(g=>{const a=eg.get(g.id)?.entries||[],b=((k.goals||[]).find(x=>x.id===g.id)||{}).entries||[];return {...g,entries:mergeList(a,b,del)}});
   out.diary=mergeList(ex.diary,k.diary,del);out.del=[...del];out.delTs=Math.max(ex.delTs||0,k.delTs||0);return out}
