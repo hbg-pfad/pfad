@@ -982,7 +982,7 @@ function profilV(){
   ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`${mtip("me")}<input class="${mk("me")}" value="${esc(db.me)}" placeholder="z. B. MU" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">`}
   <label>Alle Fächer deiner Schule</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
   <input value="${esc(db.subjects.join(", "))}" onchange="db.subjects=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')">
-  <label>Klassen</label><div class="sub">Mit Komma getrennt.</div>
+  <label>Deine Klassen</label><div class="sub">Mit Komma getrennt.</div>
   <input value="${esc(db.classes.join(", "))}" onchange="db.classes=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')"></div>
   ${rasterV()}
   ${gameV()}
