@@ -283,15 +283,26 @@ const SUBJECTS=["Deutsch","Mathe","Englisch","Franz.","Spanisch","Latein","Türk
 const RASTER=[["0.","08:00","08:20"],["1.","08:20","09:28"],["2.","09:35","10:42"],["3.","11:10","12:18"],["4.","12:25","13:32"],["5.","14:35","15:42"]];
 const OLD_RASTER=JSON.stringify([...RASTER.slice(0,5),["5.","14:35","15:42","14:00","15:07"]]);
 let db;
-function load(){try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!db||!db.kids)db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[]};
+// Mit App-Sperre liegt im Speicher nur ein verschlüsselter Umschlag {pfadEnc,salt,iv,ct}; db bleibt bis zum Entsperren leer
+let ENCWAIT=null,LKEY=null;
+function load(){try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(db?.pfadEnc){ENCWAIT=db;db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[],lock:{salt:ENCWAIT.salt,after:ENCWAIT.after??1,len:ENCWAIT.len||4}}}
+  migrate()}
+function migrate(){if(!db||!db.kids)db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[]};
   if(JSON.stringify(db.subjects)===JSON.stringify(OLD_SUBJECTS))db.subjects=SUBJECTS.slice();db.raster??=RASTER.map(r=>r.slice());
   if(JSON.stringify(db.raster)===OLD_RASTER)db.raster=RASTER.map(r=>r.slice());
   db.raster.forEach(r=>{if(typeof r[3]==="string"||typeof r[4]==="string"){const d=[r[3]||"",r[4]||""];r.length=3;r[3]={2:d,5:d.slice()}}});
-  db.yearSY??=syNow()}
+  db.yearSY??=syNow();
+  if(db.lock?.hash){delete db.lock;setTimeout(()=>toast("Die App-Sperre verschlüsselt jetzt auch die Daten. Bitte in den Einstellungen neu einschalten."),600)}}
 function applyTheme(){const t=db?.theme,r=document.documentElement;if(t==="light"||t==="dark")r.dataset.theme=t;else delete r.dataset.theme;
   if(db?.fs==="l"||db?.fs==="xl")r.dataset.fs=db.fs;else delete r.dataset.fs;
   const dark=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches);document.querySelector('meta[name=theme-color]')?.setAttribute("content",dark?"#1d1916":"#fbf6ef")}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast("Speichern nicht möglich. Bitte exportieren.")}window.autoSoon?.()}
+let SAVEQ=Promise.resolve(),SAVEN=0;
+function save(){if(ENCWAIT)return; // gesperrt und noch nicht entschlüsselt: nichts überschreiben
+  if(db.lock&&LKEY){const n=++SAVEN,key=LKEY,json=JSON.stringify(db),meta={pfadEnc:1,salt:db.lock.salt,after:db.lock.after,len:db.lock.len};
+    SAVEQ=SAVEQ.then(async()=>{const body=await gcm(key,enc(json));if(n===SAVEN)localStorage.setItem(KEY,JSON.stringify({...meta,...body}))}).catch(()=>toast("Speichern nicht möglich. Bitte exportieren."))}
+  else try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast("Speichern nicht möglich. Bitte exportieren.")}
+  window.autoSoon?.()}
 /* ===== Helfer ===== */
 const $=s=>document.querySelector(s);
 const uid=()=>Math.random().toString(36).slice(2,10);
@@ -1267,45 +1278,54 @@ async function yearBack(quick){const u=db.yearUndo;if(!u)return;
   db.classes=[...new Set([...u.classes,...db.kids.map(k=>k.cls).filter(Boolean)])].sort(byNum);db.yearSY=u.sy||syNow();delete db.yearUndo;view.filter="alle";save();render();
   toast(clash?`Zurückgesetzt. ${clash} Kürzel waren inzwischen vergeben und bleiben neu.`:"Schuljahreswechsel zurückgenommen")}
 
-/* ===== App-Sperre (optional, Standard aus) =====
-   Code als PBKDF2-Prüfwert gespeichert. Schützt vor einem kurzen Blick, verschlüsselt die Daten aber nicht. */
+/* ===== App-Sperre mit Verschlüsselung (optional, Standard aus) =====
+   Aus dem Code (4 bis 6 Ziffern) wird per PBKDF2 (600 000 Runden) ein AES-Schlüssel. Im Browserspeicher liegen die Daten dann
+   nur verschlüsselt; der Schlüssel bleibt nur im Arbeitsspeicher, solange Pfad entsperrt ist. Ein Ziffern-Code ist durchprobierbar,
+   wenn jemand den Speicher kopiert: Schutz vor dem Blick und dem einfachen Auslesen, kein Hochsicherheitstresor. Code vergessen = Daten weg. */
 let LOCKED=false,LOCKIN="",LOCKFAIL=0,LOCKWAIT=0,HIDDEN_AT=0;
-async function codeHash(code,salt){const base=await crypto.subtle.importKey("raw",enc(code),"PBKDF2",false,["deriveBits"]);
-  return b64(new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:unb64(salt),iterations:150000,hash:"SHA-256"},base,256)))}
-const codeOk=async c=>!!db.lock&&await codeHash(c,db.lock.salt)===db.lock.hash;
-function askCode(msg){return dlg(`<p style="font-weight:700;margin:0 0 10px">${esc(msg)}</p><input id="dlgIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="4 bis 6 Ziffern">
+async function codeKey(code,salt){const base=await crypto.subtle.importKey("raw",enc(code),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:unb64(salt),iterations:600000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+// Prüft einen Code am gespeicherten Umschlag; gibt {key,data} zurück oder null
+async function tryCode(c){const raw=ENCWAIT||JSON.parse(localStorage.getItem(KEY)||"null");if(!raw?.pfadEnc)return null;
+  try{const key=await codeKey(c,raw.salt);return {key,data:JSON.parse(dec(await ungcm(key,raw)))}}catch(e){return null}}
+function askCode(msg,sub){return dlg(`<p style="font-weight:700;margin:0 0 6px">${esc(msg)}</p>${sub?`<p class="small muted" style="margin:0 0 10px">${sub}</p>`:""}<input id="dlgIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="4 bis 6 Ziffern">
   <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">OK</button></div>`,
   (el,done)=>{const i=el.querySelector("#dlgIn");i.focus();i.onkeydown=e=>{if(e.key==="Enter")done(i.value)};el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done(i.value)})}
 function lockV(){const L=db.lock;
-  return `<div class="card"><h2 style="margin-top:0">App-Sperre</h2>
-  <label class="swr"><span class="grow">Pfad mit eigenem Code sperren<span class="sub">Zusätzlich zur Gerätesperre. Standard: aus.</span></span><input type="checkbox" class="sw" ${L?"checked":""} onchange="this.checked?setLock():offLock()"></label>
+  return `<div class="card"><h2 style="margin-top:0">App-Sperre und Verschlüsselung</h2>
+  <label class="swr"><span class="grow">Pfad mit Code sperren und verschlüsseln<span class="sub">Zusätzlich zur Gerätesperre. Standard: aus.</span></span><input type="checkbox" class="sw" ${L?"checked":""} onchange="this.checked?setLock():offLock()"></label>
   ${L?`<div class="sub" style="margin:10px 0 6px;font-weight:700">Sperren, wenn Pfad im Hintergrund war</div><div class="pick theme">${[[0,"Sofort"],[1,"Nach 1 Min."],[5,"Nach 5 Min."]].map(([m,t])=>`<button class="${L.after===m?"on":""}" onclick="db.lock.after=${m};save();render()">${t}</button>`).join("")}</div>
   <p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn" onclick="setLock(true)">Code ändern</button><button class="btn" onclick="lockNow()">Jetzt sperren</button></p>`:""}
-  <p class="muted small" style="margin-bottom:0">Die Sperre schützt vor einem kurzen Blick auf das entsperrte Gerät. Sie verschlüsselt die Daten nicht und ersetzt nicht den Gerätecode. Wer den Code vergisst, muss die Daten auf dem Gerät löschen und eine Sicherung laden.</p></div>`}
+  <p class="muted small" style="margin-bottom:0">Ist die Sperre an, liegen die Daten auf diesem Gerät nur verschlüsselt im Speicher. Ein Ziffern-Code schützt vor einem Blick und vor einfachem Auslesen, mit viel Aufwand ließe er sich durchprobieren. Der Gerätecode bleibt deshalb Pflicht. Wer den Code vergisst, kommt nicht mehr an die Daten und muss die letzte Sicherung laden.</p></div>`}
 async function setLock(change){if(!crypto.subtle){toast("In dieser Ansicht nicht möglich. Bitte im Browser öffnen.");return render()}
-  if(change&&!await codeOk((await askCode("Aktuellen Code eingeben"))||""))return toast("Code falsch");
-  const a=(await askCode(change?"Neuen Code festlegen":"Code für Pfad festlegen"))||"";
-  if(!/^\d{4,6}$/.test(a)){render();return a&&toast("Bitte 4 bis 6 Ziffern.")}
-  if(((await askCode("Code wiederholen"))||"")!==a){render();return toast("Die Codes stimmen nicht überein.")}
-  const salt=b64(rnd(16));db.lock={salt,hash:await codeHash(a,salt),len:a.length,after:db.lock?.after??1};save();render();toast(change?"Code geändert":"App-Sperre ist an")}
-async function offLock(){const c=await askCode("Zum Ausschalten aktuellen Code eingeben");if(c!=null&&await codeOk(c)){delete db.lock;save();render();toast("App-Sperre ist aus")}else{render();if(c)toast("Code falsch")}}
+  if(change){const c=await askCode("Aktuellen Code eingeben");if(c==null)return;if(!await tryCode(c))return toast("Code falsch")}
+  const a=await askCode(change?"Neuen Code festlegen":"Code für Pfad festlegen","4 bis 6 Ziffern, nicht dein Gerätecode. Du gibst ihn bei jedem Start ein. Vergessen heißt: Die Daten auf diesem Gerät sind weg. Speichere vorher eine Sicherung.");
+  if(a==null)return render();if(!/^\d{4,6}$/.test(a)){render();return toast("Bitte 4 bis 6 Ziffern.")}
+  if(await askCode("Code wiederholen")!==a){render();return toast("Die Codes stimmen nicht überein.")}
+  const salt=b64(rnd(16));LKEY=await codeKey(a,salt);db.lock={salt,len:a.length,after:db.lock?.after??1};save();await SAVEQ;render();toast(change?"Code geändert":"Pfad ist jetzt gesperrt und verschlüsselt")}
+async function offLock(){const c=await askCode("Zum Ausschalten Code eingeben","Danach liegen die Daten wieder unverschlüsselt im Speicher dieses Geräts.");
+  if(c!=null&&await tryCode(c)){delete db.lock;LKEY=null;save();render();toast("App-Sperre ist aus")}else{render();if(c)toast("Code falsch")}}
 function lockNow(){if(!db.lock)return;LOCKED=true;LOCKIN="";document.body.classList.add("locked");document.activeElement?.blur?.();renderLock()}
-function renderLock(msg){let el=$("#lock");if(!LOCKED){el?.remove();return}
+function renderLock(msg,busy){let el=$("#lock");if(!LOCKED){el?.remove();return}
   if(!el){el=document.createElement("div");el.id="lock";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Pfad ist gesperrt");document.body.appendChild(el)}
   const wait=Math.ceil((LOCKWAIT-Date.now())/1000),len=db.lock.len||4;
   el.innerHTML=`<div class="box"><div style="font-size:2.4rem" aria-hidden="true">🔒</div><h1 style="margin:6px 0 4px">Pfad ist gesperrt</h1>
-  <p class="muted" aria-live="polite">${wait>0?`Zu viele Versuche. Warte ${wait} Sekunden.`:esc(msg||"Gib deinen Code ein.")}</p>
+  <p class="muted" aria-live="polite">${wait>0?`Zu viele Versuche. Warte ${wait} Sekunden.`:busy?"Wird entsperrt …":esc(msg||"Gib deinen Code ein.")}</p>
   <div class="pins${msg?" bad":""}" aria-hidden="true">${[...Array(len)].map((_,i)=>`<i class="${i<LOCKIN.length?"on":""}"></i>`).join("")}</div>
-  <div class="keys">${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="lockKey('${n}')">${n}</button>`).join("")}<button class="nb" onclick="lockForgot()">Vergessen?</button><button onclick="lockKey('0')">0</button><button class="nb" aria-label="Ziffer löschen" onclick="LOCKIN=LOCKIN.slice(0,-1);renderLock()">⌫</button></div></div>`;
+  <div class="keys">${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="lockPress('${n}')">${n}</button>`).join("")}<button class="nb" onclick="lockForgot()">Vergessen?</button><button onclick="lockPress('0')">0</button><button class="nb" aria-label="Ziffer löschen" onclick="LOCKIN=LOCKIN.slice(0,-1);renderLock()">⌫</button></div></div>`;
   if(wait>0)setTimeout(()=>LOCKED&&renderLock(),1000)}
-async function lockKey(d){if(LOCKWAIT>Date.now())return;const len=db.lock.len||4;if(LOCKIN.length>=len)return;LOCKIN+=d;renderLock();if(LOCKIN.length<len)return;
-  const c=LOCKIN;if(await codeOk(c)){LOCKED=false;LOCKIN="";LOCKFAIL=0;document.body.classList.remove("locked");renderLock();return}
-  LOCKIN="";LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**(LOCKFAIL-5);try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
-async function lockForgot(){if(!await ask("Code vergessen? Ohne Code kommst du nicht an die Daten. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden.",{ok:"Alles löschen",danger:true}))return;
-  db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,bsalt:db.bsalt,yearSY:db.yearSY,classes:[],kids:[]};save();LOCKED=false;document.body.classList.remove("locked");renderLock();go({tab:"profil"});toast("Alles gelöscht. Lade jetzt deine letzte Sicherung.")}
+let LOCKBUSY=false;
+async function lockPress(d){if(LOCKWAIT>Date.now()||LOCKBUSY)return;const len=db.lock.len||4;if(LOCKIN.length>=len)return;LOCKIN+=d;renderLock();if(LOCKIN.length<len)return;
+  LOCKBUSY=true;renderLock("",true);const r=await tryCode(LOCKIN);LOCKBUSY=false;LOCKIN="";
+  if(r){LOCKFAIL=0;LKEY=r.key;if(ENCWAIT){ENCWAIT=null;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();return}
+  LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**(LOCKFAIL-5);try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
+async function lockForgot(){if(!await ask("Code vergessen? Ohne Code lassen sich die Daten nicht entschlüsseln. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden.",{ok:"Alles löschen",danger:true}))return;
+  const keep=ENCWAIT?{}:db;ENCWAIT=null;LKEY=null;
+  db={v:2,me:keep.me||"",subjects:keep.subjects||SUBJECTS.slice(),raster:keep.raster,game:keep.game,theme:keep.theme,fs:keep.fs,bsalt:keep.bsalt,yearSY:keep.yearSY,classes:[],kids:[]};migrate();
+  localStorage.removeItem(KEY);save();LOCKED=false;document.body.classList.remove("locked");renderLock();applyTheme();go({tab:"profil"});toast("Alles gelöscht. Lade jetzt deine letzte Sicherung.")}
 document.addEventListener("visibilitychange",()=>{if(!db?.lock)return;if(document.hidden){HIDDEN_AT=Date.now();if(!db.lock.after)lockNow()}
   else if(!LOCKED&&HIDDEN_AT&&Date.now()-HIDDEN_AT>=db.lock.after*6e4)lockNow()});
-document.addEventListener("keydown",e=>{if(!LOCKED)return;if(/^\d$/.test(e.key))lockKey(e.key);else if(e.key==="Backspace"){LOCKIN=LOCKIN.slice(0,-1);renderLock()}});
+document.addEventListener("keydown",e=>{if(!LOCKED||e.target.closest?.(".cele"))return;if(/^\d$/.test(e.key))lockPress(e.key);else if(e.key==="Backspace"){LOCKIN=LOCKIN.slice(0,-1);renderLock()}});
 
 function demo(quiet){
   if(db.kids.some(k=>k.demo))return quiet?null:toast("Beispielfall ist schon da");
