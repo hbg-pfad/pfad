@@ -211,7 +211,7 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 .ctx{background:var(--soft);border-radius:18px;padding:10px;display:grid;gap:8px}
 .ctx.past{outline:2px dashed var(--new)}
 .pick{display:grid;gap:5px}
-.pick.days{grid-template-columns:1fr 1fr 1.2fr}.pick.slots{grid-template-columns:repeat(7,1fr)}.pick.subjs{grid-template-columns:repeat(4,1fr)}
+.pick.days{grid-template-columns:1fr 1fr 1.2fr}.pick.pauses{grid-template-columns:repeat(3,1fr)}.pick.slots{grid-template-columns:repeat(7,1fr)}.pick.subjs{grid-template-columns:repeat(4,1fr)}
 .pick button,.pick select{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:11px;padding:8px 2px;font:inherit;font-weight:700;font-size:.82rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pick select{padding:8px 6px}
 .pick .on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
@@ -278,7 +278,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.0",PFAD_STAND="24.10.2026";
+const PFAD_VERSION="1.0.1",PFAD_STAND="24.10.2026";
 const KEY="verlaufsbogen-v2";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -297,6 +297,7 @@ function migrate(){if(!db||!db.kids)db={v:2,me:"",subjects:SUBJECTS.slice(),clas
   if(JSON.stringify(db.raster)===OLD_RASTER)db.raster=RASTER.map(r=>r.slice());
   db.raster.forEach(r=>{if(typeof r[3]==="string"||typeof r[4]==="string"){const d=[r[3]||"",r[4]||""];r.length=3;r[3]={2:d,5:d.slice()}}});
   db.yearSY??=syNow();
+  db.kids.forEach(k=>k.goals.forEach(g=>g.entries.forEach(e=>{if(e.slot==="Pause")e.slot="Große Pause"})));
   if(db.lock?.hash){delete db.lock;setTimeout(()=>toast("Die App-Sperre verschlüsselt jetzt auch die Daten. Bitte in den Einstellungen neu einschalten."),600)}}
 function applyTheme(){const t=db?.theme,r=document.documentElement;if(t==="light"||t==="dark")r.dataset.theme=t;else delete r.dataset.theme;
   if(db?.fs==="l"||db?.fs==="xl")r.dataset.fs=db.fs;else delete r.dataset.fs;
@@ -726,7 +727,8 @@ async function delGoal(){if(!await ask("Verhalten mit allen Einschätzungen lös
 /* ===== Bewerten ===== */
 let rs=null;
 const slotName=r=>r[0].replace(/\.$/,"")+". Std.";
-const SLOTS_ALL=()=>[...db.raster.map(slotName),"Pause"];
+const PAUSES=["Kleine Pause","Große Pause","Mittagspause"];
+const SLOTS_ALL=()=>[...db.raster.map(slotName),...PAUSES];
 const hm=t=>{const[a,b]=t.split(":");return +a*60+ +b};
 const rTime=(r,wd)=>{const d=r[3]?.[wd];return [d?.[0]||r[1],d?.[1]||r[2]]};
 function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getMinutes();if(wd===0||wd===6)return "";
@@ -754,7 +756,8 @@ function renderRate(){
   <div class="step">${[rs.qn>1&&`Kind ${rs.qi} von ${rs.qn}`,k.goals.length>1&&`Verhalten ${rs.i+1} von ${k.goals.length}`].filter(Boolean).join(" · ")||"&nbsp;"}</div>
   ${rs.ctxOpen?`<div class="ctx ${rs.date!==t?"past":""}">
    <div class="pick days">${days.slice(0,2).map(d=>`<button class="${d===rs.date?"on":""}" onclick="rs.date='${d}';renderRate()">${dayLbl(d)}</button>`).join("")}<select class="${days.slice(2).includes(rs.date)?"on":""}" onchange="rs.date=this.value;renderRate()"><option value="">früher …</option>${days.slice(2).map(d=>`<option value="${d}" ${d===rs.date?"selected":""}>${dayLbl(d)}</option>`).join("")}</select></div>
-   <div class="pick slots">${SLOTS_ALL().map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot==='${x}'?'':'${x}';renderRate()">${x.replace(" Std.","")}</button>`).join("")}</div>
+   <div class="pick slots">${db.raster.map(slotName).map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot==='${x}'?'':'${x}';renderRate()">${x.replace(" Std.","")}</button>`).join("")}</div>
+   <div class="pick pauses">${PAUSES.map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot==='${x}'?'':'${x}';renderRate()">${x}</button>`).join("")}</div>
    <div class="pick subjs">${db.subjects.map(x=>`<button class="${x===rs.subj?"on":""}" onclick="rs.subj=rs.subj===this.textContent?'':this.textContent;renderRate()">${esc(x)}</button>`).join("")}</div></div>`
   :`<button class="ctxline" onclick="rs.ctxOpen=true;renderRate()">${dayLbl(rs.date)} · ${rs.slot||"ohne Stunde"} · ${esc(rs.subj||"ohne Fach")} <span>ändern</span></button>`}
   ${rs.date!==t?`<p class="small" style="text-align:center;color:var(--new)">Eintrag für einen vergangenen Tag (${dDEy(rs.date)})</p>`:""}
@@ -1219,7 +1222,7 @@ function rasterV(){const wd=RDAY;
   <div class="rast${wd?" r4":""}"><span></span><span class="sub">Beginn</span><span class="sub">Ende</span>${wd?"<span></span>":""}${db.raster.map((r,i)=>{if(!wd)return `<b>${esc(r[0])}</b><input type="time" value="${r[1]}" onchange="setR(${i},1,this.value)"><input type="time" value="${r[2]}" onchange="setR(${i},2,this.value)">`;
     const [a,b]=rTime(r,wd),dv=r[3]?.[wd];return `<b>${esc(r[0])}</b><input type="time" class="${dv?.[0]?"dev":""}" value="${a}" onchange="setRD(${i},${wd},0,this.value)"><input type="time" class="${dv?.[1]?"dev":""}" value="${b}" onchange="setRD(${i},${wd},1,this.value)">${dv?`<button class="x" aria-label="Zurücksetzen" onclick="clrRD(${i},${wd})">✕</button>`:"<span></span>"}`}).join("")}</div>
   ${wd?"":`<p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn ghost" onclick="addR()">+ Stunde</button>${db.raster.length>1?`<button class="btn ghost" onclick="db.raster.pop();save();render()">Letzte entfernen</button>`:""}<button class="btn ghost" onclick="db.raster=RASTER.map(r=>r.slice());save();render()">HBG-Raster</button></p>`}
-  <p class="muted small">Jetzt vorausgewählt: <b>${currentSlot()||"keine Stunde"}</b> (in Pausen bleibt die Stunde davor ausgewählt)</p></div>`}
+  <p class="muted small">Jetzt vorausgewählt: <b>${currentSlot()||"keine Stunde"}</b> (in Pausen bleibt die Stunde davor ausgewählt). Für Beobachtungen in der Pause gibt es beim Bewerten „Kleine Pause“, „Große Pause“ und „Mittagspause“.</p></div>`}
 function gameV(){const g=G(),T=GOALTYPES[g.type],max=g.type==="days"?5:10;
   return `<div class="card"><h2 style="margin-top:0">Wochenziel</h2>
   <label class="swr"><span class="grow">Wochenziel und Feedback anzeigen<span class="sub">Ring auf „Heute“ und kurzer Haken nach dem Speichern</span></span><input type="checkbox" class="sw" ${g.on?"checked":""} onchange="G().on=this.checked;save();render()"></label>
