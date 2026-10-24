@@ -291,7 +291,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.1.1",PFAD_STAND="24.10.2026";
+const PFAD_VERSION="1.1.2",PFAD_STAND="24.10.2026";
 const KEY="verlaufsbogen-v2";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -502,6 +502,12 @@ function setupDoneV(){confetti(40);fb("big");
   <h2 style="margin:8px 0 4px">Geschafft, Pfad ist eingerichtet!</h2><p class="muted" style="margin:0 0 14px">Kürzel, Beispielfall und erste Sicherung sind erledigt. Jetzt zeigt dir die Anleitung in 8 Schritten, wo du was findest.</p></div>
   <div class="duo"><button class="btn" data-a="0">Später</button><button class="btn pri" data-a="1">Anleitung starten</button></div>`,
   (el,done)=>{el.querySelector(".box").classList.add("pop");el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))}).then(v=>v===true?openHelp():go({tab:"heute"}))}
+// Ende der Anleitung genauso feiern wie die Einrichtung
+function tourDoneV(){confetti(40);fb("big");
+  dlg(`<div style="text-align:center"><svg width="72" height="72" viewBox="0 0 72 72" class="setok"><circle class="c" cx="36" cy="36" r="30" fill="none" stroke="var(--up)" stroke-width="6"/><path d="M23 37l9 9 17-19" fill="none" stroke="var(--up)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h2 style="margin:8px 0 4px">Super, du kennst dich jetzt aus!</h2><p class="muted" style="margin:0 0 14px">Du hast alle 8 Schritte geschafft. Lege jetzt dein erstes Kind an. Den Beispielfall löschst du beim Kind, wenn du ihn nicht mehr brauchst.</p></div>
+  <div class="duo"><button class="btn" data-a="0">Zu Heute</button><button class="btn pri" data-a="1">Kind anlegen</button></div>`,
+  (el,done)=>{el.querySelector(".box").classList.add("pop");el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))}).then(v=>{go(v===true?{tab:"klassen",adding:true}:{tab:"heute"});if(v===true)$("#ncode")?.focus()})}
 function celebrate(k,n,kn=1){
   const msg=`${n} Einschätzung${n===1?"":"en"} für ${kn>1?kn+" Kinder":esc(k.code)} gespeichert`;
   if(!G().on){fb("small");toast(msg);return}
@@ -651,7 +657,7 @@ const TOUR=[
  {v:()=>({tab:"profil"}),sel:()=>[...document.querySelectorAll("#app h2")].find(h=>h.textContent.trim()==="Datenschutz")?.closest(".card")}];
 function openHelp(){db.seenHelp=1;demo(true);save();tourGo(0)}
 function tourGo(i){if(i<0)return;if(i>=TOUR.length)return tourEnd(true);if(!demoKid())demo(true);go({...TOUR[i].v(),tour:i})}
-function tourEnd(done){const back=view.tour!=null?view.tab:"heute";view={tab:"heute"};render();window.scrollTo(0,0);if(done)toast("Fertig! Den Beispielfall löschst du beim Kind, wenn du ihn nicht mehr brauchst.")}
+function tourEnd(done){const back=view.tour!=null?view.tab:"heute";view={tab:"heute"};render();window.scrollTo(0,0);if(done)tourDoneV()}
 function tourApply(){let el=$("#tour");document.body.classList.toggle("touring",view.tour!=null);
   document.querySelectorAll(".tmark").forEach(x=>x.classList.remove("tmark","mark"));
   if(view.tour==null){el?.remove();return}
