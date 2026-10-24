@@ -53,3 +53,6 @@ Fälle neu anlegen darf jede angemeldete Lehrkraft (sie ist dann allein eingetra
 - Datensicherung der Datendatei, Löschfristen (z. B. nach Ende der Förderung), Protokollierung und Rollen klären.
 - Vor dem Betrieb: Freigabe durch Schulleitung und DSB, Eintrag ins Verarbeitungsverzeichnis.
 - Diese Referenz ist ein Prototyp. Für den echten Betrieb gehört sie geprüft oder durch eine Lösung des Schulträgers ersetzt.
+
+## Geplant: Wiederherstellung vergessener Codes und Passwörter
+Nick-Entscheidung 24.10.2026: Bis der Schulserver läuft, gilt „vergessen = Daten auf dem Gerät löschen und letzte Sicherung laden“. Mit dem Server soll eine Wiederherstellung über die verifizierte Dienstmail kommen (App-Sperre und Sicherungs-Passwort). Idee: Die App hinterlegt einen mit einem Server-Schlüssel verpackten Ersatzschlüssel; nach Bestätigung über einen Link an die Dienstmail gibt der Server ihn frei. Braucht Mailversand im Schulnetz, Schlüsselverwaltung und Freigabe durch IT und DSB.
