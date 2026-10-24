@@ -23,7 +23,7 @@
 --acc:#8db8e3;--acc-ink:#10151b;--accs:#26323f;--up:#7fcf9c;--ups:#1f3328;--down:#f0957f;--downs:#3d2620;--flat:#b3afa7;--flats:#2c2e31;--new:#e3c06e;--news:#3a3220;
 --chart1:#8db8e3;--chart2:#eba068}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{max-width:640px;margin:0 auto;padding:16px 16px 96px}
 @media (min-width:900px) and (orientation:landscape){main{max-width:860px;padding-left:24px;padding-right:24px}body .rate .inner{max-width:760px}}
 h1{font-size:1.7rem;margin:6px 0 12px;letter-spacing:-.01em}
@@ -241,7 +241,32 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 .pointer.left{left:8px}.pointer.right{right:8px}
 @keyframes bob{50%{transform:translateY(7px)}}@keyframes bobup{50%{transform:translateY(-7px)}}
 @media (prefers-reduced-motion:reduce){.mark,.pointer{animation:none}}
+/* Schriftgröße */
+:root{font-size:16px}:root[data-fs=l]{font-size:18px}:root[data-fs=xl]{font-size:20px}
+/* Rückgängig-Hinweis */
+.toast.undo{display:flex;gap:14px;align-items:center;z-index:35;text-align:left}
+.toast.undo button{border:none;background:none;color:var(--bg);font-weight:800;text-decoration:underline;padding:4px 2px;flex:none}
+.kcard .late{color:var(--new);font-weight:700}
+/* App-Sperre */
+#lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;overflow:auto}
+#lock .box{max-width:340px;width:100%;text-align:center}
+#lock .pins{display:flex;justify-content:center;gap:14px;margin:18px 0 8px}
+#lock .pins i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink)}#lock .pins i.on{background:var(--ink)}
+#lock .pins.bad{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#lock .keys{display:grid;grid-template-columns:repeat(3,70px);justify-content:center;gap:14px 22px;margin:12px auto 0}
+#lock .keys button{height:64px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:1.5rem;font-weight:700}
+#lock .keys button{width:70px;height:70px;padding:0}#lock .keys button.nb{border:none;background:none;font-size:.8rem;font-weight:600;color:var(--muted)}#lock .keys button.nb:last-child{font-size:1.3rem;color:var(--ink)}
+body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.locked .cele:not(.lockdlg),body.locked .toast{visibility:hidden}
+/* Bericht für die Förderakte */
+.report .meta{width:100%;margin:6px 0 10px}.report .meta td{padding:3px 8px 3px 0;vertical-align:top}.report .meta td:nth-child(odd){color:var(--muted);white-space:nowrap}
+.report .rg{break-inside:avoid}
+.report .dentry{break-inside:avoid}
+@media print{.report h1{font-size:1.4rem;margin:0 0 4px}.report .card{border-color:#ccc;padding:10px 12px}.report svg.chart{max-height:62mm}
+ :root,:root:not([data-theme=light]),:root[data-theme=dark]{--bg:#fff;--card:#fff;--ink:#2b2420;--muted:#6e6259;--line:#ddd2c4;--soft:#f5ece0;--acc:#d0643c;--accs:#fbe6dc;--up:#4c8a5a;--ups:#e4f1e3;--down:#c0483a;--downs:#f9e1dc;--flat:#80736a;--flats:#f1ebe3;--new:#a7790f;--news:#f8edcf;--chart1:#d0643c}
+ #lock{display:none!important}}
 </style>
+<style id="pg"></style>
 </head>
 <body>
 <main id="app"></main>
@@ -261,8 +286,10 @@ let db;
 function load(){try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!db||!db.kids)db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[]};
   if(JSON.stringify(db.subjects)===JSON.stringify(OLD_SUBJECTS))db.subjects=SUBJECTS.slice();db.raster??=RASTER.map(r=>r.slice());
   if(JSON.stringify(db.raster)===OLD_RASTER)db.raster=RASTER.map(r=>r.slice());
-  db.raster.forEach(r=>{if(typeof r[3]==="string"||typeof r[4]==="string"){const d=[r[3]||"",r[4]||""];r.length=3;r[3]={2:d,5:d.slice()}}})}
+  db.raster.forEach(r=>{if(typeof r[3]==="string"||typeof r[4]==="string"){const d=[r[3]||"",r[4]||""];r.length=3;r[3]={2:d,5:d.slice()}}});
+  db.yearSY??=syNow()}
 function applyTheme(){const t=db?.theme,r=document.documentElement;if(t==="light"||t==="dark")r.dataset.theme=t;else delete r.dataset.theme;
+  if(db?.fs==="l"||db?.fs==="xl")r.dataset.fs=db.fs;else delete r.dataset.fs;
   const dark=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches);document.querySelector('meta[name=theme-color]')?.setAttribute("content",dark?"#1d1916":"#fbf6ef")}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast("Speichern nicht möglich. Bitte exportieren.")}window.autoSoon?.()}
 /* ===== Helfer ===== */
@@ -279,7 +306,11 @@ const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
 const kidById=id=>db.kids.find(k=>k.id===id);
 const goalById=(k,id)=>k.goals.find(g=>g.id===id);
 const looksLikeName=s=>/^[A-ZÄÖÜ][a-zäöüß]{2,}([ -][A-ZÄÖÜ][a-zäöüß]+)*$/.test(s.trim());
-function toast(t){document.querySelectorAll(".toast").forEach(x=>x.remove());const el=document.createElement("div");el.className="toast";el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),Math.max(1800,t.length*45))}
+function toast(t){document.querySelectorAll(".toast").forEach(x=>x.remove());const el=document.createElement("div");el.className="toast";el.setAttribute("role","status");el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),Math.max(1800,t.length*45))}
+// Hinweis mit „Rückgängig“, verschwindet nach ein paar Sekunden
+let UNDO_T;
+function undoToast(msg,fn,ms=8000){document.querySelectorAll(".toast").forEach(x=>x.remove());const el=document.createElement("div");el.className="toast undo";el.setAttribute("role","status");
+  el.innerHTML=`<span class="grow">${esc(msg)}</span><button>Rückgängig</button>`;el.querySelector("button").onclick=()=>{el.remove();clearTimeout(UNDO_T);fn()};document.body.appendChild(el);clearTimeout(UNDO_T);UNDO_T=setTimeout(()=>el.remove(),ms)}
 const sortE=e=>[...e].sort((a,b)=>(a.date+(a.slot||"")+a.ts).localeCompare(b.date+(b.slot||"")+b.ts));
 const rated=g=>sortE(g.entries).filter(e=>e.value!=null);
 const SCALES={"10":"10-stufig (0 bis 10)","5":"5-stufig (1 bis 5)","2":"ja / nein","c":"eigene Skala"};
@@ -335,25 +366,27 @@ heute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="
 klassen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.4-.2 4 1.3 4.5 4.3"/></svg>',
 analyse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4v16h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>',
 profil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.9-4 3.8-6 7.5-6s6.6 2 7.5 6"/></svg>'};
-function renderNav(){$("#nav").innerHTML=[["heute","Heute"],["klassen","Kinder"],["analyse","Verlauf"],["profil","Einstellungen"]].map(([k,t])=>`<button class="${view.tab===k?"on":""}" onclick="go({tab:'${k}'})">${ICON[k]}${t}</button>`).join("")}
+function renderNav(){$("#nav").innerHTML=[["heute","Heute"],["klassen","Kinder"],["analyse","Verlauf"],["profil","Einstellungen"]].map(([k,t])=>`<button class="${view.tab===k?"on":""}" ${view.tab===k?'aria-current="page"':""} onclick="go({tab:'${k}'})">${ICON[k].replace("<svg ",'<svg aria-hidden="true" ')}${t}</button>`).join("")}
 function go(v){view=v;render();window.scrollTo(0,0)}
 function render(){
   renderNav();
   const a=$("#app"),inst=setupMode();$("#nav").style.display=inst?"none":"";
   if(inst)a.innerHTML=installV();
+  else if(view.report)a.innerHTML=reportV();
   else if(view.talk)a.innerHTML=talkV();
   else if(view.goal!==undefined)a.innerHTML=goalEditV();
   else if(view.imp)a.innerHTML=importV();
   else if(view.kid)a.innerHTML=kidV();
   else a.innerHTML={heute:heuteV,klassen:klassenV,analyse:analyseV,profil:profilV}[view.tab]();
   if(view.mark)requestAnimationFrame(()=>$("#app .mark")?.scrollIntoView({block:"center",behavior:"smooth"}));
+  $("#pg").textContent=view.report?"@page{size:A4 portrait;margin:12mm 14mm}":"";
   tourApply();
 }
 
 
 
 /* ===== Eigene Dialoge (funktionieren auch in App-Vorschauen, wo confirm/prompt blockiert sind) ===== */
-function dlg(html,onMount){return new Promise(res=>{const el=document.createElement("div");el.className="cele";el.style.zIndex=40;
+function dlg(html,onMount){return new Promise(res=>{const el=document.createElement("div");el.className="cele"+(LOCKED?" lockdlg":"");el.style.zIndex=LOCKED?120:40;
   el.innerHTML=`<div class="box" role="dialog" aria-modal="true" style="text-align:left">${html}</div>`;document.body.appendChild(el);
   const done=v=>{el.remove();res(v)};el.onclick=e=>{if(e.target===el)done(null)};onMount(el,done)})}
 async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 16px">${esc(msg)}</p>
@@ -406,8 +439,8 @@ function setupDoneV(){confetti(40);fb("big");
   <h2 style="margin:8px 0 4px">Geschafft, Pfad ist eingerichtet!</h2><p class="muted" style="margin:0 0 14px">Kürzel, Beispielfall und erste Sicherung sind erledigt. Jetzt zeigt dir die Anleitung in 8 Schritten, wo du was findest.</p></div>
   <div class="duo"><button class="btn" data-a="0">Später</button><button class="btn pri" data-a="1">Anleitung starten</button></div>`,
   (el,done)=>{el.querySelector(".box").classList.add("pop");el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))}).then(v=>v===true?openHelp():go({tab:"heute"}))}
-function celebrate(k,n){
-  const msg=`${n} Einschätzung${n===1?"":"en"} für ${esc(k.code)} gespeichert`;
+function celebrate(k,n,kn=1){
+  const msg=`${n} Einschätzung${n===1?"":"en"} für ${kn>1?kn+" Kinder":esc(k.code)} gespeichert`;
   if(!G().on){fb("small");toast(msg);return}
   const p=weekProgress(),now=weekDone(p),first=now&&G().doneWeek!==weekStart();
   if(now)G().doneWeek=weekStart();save();fb(first?"big":"small");
@@ -505,20 +538,30 @@ function heuteV(){
   const t=today(),wk=addDays(t,-6);
   const all=db.kids.flatMap(k=>k.goals.flatMap(g=>g.entries));
   const week=all.filter(e=>e.date>=wk).length,todayN=all.filter(e=>e.date===t).length;
-  const kids=db.kids.filter(k=>k.goals.length);
+  const kids=db.kids.filter(k=>k.goals.length&&!k.closed);
   const dateLong=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${setupCard()}${invitesV()}${backupHint()}${db.seenHelp||db.kids.some(k=>!k.demo)||setupOpen().length?"":`<div class="card" style="border:2px solid var(--sig)"><b>${db.setupDone?"Einrichtung fertig. Jetzt die Anleitung":"Neu hier?"}</b><p class="small" style="margin:6px 0 10px">Pfad führt dich in 8 kurzen Schritten durch die App und zeigt dir, wo du was findest.</p>${db.setupDone?`<div class="marktip">Tippe auf „Anleitung starten“.</div>`:""}<button class="btn pri${db.setupDone?" mark":""}" onclick="openHelp()">Anleitung starten</button></div>`}
+  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${setupCard()}${invitesV()}${backupHint()}${yearHint()}${closedHint()}${db.seenHelp||db.kids.some(k=>!k.demo)||setupOpen().length?"":`<div class="card" style="border:2px solid var(--sig)"><b>${db.setupDone?"Einrichtung fertig. Jetzt die Anleitung":"Neu hier?"}</b><p class="small" style="margin:6px 0 10px">Pfad führt dich in 8 kurzen Schritten durch die App und zeigt dir, wo du was findest.</p>${db.setupDone?`<div class="marktip">Tippe auf „Anleitung starten“.</div>`:""}<button class="btn pri${db.setupDone?" mark":""}" onclick="openHelp()">Anleitung starten</button></div>`}
   ${G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`}`+motivationV();
   if(!kids.length)return h+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button><button class="btn" onclick="openHelp()">Anleitung ansehen</button></p></div>`;
-  h+=`<h2>Wen bewertest du?</h2>`;
+  h+=`<div class="between"><h2>Wen bewertest du?</h2>${kids.length>1?`<button class="btn ghost" onclick="pickMulti()">Mehrere nacheinander</button>`:""}</div>`;
   for(const k of kids){
-    const done=k.goals.filter(g=>g.entries.some(e=>e.date===t)).length;
+    const done=k.goals.filter(g=>g.entries.some(e=>e.date===t)).length,gap=daysSince(k);
     h+=`<div class="card row kcard" style="--kc:${kidColor(k)}">${kidIcon(k)}<div class="grow"><div class="code">${esc(k.code)}</div>
-    <div class="muted small">${k.cls?esc(k.cls)+" · ":""}${done===k.goals.length?"✓ heute erledigt":`heute ${done} von ${k.goals.length} Verhalten`}</div></div>
-    <button class="btn ghost" onclick="openDiary('${k.id}')">Notiz</button><button class="btn ${done===k.goals.length?"":"pri"}" onclick="startRate('${k.id}')">Bewerten</button></div>`;
+    <div class="muted small">${k.cls?esc(k.cls)+" · ":""}${done===k.goals.length?"✓ heute erledigt":`heute ${done} von ${k.goals.length} Verhalten`}</div>${gap>=7?`<div class="small late">seit ${gap} Tagen keine Einschätzung</div>`:""}</div>
+    <button class="btn ghost" aria-label="Notiz zu ${esc(k.code)}" onclick="openDiary('${k.id}')">Notiz</button><button class="btn ${done===k.goals.length?"":"pri"}" aria-label="${esc(k.code)} bewerten" onclick="startRate('${k.id}')">Bewerten</button></div>`;
   }
   return h+`<p class="muted small">Tipp: Direkt nach der Stunde bewerten. Das dauert pro Ziel nur wenige Sekunden.</p>`;
 }
+
+// Tage seit der letzten Einschätzung (oder seit dem Anlegen)
+function daysSince(k){const last=k.goals.flatMap(g=>g.entries.map(e=>e.date)).sort().pop()||(k.ts?iso(new Date(k.ts)):today());
+  return Math.round((new Date(today()+"T12:00")-new Date(last+"T12:00"))/864e5)}
+function closedHint(){const due=db.kids.filter(k=>k.closed&&k.delAt&&k.delAt<=today());if(!due.length)return "";
+  return `<div class="card" style="border:2px solid var(--new)"><b>Löschen fällig</b><p class="small" style="margin:6px 0 8px">Die Förderung ist abgeschlossen bei: ${due.map(k=>esc(k.code)).join(", ")}. Liegt der Bericht in der Förderakte? Dann lösche die Daten von diesem Gerät.</p>
+  <p class="row" style="flex-wrap:wrap;margin:0">${due.map(k=>`<button class="btn" onclick="go({tab:'klassen',kid:'${k.id}'})">${esc(k.code)} ansehen</button>`).join("")}</p></div>`}
+function yearHint(){if(db.yearSY===syNow()||!db.kids.some(k=>!k.demo&&upCls(k.cls||"")))return "";
+  return `<div class="card" style="border:2px solid var(--sig)"><b>Neues Schuljahr ${syNow()}</b><p class="small" style="margin:6px 0 10px">Sollen alle Klassen eine Stufe hoch? Aus 7B wird 8B, aus 7B-01 wird 8B-01.</p>
+  <p class="row" style="flex-wrap:wrap;margin:0"><button class="btn pri" onclick="yearUp()">Klassen hochsetzen</button><button class="btn ghost" onclick="db.yearSY=syNow();save();render()">Nicht nötig</button></p></div>`}
 
 /* ===== Anleitung ===== */
 const HELP=[
@@ -528,7 +571,7 @@ const HELP=[
  {t:"Nach der Stunde bewerten",p:"Auf „Heute“ tippst du beim Kind auf „Bewerten“.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
  {t:"Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
  {t:"Verlauf ansehen",p:"Unter „Verlauf“ siehst du jedes Verhalten als Kurve mit Ziel und Förderbeginn.",l:["Die App sagt in Worten, ob es eher besser, stabil oder eher schwieriger wird.","Der Text für die Evaluation im Förderplan lässt sich kopieren.","Das Gesprächsblatt für Kind und Eltern druckst du auf einer Seite aus."]},
- {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Spätestens alle 5 Tage: Einstellungen → „Sicherung speichern“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder teilen“ und nur die Kinder auswählen, um die es geht.","Eine geteilte Datei lädst du über „Datei laden“. Neues kommt dazu, deine Einträge bleiben."]},
+ {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Spätestens alle 5 Tage: Einstellungen → „Sicherung speichern“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt. Mit „Sicherung prüfen“ siehst du, ob sie sich öffnen lässt.","Mit Kolleg:innen: „Kinder teilen“ und nur die Kinder auswählen, um die es geht.","Über „Dateien laden“ führst du Sicherungen und geteilte Stände zusammen, auch mehrere auf einmal. Neues kommt dazu, deine Einträge bleiben."]},
  {t:"Sicher arbeiten",p:"Ein paar Regeln, damit die Daten geschützt bleiben.",l:["Nur auf dem Dienstgerät mit Gerätecode und automatischer Sperre.","Auf iPad und iPhone: In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Mit iOS 27 liegt „Teilen“ im Seitenmenü links neben der Adresse.","Das Symbol nicht löschen, ohne vorher zu sichern. Sonst sind die Daten weg."]}];
 // Geführte Anleitung: zeigt die echten Bildschirme mit dem fiktiven Beispielfall und markiert die Stelle
 const demoKid=()=>db.kids.find(k=>k.demo);
@@ -575,7 +618,7 @@ function klassenV(){
   <p style="margin-top:12px" class="row"><button class="btn pri" onclick="addKid()">Anlegen</button><button class="btn ghost" onclick="view.adding=false;render()">Abbrechen</button></p></div>`;
   if(!list.length&&!view.adding)h+=`<p class="muted">Hier ist noch niemand. Lege unten ein Kind mit Kürzel an.</p>`;
   for(const k of list)h+=`<div class="card tap row kcard" style="--kc:${kidColor(k)}" onclick="go({tab:'klassen',kid:'${k.id}'})">${kidIcon(k)}
-  <div class="grow"><div class="code">${esc(k.code)} ${k.demo?'<span class="tag">fiktiv</span>':""}</div><div class="muted small">${k.cls?esc(k.cls)+" · ":""}${k.goals.length} ${k.goals.length===1?"Verhalten":"Verhalten"}</div></div>${badge(kidTrend(k))}</div>`;
+  <div class="grow"><div class="code">${esc(k.code)} ${k.demo?'<span class="tag">fiktiv</span>':""}${k.closed?'<span class="tag">abgeschlossen</span>':""}</div><div class="muted small">${k.cls?esc(k.cls)+" · ":""}${k.goals.length} ${k.goals.length===1?"Verhalten":"Verhalten"}</div></div>${badge(kidTrend(k))}</div>`;
   if(!view.adding)h+=`<p style="margin-top:14px"><button class="btn block noprint" onclick="view.adding=true;render();$('#ncode').focus()">+ Kind anlegen</button></p>`;
   h+=`<p class="muted small" style="text-align:center">Nur Kürzel verwenden, keine Namen.</p>`;
   return h;
@@ -584,7 +627,7 @@ async function addClass(){const c=((await askText("Name der neuen Klasse","z. B.
 function newCode(cls){let n=1,c;do{c=`${cls}-${String(n++).padStart(2,"0")}`}while(db.kids.some(k=>k.code.toLowerCase()===c.toLowerCase()));return c}
 async function addKid(){const code=$("#ncode").value.trim();if(!code)return toast("Bitte ein Kürzel eingeben.");
   if(looksLikeName(code)&&!await ask("Das Kürzel sieht nach einem Namen aus. Trotzdem speichern?",{ok:"Trotzdem speichern"}))return;
-  const k={id:uid(),code,icon:$("#nicon").dataset.i,cls:$("#ncls").value,goals:[],diary:[],ts:Date.now()};delete view.newIcon;db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
+  const k={id:uid(),code,icon:$("#nicon").dataset.i,cls:$("#ncls").value,goals:[],diary:[],ts:Date.now()};db.yearSY??=syNow();delete view.newIcon;db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
 
 /* ===== Kind ===== */
 function spark(g){
@@ -597,7 +640,9 @@ function kidV(){
   let h=`<button class="btn ghost noprint" onclick="go({tab:'${view.tab}'})">‹ Zurück</button>
   <div class="row" style="margin:6px 0 4px"><button class="icbtn" aria-label="Symbol ändern" onclick="setKidIcon('${k.id}')">${k.icon?kidIcon(k,1):`<span class="kic big add" style="--kc:${kidColor(k)}">+</span>`}</button><div class="grow"><div class="code" style="font-size:1.4rem">${esc(k.code)}</div>
   <select class="chip" style="margin-top:4px;width:auto" onchange="Object.assign(kidById('${k.id}'),{cls:this.value,upd:Date.now()});save();render()"><option value="">Ohne Klasse</option>${db.classes.map(c=>`<option ${c===k.cls?"selected":""}>${esc(c)}</option>`).join("")}</select></div>${badge(kidTrend(k))}</div>
-  ${k.goals.length?`<div class="duo" style="margin:14px 0;grid-template-columns:1fr 1fr"><button class="btn pri" onclick="startRate('${k.id}')">Jetzt bewerten</button><button class="btn" onclick="go({tab:'${view.tab}',kid:'${k.id}',talk:true})">Gesprächsblatt</button></div>`:""}
+  ${k.closed?`<div class="card" style="border:2px solid var(--new);margin-top:12px"><b>Förderung abgeschlossen am ${dDEy(k.closed)}</b><p class="small" style="margin:6px 0 10px">Das Kind erscheint nicht mehr auf „Heute“. Lege den Bericht in die Förderakte und lösche die Daten danach von diesem Gerät.${k.delAt?` Pfad erinnert dich am ${dDEy(k.delAt)}.`:""}</p>
+  <p class="row" style="flex-wrap:wrap;margin:0"><button class="btn pri" onclick="go({tab:'${view.tab}',kid:'${k.id}',report:true})">Bericht (PDF)</button><button class="btn danger" onclick="delKid('${k.id}')">Jetzt löschen</button><button class="btn ghost" onclick="reopenKid('${k.id}')">Wieder aufnehmen</button></p></div>`:""}
+  ${k.goals.length&&!k.closed?`<div class="duo" style="margin:14px 0;grid-template-columns:1fr 1fr"><button class="btn pri" onclick="startRate('${k.id}')">Jetzt bewerten</button><button class="btn" onclick="go({tab:'${view.tab}',kid:'${k.id}',talk:true})">Gesprächsblatt</button></div>`:""}
   <h2>Verhalten</h2>`;
   if(!k.goals.length)h+=`<p class="muted">Noch kein Verhalten angelegt. Übernimm am besten ein Förderziel aus dem Förderplan.</p>`;
   for(const g of k.goals){const t=trend(g),n=rated(g).length;
@@ -606,9 +651,18 @@ function kidV(){
   h+=`<p><button class="btn block" onclick="go({tab:'${view.tab}',kid:'${k.id}',goal:''})">+ Verhalten</button></p>`+diaryV(k)+`
   <div class="card noprint row"><div class="grow small"><b>Mit Kolleg:in teilen</b><br><span class="muted">Verschlüsselte Datei nur mit diesem Kind.</span></div><button class="btn" onclick="shareKids('${k.id}')">Teilen</button></div>
   ${srvKidCard(k)}
+  ${k.goals.length?`<div class="card noprint row"><div class="grow small"><b>Bericht für die Förderakte</b><br><span class="muted">Verlauf, Auswertung und Tagebuch als PDF.</span></div><button class="btn" onclick="go({tab:'${view.tab}',kid:'${k.id}',report:true})">Bericht</button></div>`:""}
+  ${k.closed||k.demo?"":`<div class="card noprint row"><div class="grow small"><b>Förderung abschließen</b><br><span class="muted">Zum Beispiel am Schuljahresende oder bei Schulwechsel.</span></div><button class="btn" onclick="closeKid('${k.id}')">Abschließen</button></div>`}
   <p class="noprint" style="margin-top:24px"><button class="btn ghost danger" onclick="delKid('${k.id}')">Kind und alle Einschätzungen löschen</button></p>`;
   return h;
 }
+async function closeKid(id){const k=kidById(id);
+  const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Förderung für ${esc(k.code)} abschließen?</p>
+  <ol class="small" style="padding-left:20px;margin:0 0 10px"><li style="margin:5px 0">Pfad erstellt den Bericht mit Verlauf, Auswertung und Tagebuch. Speichere ihn als PDF und lege ihn in die Förderakte.</li><li style="margin:5px 0">Danach löschst du ${esc(k.code)} von diesem Gerät. Pfad erinnert dich in 4 Wochen daran.</li></ol>
+  <p class="small muted" style="margin:0 0 14px">Bis dahin erscheint ${esc(k.code)} nicht mehr auf „Heute“. Du kannst die Förderung jederzeit wieder aufnehmen.</p>
+  <div class="duo"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Abschließen</button></div>`,(el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))});
+  if(r!==true)return;Object.assign(k,{closed:today(),delAt:addDays(today(),28),upd:Date.now()});save();go({tab:view.tab,kid:id,report:true});toast("Abgeschlossen. Jetzt den Bericht als PDF sichern.")}
+function reopenKid(id){const k=kidById(id);delete k.closed;delete k.delAt;k.upd=Date.now();save();render();toast(`${k.code} ist wieder aktiv`)}
 async function delKid(id){if(!await ask(`Kind mit allen Zielen, Einschätzungen und Tagebucheinträgen von diesem Gerät löschen? ${kidById(id)?.srv?"Auf dem Schulserver bleibt es für die anderen erhalten.":""}`,{ok:"Löschen",danger:true}))return;db.kids=db.kids.filter(k=>k.id!==id);save();go({tab:"klassen"})}
 
 /* ===== Verhalten bearbeiten ===== */
@@ -662,17 +716,27 @@ const hm=t=>{const[a,b]=t.split(":");return +a*60+ +b};
 const rTime=(r,wd)=>{const d=r[3]?.[wd];return [d?.[0]||r[1],d?.[1]||r[2]]};
 function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getMinutes();if(wd===0||wd===6)return "";
   let best="";for(const r of db.raster){const [a,b]=rTime(r,wd),st=hm(a),en=hm(b);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
-function startRate(kidId){const k=kidById(kidId);if(!k.goals.length)return;
+function startRate(kidId,queue=[]){const k=kidById(kidId);if(!k.goals.length)return;
   const cs=currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
-  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:true};renderRate()}
+  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:true,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
+// Mehrere Kinder nacheinander, z. B. alle aus 8A
+async function pickMulti(){const ks=db.kids.filter(k=>k.goals.length&&!k.closed).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true}));
+  const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))];
+  const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Wen bewertest du nacheinander?</p>
+    ${cls.length?`<p class="row" style="flex-wrap:wrap;gap:6px;margin:0 0 8px">${cls.map(c=>`<button class="btn small" data-c="${esc(c)}">Alle aus ${esc(c)}</button>`).join("")}</p>`:""}
+    <div style="max-height:46vh;overflow:auto">${ks.map(k=>`<label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" value="${k.id}" data-k="${esc(k.cls||"")}"> ${kidIcon(k)} ${esc(k.code)}</label>`).join("")}</div>
+    <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Los geht's</button></div>`,
+    (el,done)=>{el.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>el.querySelectorAll("input").forEach(i=>i.checked=i.dataset.k===b.dataset.c));
+      el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done([...el.querySelectorAll("input:checked")].map(i=>i.value))});
+  if(!sel?.length)return;startRate(sel[0],sel.slice(1))}
 function renderRate(){
   const o=$("#overlay");if(!rs){o.innerHTML="";return}
   const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur,t=today();
   const days=[...Array(7)].map((_,i)=>addDays(t,-i));
   const dayLbl=d=>d===t?"Heute":d===addDays(t,-1)?"Gestern":new Date(d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"numeric"});
   o.innerHTML=`<div class="rate" role="dialog" aria-label="Bewerten"><div class="inner">
-  <div class="between"><button class="btn ghost" style="font-size:1.3rem" aria-label="Schließen" onclick="closeRate()">✕</button><div class="row">${kidIcon(k)}<span class="code">${esc(k.code)}</span></div><span style="width:40px"></span></div>
-  <div class="step">${k.goals.length>1?`Verhalten ${rs.i+1} von ${k.goals.length}`:"&nbsp;"}</div>
+  <div class="between"><button class="btn ghost" style="font-size:1.3rem" aria-label="Schließen" onclick="closeRate()">✕</button><div class="row">${kidIcon(k)}<span class="code">${esc(k.code)}</span></div>${rs.qn>1?`<button class="btn ghost small" onclick="skipKid()">${rs.queue.length?"Überspringen":"Beenden"}</button>`:`<span style="width:40px"></span>`}</div>
+  <div class="step">${[rs.qn>1&&`Kind ${rs.qi} von ${rs.qn}`,k.goals.length>1&&`Verhalten ${rs.i+1} von ${k.goals.length}`].filter(Boolean).join(" · ")||"&nbsp;"}</div>
   ${rs.ctxOpen?`<div class="ctx ${rs.date!==t?"past":""}">
    <div class="pick days">${days.slice(0,2).map(d=>`<button class="${d===rs.date?"on":""}" onclick="rs.date='${d}';renderRate()">${dayLbl(d)}</button>`).join("")}<select class="${days.slice(2).includes(rs.date)?"on":""}" onchange="rs.date=this.value;renderRate()"><option value="">früher …</option>${days.slice(2).map(d=>`<option value="${d}" ${d===rs.date?"selected":""}>${dayLbl(d)}</option>`).join("")}</select></div>
    <div class="pick slots">${SLOTS_ALL().map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot==='${x}'?'':'${x}';renderRate()">${x.replace(" Std.","")}</button>`).join("")}</div>
@@ -682,7 +746,7 @@ function renderRate(){
   <div class="goalTitle">${esc(g.title)}</div>
   ${g.how?`<p class="muted small" style="text-align:center">${esc(g.how)}</p>`:""}
   <div class="big" id="big">${c.na?'<span class="muted" style="font-size:1.1rem">Nicht beobachtet</span>':c.value==null?`<span class="muted" style="font-size:1.05rem;font-weight:400">${sc(g)==="2"?"Wurde das Verhalten gezeigt?":"Wie stark war es? Tippe eine Zahl an."}</span>`:esc(dv(g,c.value))}</div>
-  <div class="ruler s${sc(g)==="c"&&scaleOpts(g).length>7?"10":sc(g)} ${c.na?"off":""}" style="${sc(g)==="c"?`grid-template-columns:repeat(${scaleOpts(g).length},1fr)`:""}" id="ruler" role="radiogroup" aria-label="Einschätzung">${scaleOpts(g).map(o=>`<button data-v="${o.v}" role="radio" aria-checked="${c.value===o.v}" class="${c.value===o.v?"sel":sc(g)!=="2"&&c.value!=null&&o.v<c.value?"lit":""}">${esc(o.l)}</button>`).join("")}</div>
+  <div class="ruler s${sc(g)==="c"&&scaleOpts(g).length>7?"10":sc(g)} ${c.na?"off":""}" style="${sc(g)==="c"?`grid-template-columns:repeat(${scaleOpts(g).length},1fr)`:""}" id="ruler" role="radiogroup" aria-label="Einschätzung: ${esc(g.title)}">${scaleOpts(g).map(o=>`<button data-v="${o.v}" role="radio" aria-label="${esc(o.l)}${sc(g)==="2"?"":` von ${rng(g)[1]}`}" aria-checked="${c.value===o.v}" class="${c.value===o.v?"sel":sc(g)!=="2"&&c.value!=null&&o.v<c.value?"lit":""}">${esc(o.l)}</button>`).join("")}</div>
   ${sc(g)==="2"?"":`<div class="ends"><span>${rng(g)[0]} = ${esc(g.a0)}</span><span>${esc(g.a10)} = ${rng(g)[1]}</span></div>`}
   <label>Kommentar <span class="sub">(optional)</span></label>
   <textarea id="note" placeholder="Was war los? Was hat geholfen? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
@@ -699,12 +763,19 @@ function renderRate(){
 }
 function markRuler(){const g=kidById(rs.kid).goals[rs.i],v=rs.cur.value;$("#big").textContent=dv(g,v);document.querySelectorAll("#ruler button").forEach(b=>{const i=+b.dataset.v;b.className=i===v?"sel":sc(g)!=="2"&&i<v?"lit":"";b.setAttribute("aria-checked",i===v)})}
 function nextRate(){const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur;
-  g.entries.push({id:uid(),date:rs.date,slot:rs.slot,subj:rs.subj,value:c.na?null:c.value,note:c.note.trim(),...(c.pin?{pin:true}:{}),rater:db.me||"",ts:Date.now()});
-  save();rs.count++;
+  const id=uid();g.entries.push({id,date:rs.date,slot:rs.slot,subj:rs.subj,value:c.na?null:c.value,note:c.note.trim(),...(c.pin?{pin:true}:{}),rater:db.me||"",ts:Date.now()});
+  save();rs.count++;rs.saved.push({kid:k.id,gid:g.id,id});
   if(rs.i<k.goals.length-1){rs.i++;rs.ctxOpen=false;rs.cur={value:null,na:false,note:"",pin:false};fb("small");renderRate();$(".goalTitle")?.classList.add("anim")}
-  else{const n=rs.count;lastCtx={slot:rs.slot,subj:rs.subj,day:today(),ts:Date.now()};rs=null;$("#overlay").innerHTML="";render();celebrate(k,n)}}
+  else if(rs.queue.length)nextKid();else finishRate()}
+function nextKid(){rs.kid=rs.queue.shift();rs.i=0;rs.qi++;rs.ctxOpen=false;rs.cur={value:null,na:false,note:"",pin:false};fb("small");renderRate();$(".goalTitle")?.classList.add("anim")}
+function skipKid(){if(rs.queue.length)nextKid();else finishRate()}
+function finishRate(){const k=kidById(rs.kid),n=rs.count,saved=rs.saved,kn=new Set(saved.map(x=>x.kid)).size;
+  lastCtx={slot:rs.slot,subj:rs.subj,day:today(),ts:Date.now()};rs=null;$("#overlay").innerHTML="";render();if(!n)return;
+  celebrate(kidById(saved[0].kid)||k,n,kn);undoToast(`${n} Einschätzung${n===1?"":"en"} gespeichert`,()=>undoRate(saved))}
+function undoRate(saved){for(const x of saved){const k=kidById(x.kid),g=k&&goalById(k,x.gid);if(!g)continue;g.entries=g.entries.filter(e=>e.id!==x.id);tomb(k,x.id)}
+  document.querySelectorAll(".cele").forEach(x=>x.remove());save();render();toast(`${saved.length} Einschätzung${saved.length===1?"":"en"} zurückgenommen`)}
 let lastCtx=null;
-async function closeRate(){if(rs.count&&!await ask("Bewerten beenden? Bereits gespeicherte Einschätzungen bleiben erhalten.",{ok:"Beenden"}))return;rs=null;$("#overlay").innerHTML="";render()}
+async function closeRate(){if(rs.count&&!await ask("Bewerten beenden? Bereits gespeicherte Einschätzungen bleiben erhalten.",{ok:"Beenden"}))return;if(rs.count)return finishRate();rs=null;$("#overlay").innerHTML="";render()}
 
 /* ===== Tagebuch ===== */
 const CATS=["Beobachtung","Gespräch","Elternkontakt","Absprache","Vorfall","Erfolg"];
@@ -787,13 +858,42 @@ function talkV(){
   return h;
 }
 
+/* ===== Bericht für die Förderakte (über Drucken als PDF) ===== */
+function pdfHint(){return isIOS?"Tippe auf „Als PDF sichern“. Im Druckfenster tippst du auf „Teilen“ und dann auf „In Dateien sichern“. Lege die Datei in die Förderakte, nicht in eine private Cloud."
+  :"Tippe auf „Als PDF sichern“. Wähle im Druckfenster als Ziel „Als PDF speichern“. Lege die Datei in die Förderakte, nicht in eine private Cloud."}
+function reportV(){
+  const k=kidById(view.kid);if(!k){view={tab:"klassen"};return klassenV()}
+  const r=view.range||"all",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),inR=x=>!from||x.date>=from;
+  const all=k.goals.flatMap(g=>g.entries).filter(inR).map(e=>e.date).sort(),diary=sortD(k.diary).filter(inR).reverse();
+  const span=all.length?`${dDEy(all[0])} bis ${dDEy(all.at(-1))}`:"noch keine Einschätzungen";
+  const raters=[...new Set(k.goals.flatMap(g=>g.entries).filter(inR).map(e=>e.rater).filter(Boolean))];
+  let h=`<div class="report"><div class="noprint between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px"><button class="btn ghost" onclick="go({tab:'${view.tab}',kid:'${k.id}'})">‹ Zurück</button>
+   <span class="row" style="flex-wrap:wrap;gap:8px"><select style="width:auto" aria-label="Zeitraum" onchange="view.range=this.value;render()">${Object.entries(RANGES).map(([key,[t]])=>`<option value="${key}" ${key===r?"selected":""}>${t}</option>`).join("")}</select>
+   <button class="btn pri" onclick="print()">Als PDF sichern</button></span></div>
+  <p class="noprint small muted">${pdfHint()}</p>
+  <h1>Verlauf für die Förderakte</h1>
+  <table class="meta"><tr><td>Kürzel</td><td><b>${esc(k.code)}</b>${k.cls?` · Klasse ${esc(k.cls)}`:""}</td></tr>
+  <tr><td>Name</td><td><span style="display:inline-block;min-width:220px;border-bottom:1.5px solid var(--line)">&nbsp;</span> <span class="muted small">(nur auf dem Ausdruck von Hand)</span></td></tr>
+  <tr><td>Zeitraum</td><td>${RANGES[r][0]}: ${span}</td></tr>
+  <tr><td>Eingeschätzt von</td><td>${raters.length?raters.map(esc).join(", "):"–"}</td></tr>
+  <tr><td>Erstellt</td><td>${dDEy(today())}${db.me?` von ${esc(db.me)}`:""}${k.closed?` · Förderung abgeschlossen am ${dDEy(k.closed)}`:""}</td></tr></table>`;
+  if(!k.goals.length)h+=`<p class="muted">Für dieses Kind ist noch kein Verhalten angelegt.</p>`;
+  for(const g0 of k.goals){const g={...g0,entries:g0.entries.filter(inR)},s=summary(k,g);
+    h+=`<div class="card rg"><div class="between"><div><b style="font-size:1.1rem">${esc(g.title)}</b><div class="muted small">${g.fp?`Förderziel: ${esc(g.fp)} · `:""}${g.dir==="down"?"weniger davon":"mehr davon"} · ${esc(scaleName(g))}${g.target!==""?` · Ziel ${g.dir==="down"?"≤":"≥"} ${tgt(g)}`:""}${g.start?` · Förderung seit ${dDEy(g.start)}`:""}</div></div>${badge(trend(g))}</div>
+    ${chart(g,{...k,diary:[]},400)}
+    <h2 style="font-size:1rem;margin:12px 0 4px">Was zeigt sich?</h2>${s.lines.map(l=>`<p class="small">${l}</p>`).join("")}
+    ${s.bs?.html?`<h2 style="font-size:1rem;margin:12px 0 4px">Nach Fach</h2>${s.bs.html}`:""}</div>`}
+  h+=`<div class="card"><h2 style="margin-top:0">Tagebuch</h2>${diary.length?diary.map(dItem).join(""):`<p class="muted small">Keine Einträge im Zeitraum.</p>`}</div>
+  <p class="muted small">Die Werte sind Einschätzungen der Lehrkräfte direkt nach der Stunde, kein Test. Sie zeigen Tendenzen und ersetzen nicht das Gespräch im Team. Erstellt mit Pfad (schulinterner Prototyp).</p></div>`;
+  return h}
+
 /* ===== Analyse ===== */
 const CATCOL={Notiz:"--chart1",Erfolg:"--up",Vorfall:"--down",Gespräch:"--acc",Elternkontakt:"--acc",Absprache:"--new",Beobachtung:"--muted"};
-function chart(g,k){
-  const e=sortE(g.entries).slice(-30);if(!e.length)return '<p class="muted">Noch keine Einschätzungen.</p>';
+function chart(g,k,max=30){
+  const e=sortE(g.entries).slice(-max);if(!e.length)return '<p class="muted">Noch keine Einschätzungen.</p>';
   const W=innerWidth<600?420:600,H=236,L=26,R=8,T=30,B=26;
   const X=i=>e.length===1?(L+W-R)/2:L+i*(W-L-R)/(e.length-1),Y=v=>T+(1-v/10)*(H-T-B);
-  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Verlauf der letzten Einschätzungen">`;
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Verlauf: ${esc(g.title)}, ${e.length} Einschätzungen, Tendenz ${esc(trend(g).t)}">`;
   [0,5,10].forEach(v=>s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="var(--muted)">${sc(g)==="2"?(v===10?"ja":v===0?"nein":""):num(toK(g,v))}</text>`);
   if(g.target!==""){s+=`<line x1="${L}" x2="${W-R}" y1="${Y(g.target)}" y2="${Y(g.target)}" stroke="var(--up)" stroke-dasharray="3 4" stroke-width="1.5"/><text x="${W-R}" y="${Y(g.target)-5}" font-size="11" text-anchor="end" fill="var(--up)">Ziel</text>`}
   if(g.start){const i=e.findIndex(x=>x.date>=g.start);if(i>0){const xs=(X(i-1)+X(i))/2;s+=`<line x1="${xs}" x2="${xs}" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-dasharray="5 4"/><text x="${xs+5}" y="${T+10}" font-size="11" fill="var(--muted)">Förderung</text>`}}
@@ -847,7 +947,7 @@ function analyseV(){
   <select onchange="go({tab:'analyse',aKid:'${k.id}',aGoal:this.value})">${k.goals.map(x=>`<option value="${x.id}" ${x.id===g.id?"selected":""}>${esc(x.title)}</option>`).join("")}</select></div>
   <div class="card" style="margin-top:12px"><div class="between"><div><b>${esc(g.title)}</b><div class="muted small">${esc(k.code)} · ${g.dir==="down"?"weniger davon":"mehr davon"}</div></div>${badge(trend(g))}</div>
   ${chart(g,k)}</div>
-  <p class="noprint"><button class="btn block" onclick="go({tab:'analyse',kid:'${k.id}',talk:true,aKid:'${k.id}'})">Gesprächsblatt für ${esc(k.code)} (Kind und Eltern)</button></p>
+  <div class="duo noprint" style="grid-template-columns:1fr 1fr;margin-bottom:10px"><button class="btn" onclick="go({tab:'analyse',kid:'${k.id}',talk:true,aKid:'${k.id}'})">Gesprächsblatt</button><button class="btn" onclick="go({tab:'analyse',kid:'${k.id}',report:true,aKid:'${k.id}'})">Bericht für die Akte</button></div>
   <div class="card sum"><h2 style="margin-top:0">Was zeigt sich?</h2>${s.lines.map(l=>`<p>${l}</p>`).join("")}</div>
   ${s.bs?.html?`<div class="card"><h2 style="margin-top:0">Nach Fach</h2>${s.bs.html}</div>`:""}
   ${s.bt?.html?`<div class="card"><h2 style="margin-top:0">Nach Stunde</h2>${s.bt.html}</div>`:""}
@@ -888,14 +988,14 @@ const tomb=(k,id)=>{(k.del??=[]).includes(id)||k.del.push(id);k.delTs=Date.now()
 const ver=x=>x.edited||x.upd||x.ts||0;
 function kidVer(k){return Math.max(ver(k),...k.goals.map(ver),...k.goals.flatMap(g=>g.entries.map(ver)),...(k.diary||[]).map(ver),k.delTs||0)}
 function mergeList(a=[],b=[],del){const m=new Map(a.map(x=>[x.id,x]));for(const x of b){const y=m.get(x.id);if(!y||ver(x)>ver(y))m.set(x.id,x)}return [...m.values()].filter(x=>!del.has(x.id))}
-function mergeKid(k){const ex=kidById(k.id);
-  if(!ex){db.kids.push(k);if(k.cls&&!db.classes.includes(k.cls))db.classes.push(k.cls);return 1}
+function mergeKid(k,kids=db.kids,classes=db.classes){const ex=kids.find(x=>x.id===k.id);
+  if(!ex){kids.push(k);if(k.cls&&!classes.includes(k.cls))classes.push(k.cls);return 1}
   const del=new Set([...(ex.del||[]),...(k.del||[])]),before=JSON.stringify(ex);
   if(ver(k)>ver(ex))Object.assign(ex,{code:k.code,cls:k.cls,upd:k.upd,...(k.icon?{icon:k.icon}:{})});
   if(k.team)ex.team=k.team;if(k.pending)ex.pending=k.pending;
   const eg=new Map(ex.goals.map(g=>[g.id,g]));
   ex.goals=mergeList(ex.goals,k.goals,del).map(g=>{const a=eg.get(g.id)?.entries||[],b=(k.goals.find(x=>x.id===g.id)||{}).entries||[];return {...g,entries:mergeList(a,b,del)}});
-  ex.diary=mergeList(ex.diary,k.diary,del);ex.del=[...del];ex.delTs=Math.max(ex.delTs||0,k.delTs||0);if(ex.cls&&!db.classes.includes(ex.cls))db.classes.push(ex.cls);
+  ex.diary=mergeList(ex.diary,k.diary,del);ex.del=[...del];ex.delTs=Math.max(ex.delTs||0,k.delTs||0);if(ex.cls&&!classes.includes(ex.cls))classes.push(ex.cls);
   return before!==JSON.stringify(ex)?1:0}
 // Was brächte ein fremder Stand für dieses Kind Neues? (für die Auswahl beim Import)
 function diffKid(k){const ex=kidById(k.id);
@@ -930,8 +1030,8 @@ async function backupKey(){let k=null;try{k=await idbGet("bkey")}catch(e){}if(k&
 async function forgetBackupPw(){await idbSet("bkey",null);delete db.bsalt;save();render();toast("Sicherungs-Passwort vergessen")}
 async function sealFile(art,payload,keyInfo){const body=await gcm(keyInfo.key,enc(payload));
   return JSON.stringify({pfad:3,art,von:db.me||"",erstellt:new Date().toISOString(),anzahl:payload.kids.length,salt:keyInfo.salt,...body})}
-async function openFile(o){
-  if(o.pfad===3||(o.verlaufsbogen==="sicherung"&&o.salt)){for(;;){const pw=await askText(o.art==="teilen"?`Passwort für den geteilten Stand${o.von?` von ${o.von}`:""}`:"Passwort der Sicherung","Passwort","password");if(!pw)return null;
+async function openFile(o,name){
+  if(o.pfad===3||(o.verlaufsbogen==="sicherung"&&o.salt)){for(;;){const pw=await askText((o.art==="teilen"?`Passwort für den geteilten Stand${o.von?` von ${o.von}`:""}`:"Passwort der Sicherung")+(name?` (${name})`:""),"Passwort","password");if(!pw)return null;
     try{const k=await pwKey(pw,unb64(o.salt));if(o.pfad===3)return JSON.parse(dec(await ungcm(k,o)));
       const raw=new Uint8Array(await ungcm(k,o.wrapped));return JSON.parse(dec(await ungcm(await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]),o)))}catch(e){toast("Passwort falsch")}}}
   if(o.kids)return o; // alte, unverschlüsselte Sicherung
@@ -1025,7 +1125,8 @@ function profilV(){
   const n=db.kids.reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0),0);
   return `<h1>Einstellungen</h1>
   <div class="card row"><div class="grow"><b>Anleitung</b><br><span class="small muted">Pfad zeigt dir in 8 Schritten die wichtigsten Stellen der App.</span></div><button class="btn" onclick="openHelp()">Starten</button></div>
-  <div class="card"><b>Erscheinungsbild</b><div class="pick theme" style="margin-top:10px">${[["system","Wie Gerät"],["light","Hell"],["dark","Dunkel"]].map(([k,t])=>`<button class="${(db.theme||"system")===k?"on":""}" onclick="db.theme='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div><div class="sub" style="margin-top:6px">„Wie Gerät“ folgt der Einstellung von iPad oder iPhone.</div></div>
+  <div class="card"><b>Erscheinungsbild</b><div class="pick theme" style="margin-top:10px">${[["system","Wie Gerät"],["light","Hell"],["dark","Dunkel"]].map(([k,t])=>`<button class="${(db.theme||"system")===k?"on":""}" onclick="db.theme='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div><div class="sub" style="margin-top:6px">„Wie Gerät“ folgt der Einstellung von iPad oder iPhone.</div>
+  <div class="sub" style="margin:14px 0 6px;font-weight:700">Schriftgröße</div><div class="pick theme">${[["m","Normal"],["l","Groß"],["xl","Sehr groß"]].map(([k,t])=>`<button class="${(db.fs||"m")===k?"on":""}" onclick="db.fs='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div></div>
   <div class="card"><label style="margin-top:0">Dein Kürzel</label><div class="sub">Wird bei jeder Einschätzung gespeichert. Hilfreich, wenn ihr Daten im Team zusammenführt.</div>
   ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`${mtip("me")}<div class="row" style="gap:8px"><input id="meIn" class="grow${mk("me")}" value="${esc(db.me)}" placeholder="z. B. MU" onkeydown="if(event.key==='Enter')this.blur()" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">${view.mark==="me"?`<button class="btn pri" onclick="const v=$('#meIn').value.trim();if(!v)return toast('Bitte dein Kürzel eintragen.');db.me=v;save();render()">Weiter</button>`:""}</div>`}
   <label>Alle Fächer deiner Schule</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
@@ -1034,10 +1135,12 @@ function profilV(){
   <input value="${esc(db.classes.join(", "))}" onchange="db.classes=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')"></div>
   ${rasterV()}
   ${gameV()}
+  ${yearV()}
+  ${lockV()}
   <div class="card"><h2 style="margin-top:0">Daten</h2><p class="muted">${db.kids.length} Kinder · ${n} Einschätzungen auf diesem Gerät</p>
-  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Datei laden</button></p>
-  <input type="file" id="imp" accept=".json,application/json" hidden onchange="importJSON(this)">
-  <p class="muted small">${db.lastBackup?`Letzte Sicherung: ${dDEy(iso(new Date(db.lastBackup)))}. `:""}Sicherung: alle deine Kinder, nur für dich, spätestens alle 5 Tage. Teilen: nur ausgewählte Kinder, für eine Kollegin oder einen Kollegen. Beim Laden wählst du pro Kind, was du ergänzt.</p>
+  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Dateien laden</button><button class="btn" onclick="$('#chk').click()">Sicherung prüfen</button></p>
+  <input type="file" id="imp" accept=".json,application/json" multiple hidden onchange="importJSON(this)"><input type="file" id="chk" accept=".json,application/json" hidden onchange="checkFile(this)">
+  <p class="muted small">${db.lastBackup?`Letzte Sicherung: ${dDEy(iso(new Date(db.lastBackup)))}. `:""}Sicherung: alle deine Kinder, nur für dich, spätestens alle 5 Tage. Teilen: nur ausgewählte Kinder, für eine Kollegin oder einen Kollegen. Laden: Du kannst mehrere Sicherungen und geteilte Stände auf einmal auswählen. Pfad führt sie zusammen, du wählst pro Kind, was du ergänzt. Prüfen: zeigt, was in einer Sicherung steckt, ohne etwas zu übernehmen.</p>
   ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}
   ${mtip("demo")}<p class="row" style="flex-wrap:wrap">${db.kids.some(k=>k.demo)&&!view.mark?`<button class="btn" onclick="delDemo()">Beispielfall entfernen</button>`:`<button class="btn${mk("demo")}" onclick="demo()">Fiktiven Beispielfall laden</button>`}</p>
   <p><button class="btn ghost danger" onclick="wipe()">Alle Daten auf diesem Gerät löschen</button></p></div>
@@ -1055,7 +1158,7 @@ const realKid=k=>!k.demo;
 async function exportJSON(){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
   const ki=await backupKey();if(!ki)return;
   if(!db.backupTip&&!await backupTip())return;
-  const {srv,bsalt,...rest}=db,payload={...rest,kids:db.kids.filter(realKid)};
+  const {srv,bsalt,lock,yearUndo,...rest}=db,payload={...rest,kids:db.kids.filter(realKid)};
   if(!await giveFile(backupName(),await sealFile("sicherung",payload,ki)))return;
   db.lastBackup=Date.now();db.backupTip=1;save();render();toast(isIOS?"Sicherung erstellt. Sie liegt in „Dateien“ → „Auf meinem "+(/iPad/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Mac/.test(navigator.userAgent)?"iPad":"iPhone")+"“.":"Sicherung erstellt.")}
 // Dateiname mit Datum: jede Sicherung ist eine eigene Datei
@@ -1084,12 +1187,29 @@ async function shareKids(pre){if(!crypto.subtle)return toast("Verschlüsselung i
   if(await giveFile(name,await sealFile("teilen",{kids,classes:[...new Set(kids.map(k=>k.cls).filter(Boolean))]},{key:await pwKey(pw,unb64(salt)),salt})))toast(`Stand von ${kids.length} Kind${kids.length===1?"":"ern"} erstellt`)}
 // Import: erst ansehen und auswählen, dann ergänzen
 let IMP=null;
-function importJSON(inp){const f=inp.files[0];if(!f)return;inp.value="";f.text().then(async t=>{let o,d;try{o=JSON.parse(t)}catch(e){return toast("Datei nicht lesbar")}
-  if(!crypto.subtle&&(o.pfad||o.salt))return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
-  try{d=await openFile(o)}catch(e){return toast("Keine Pfad-Datei")}if(!d)return;if(!Array.isArray(d.kids))return toast("Keine Pfad-Datei");
-  const kids=d.kids.filter(realKid);
-  IMP={art:o.art||"sicherung",von:o.von||d.me||"",erstellt:o.erstellt||"",d,kids,sel:new Set(kids.filter(k=>{const x=diffKid(k);return x.neu||!x.leer}).map(k=>k.id)),settings:!db.kids.length&&(o.art||"sicherung")==="sicherung"};
-  go({tab:"profil",imp:true})})}
+// Eine Datei öffnen (Passwort fragen). Gibt {o,d} zurück oder null.
+async function readPfad(f,many){let o,d;try{o=JSON.parse(await f.text())}catch(e){toast(`${f.name}: nicht lesbar`);return null}
+  if(!crypto.subtle&&(o.pfad||o.salt)){toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");return null}
+  try{d=await openFile(o,many?f.name:"")}catch(e){toast(`${f.name}: keine Pfad-Datei`);return null}if(!d)return null;if(!Array.isArray(d.kids)){toast(`${f.name}: keine Pfad-Datei`);return null}
+  return {o,d}}
+// Laden: eine oder mehrere Dateien; mehrere Stände werden erst untereinander zusammengeführt
+async function importJSON(inp){const fs=[...inp.files];inp.value="";if(!fs.length)return;
+  const got=[];for(const f of fs){const x=await readPfad(f,fs.length>1);if(x)got.push(x)}if(!got.length)return;
+  got.sort((a,b)=>(a.o.erstellt||"").localeCompare(b.o.erstellt||""));
+  const kids=[],cls=[];for(const {d} of got)for(const k of d.kids.filter(realKid))mergeKid(structuredClone(k),kids,cls);
+  const newest=got.filter(x=>(x.o.art||"sicherung")==="sicherung").at(-1),one=got.length===1?got[0]:null;
+  IMP={art:one?one.o.art||"sicherung":"mehrere",files:got.length,von:[...new Set(got.map(x=>x.o.von||x.d.me||"").filter(Boolean))].join(", "),erstellt:one?one.o.erstellt||"":"",
+    d:newest?newest.d:{},kids,sel:new Set(kids.filter(k=>{const x=diffKid(k);return x.neu||!x.leer}).map(k=>k.id)),settings:!!newest&&!db.kids.length};
+  go({tab:"profil",imp:true})}
+// Prüfen: nur ansehen, nichts übernehmen
+async function checkFile(inp){const f=inp.files[0];inp.value="";if(!f)return;const x=await readPfad(f);if(!x)return;const {o,d}=x;
+  const ks=d.kids.filter(realKid).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true})),ne=k=>k.goals.reduce((s,g)=>s+g.entries.length,0);
+  const last=ks.flatMap(k=>[...k.goals.flatMap(g=>g.entries),...(k.diary||[])].map(e=>e.date)).sort().pop();
+  await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 6px">✓ Die Datei lässt sich öffnen</p>
+  <p class="small" style="margin:0 0 8px">${o.art==="teilen"?"Geteilter Stand":"Sicherung"}${o.von||d.me?` von ${esc(o.von||d.me)}`:""}${o.erstellt?`, erstellt am ${dDEy(o.erstellt.slice(0,10))}`:""}. ${ks.length} Kind${ks.length===1?"":"er"}${last?`, letzter Eintrag am ${dDEy(last)}`:""}.</p>
+  <div style="max-height:42vh;overflow:auto"><table class="small"><tr><th>Kürzel</th><th>Verhalten</th><th>Einschätz.</th><th>Tagebuch</th></tr>${ks.map(k=>`<tr><td>${esc(k.code)}${kidById(k.id)?"":' <span class="tag">nicht auf dem Gerät</span>'}</td><td>${k.goals.length}</td><td>${ne(k)}</td><td>${(k.diary||[]).length}</td></tr>`).join("")}</table></div>
+  <p class="small muted" style="margin:10px 0 14px">Es wurde nichts übernommen. Zum Übernehmen nutze „Dateien laden“.</p>
+  <button class="btn pri block" data-a="1">Schließen</button>`,(el,done)=>{el.querySelector("[data-a]").onclick=()=>done(true);el.querySelector("[data-a]").focus()})}
 function importV(){if(!IMP){view={tab:"profil"};return profilV()}
   const rows=IMP.kids.map(k=>{const x=diffKid(k),on=IMP.sel.has(k.id);
     const what=x.neu?`neu · ${x.goals} Verhalten · ${x.entries} Einschätzung${x.entries===1?"":"en"} · ${x.diary} Tagebuch`
@@ -1097,12 +1217,13 @@ function importV(){if(!IMP){view={tab:"profil"};return profilV()}
     return `<label class="card row" style="margin:8px 0;align-items:flex-start;${x.leer?"opacity:.6":""}"><input type="checkbox" style="width:auto;margin-top:4px" ${on?"checked":""} ${x.leer?"disabled":""} onchange="this.checked?IMP.sel.add('${k.id}'):IMP.sel.delete('${k.id}');render()">
       <span class="grow"><b>${esc(k.code)}</b> <span class="muted small">${esc(k.cls||"")}</span><br><span class="small ${x.neu?"":"muted"}" style="${x.neu?"color:var(--up);font-weight:700":""}">${x.neu?"":"vorhanden: "}${what}</span></span></label>`}).join("");
   return `<button class="btn ghost" onclick="IMP=null;go({tab:'profil'})">‹ Abbrechen</button>
-  <h1>${IMP.art==="teilen"?"Geteilten Stand übernehmen":"Sicherung laden"}</h1>
-  <p class="muted">${IMP.von?`Von ${esc(IMP.von)}`:""}${IMP.erstellt?` · erstellt ${dDEy(IMP.erstellt.slice(0,10))}`:""} · ${IMP.kids.length} Kind${IMP.kids.length===1?"":"er"}</p>
+  <h1>${IMP.art==="mehrere"?"Stände zusammenführen":IMP.art==="teilen"?"Geteilten Stand übernehmen":"Sicherung laden"}</h1>
+  <p class="muted">${[IMP.files>1&&`${IMP.files} Dateien`,IMP.von&&`von ${esc(IMP.von)}`,IMP.erstellt&&`erstellt ${dDEy(IMP.erstellt.slice(0,10))}`,`${IMP.kids.length} Kind${IMP.kids.length===1?"":"er"}`].filter(Boolean).join(" · ")}</p>
+  ${IMP.files>1?`<p class="small">Die Dateien sind schon untereinander zusammengeführt: Jeder Eintrag kommt nur einmal vor, bei zwei Fassungen gilt die neuere.</p>`:""}
   <p class="small">Wähle, welche Kinder du übernimmst. Bei vorhandenen Kindern wird <b>ergänzt</b>: Neues kommt dazu, deine eigenen Einträge bleiben erhalten. Bei gleichen Einträgen gilt die neuere Fassung.</p>
   ${IMP.kids.length>1?`<p class="row"><button class="btn ghost small" onclick="IMP.kids.forEach(k=>diffKid(k).leer||IMP.sel.add(k.id));render()">Alle auswählen</button><button class="btn ghost small" onclick="IMP.sel.clear();render()">Keine</button></p>`:""}
   ${rows}
-  ${IMP.art==="sicherung"?`<label class="row" style="margin:12px 0;font-weight:600"><input type="checkbox" style="width:auto" ${IMP.settings?"checked":""} onchange="IMP.settings=this.checked"> Auch Einstellungen übernehmen (Fächer, Stundenraster, Wochenziel)</label>`:""}
+  ${IMP.d.subjects?`<label class="row" style="margin:12px 0;font-weight:600"><input type="checkbox" style="width:auto" ${IMP.settings?"checked":""} onchange="IMP.settings=this.checked"> Auch Einstellungen übernehmen (Fächer, Stundenraster, Wochenziel${IMP.files>1?", aus der neuesten Sicherung":""})</label>`:""}
   <p><button class="btn pri block" ${IMP.sel.size||IMP.settings?"":"disabled"} onclick="applyImport()">${IMP.sel.size?`${IMP.sel.size} Kind${IMP.sel.size===1?"":"er"} übernehmen`:"Übernehmen"}</button></p>`}
 function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=mergeKid(structuredClone(k))}
   if(IMP.settings){const d=IMP.d;for(const f of ["subjects","raster","game"])if(d[f])db[f]=d[f];if(!db.me&&d.me)db.me=d.me;(d.classes||[]).forEach(c=>db.classes.includes(c)||db.classes.push(c))}
@@ -1110,8 +1231,82 @@ function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=
 function exportCSV(kid,gid){const k=kidById(kid),g=goalById(k,gid);
   const rows=[["Kürzel","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value==null?"nicht beobachtet":dv(g,e.value),e.note,e.rater]));
   download(`verlauf-${k.code}-${today()}.csv`,"﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
-async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,classes:[],kids:[]};save();go({tab:"heute"})}
+async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,classes:[],kids:[]};save();go({tab:"heute"})}
 async function delDemo(){if(!await ask("Den fiktiven Beispielfall entfernen? Deine eigenen Kinder bleiben.",{ok:"Entfernen"}))return;db.kids=db.kids.filter(k=>!k.demo);save();render();toast("Beispielfall entfernt")}
+/* ===== Schuljahreswechsel ===== */
+const syNow=()=>{const d=new Date(),y=d.getFullYear()-(d.getMonth()<7?1:0);return `${y}/${String(y+1).slice(2)}`};
+// 7B → 8B; Jahrgang 10 und Klassen ohne Zahl bleiben
+const upCls=c=>{const m=/^(\d{1,2})(.*)$/.exec(c||"");if(!m)return null;const n=+m[1];return n>=10||n<1?null:(n+1)+m[2]};
+const byNum=(a,b)=>a.localeCompare(b,"de",{numeric:true});
+function yearV(){const u=db.yearUndo;
+  return `<div class="card"><h2 style="margin-top:0">Schuljahreswechsel</h2><div class="sub">Setzt alle Klassen eine Stufe hoch: 7B wird 8B, 7B-01 wird 8B-01. Einträge bleiben, wie sie sind. Jahrgang 10 bleibt.</div>
+  <p class="row" style="flex-wrap:wrap;margin:10px 0 0"><button class="btn" onclick="yearUp()">Klassen hochsetzen</button>${u?`<button class="btn ghost" onclick="yearBack()">Wechsel vom ${dDEy(iso(new Date(u.ts)))} rückgängig machen</button>`:""}</p></div>`}
+async function yearUp(){const map={};db.classes.forEach(c=>{const u=upCls(c);if(u)map[c]=u});db.kids.forEach(k=>{const u=upCls(k.cls);if(u)map[k.cls]=u});
+  if(!Object.keys(map).length)return toast("Keine Klasse mit Jahrgang gefunden, z. B. 7B.");
+  const n=c=>db.kids.filter(k=>!k.demo&&k.cls===c).length,stay=[...new Set([...db.classes,...db.kids.map(k=>k.cls).filter(Boolean)])].filter(c=>!map[c]).sort(byNum);
+  const ok=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Schuljahreswechsel</p>
+  <p class="small" style="margin:0 0 8px">Alle Klassen gehen eine Stufe hoch. Kürzel, die mit der Klasse beginnen, ändern sich mit.</p>
+  <ul class="small" style="padding-left:20px;margin:0 0 8px;max-height:34vh;overflow:auto">${Object.keys(map).sort(byNum).map(c=>`<li>${esc(c)} → <b>${esc(map[c])}</b> <span class="muted">(${n(c)} Kind${n(c)===1?"":"er"})</span></li>`).join("")}</ul>
+  ${stay.length?`<p class="small muted" style="margin:0 0 8px">Bleiben: ${stay.map(esc).join(", ")}. Für Kinder, die die Schule verlassen, nutze beim Kind „Förderung abschließen“.</p>`:""}
+  <p class="small muted" style="margin:0 0 14px">Du kannst den Wechsel danach in den Einstellungen rückgängig machen.</p>
+  <div class="duo"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Hochsetzen</button></div>`,(el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))});
+  if(ok!==true)return;
+  const now=Date.now(),up=db.kids.filter(k=>map[k.cls]),taken=new Set(db.kids.filter(k=>!map[k.cls]).map(k=>k.code.toLowerCase()));
+  db.yearUndo={ts:now,sy:db.yearSY||"",classes:db.classes.slice(),kids:up.map(k=>({id:k.id,cls:k.cls,code:k.code}))};
+  for(const k of up){const nc=map[k.cls],pre=k.cls.toLowerCase()+"-";let code=k.code;
+    if(code.toLowerCase().startsWith(pre))code=nc+"-"+code.slice(pre.length);
+    if(taken.has(code.toLowerCase())){let i=1;do{code=`${nc}-${String(i++).padStart(2,"0")}`}while(taken.has(code.toLowerCase()))}
+    taken.add(code.toLowerCase());Object.assign(k,{cls:nc,code,upd:now})}
+  db.classes=[...new Set(db.classes.map(c=>map[c]||c))].sort(byNum);db.yearSY=syNow();view.filter="alle";save();render();
+  undoToast(`${up.filter(k=>!k.demo).length} Kinder hochgesetzt`,()=>yearBack(true))}
+async function yearBack(quick){const u=db.yearUndo;if(!u)return;
+  if(!quick&&!await ask(`Schuljahreswechsel vom ${dDEy(iso(new Date(u.ts)))} rückgängig machen? Klassen und Kürzel bekommen den alten Stand.`,{ok:"Rückgängig machen"}))return;
+  const now=Date.now(),back=new Set(u.kids.map(x=>x.id));let clash=0;
+  for(const x of u.kids){const k=kidById(x.id);if(!k)continue;
+    if(db.kids.some(o=>!back.has(o.id)&&o.code.toLowerCase()===x.code.toLowerCase())){clash++;k.cls=x.cls}else Object.assign(k,{cls:x.cls,code:x.code});k.upd=now}
+  db.classes=[...new Set([...u.classes,...db.kids.map(k=>k.cls).filter(Boolean)])].sort(byNum);db.yearSY=u.sy||syNow();delete db.yearUndo;view.filter="alle";save();render();
+  toast(clash?`Zurückgesetzt. ${clash} Kürzel waren inzwischen vergeben und bleiben neu.`:"Schuljahreswechsel zurückgenommen")}
+
+/* ===== App-Sperre (optional, Standard aus) =====
+   Code als PBKDF2-Prüfwert gespeichert. Schützt vor einem kurzen Blick, verschlüsselt die Daten aber nicht. */
+let LOCKED=false,LOCKIN="",LOCKFAIL=0,LOCKWAIT=0,HIDDEN_AT=0;
+async function codeHash(code,salt){const base=await crypto.subtle.importKey("raw",enc(code),"PBKDF2",false,["deriveBits"]);
+  return b64(new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:unb64(salt),iterations:150000,hash:"SHA-256"},base,256)))}
+const codeOk=async c=>!!db.lock&&await codeHash(c,db.lock.salt)===db.lock.hash;
+function askCode(msg){return dlg(`<p style="font-weight:700;margin:0 0 10px">${esc(msg)}</p><input id="dlgIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="4 bis 6 Ziffern">
+  <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">OK</button></div>`,
+  (el,done)=>{const i=el.querySelector("#dlgIn");i.focus();i.onkeydown=e=>{if(e.key==="Enter")done(i.value)};el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done(i.value)})}
+function lockV(){const L=db.lock;
+  return `<div class="card"><h2 style="margin-top:0">App-Sperre</h2>
+  <label class="swr"><span class="grow">Pfad mit eigenem Code sperren<span class="sub">Zusätzlich zur Gerätesperre. Standard: aus.</span></span><input type="checkbox" class="sw" ${L?"checked":""} onchange="this.checked?setLock():offLock()"></label>
+  ${L?`<div class="sub" style="margin:10px 0 6px;font-weight:700">Sperren, wenn Pfad im Hintergrund war</div><div class="pick theme">${[[0,"Sofort"],[1,"Nach 1 Min."],[5,"Nach 5 Min."]].map(([m,t])=>`<button class="${L.after===m?"on":""}" onclick="db.lock.after=${m};save();render()">${t}</button>`).join("")}</div>
+  <p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn" onclick="setLock(true)">Code ändern</button><button class="btn" onclick="lockNow()">Jetzt sperren</button></p>`:""}
+  <p class="muted small" style="margin-bottom:0">Die Sperre schützt vor einem kurzen Blick auf das entsperrte Gerät. Sie verschlüsselt die Daten nicht und ersetzt nicht den Gerätecode. Wer den Code vergisst, muss die Daten auf dem Gerät löschen und eine Sicherung laden.</p></div>`}
+async function setLock(change){if(!crypto.subtle){toast("In dieser Ansicht nicht möglich. Bitte im Browser öffnen.");return render()}
+  if(change&&!await codeOk((await askCode("Aktuellen Code eingeben"))||""))return toast("Code falsch");
+  const a=(await askCode(change?"Neuen Code festlegen":"Code für Pfad festlegen"))||"";
+  if(!/^\d{4,6}$/.test(a)){render();return a&&toast("Bitte 4 bis 6 Ziffern.")}
+  if(((await askCode("Code wiederholen"))||"")!==a){render();return toast("Die Codes stimmen nicht überein.")}
+  const salt=b64(rnd(16));db.lock={salt,hash:await codeHash(a,salt),len:a.length,after:db.lock?.after??1};save();render();toast(change?"Code geändert":"App-Sperre ist an")}
+async function offLock(){const c=await askCode("Zum Ausschalten aktuellen Code eingeben");if(c!=null&&await codeOk(c)){delete db.lock;save();render();toast("App-Sperre ist aus")}else{render();if(c)toast("Code falsch")}}
+function lockNow(){if(!db.lock)return;LOCKED=true;LOCKIN="";document.body.classList.add("locked");document.activeElement?.blur?.();renderLock()}
+function renderLock(msg){let el=$("#lock");if(!LOCKED){el?.remove();return}
+  if(!el){el=document.createElement("div");el.id="lock";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Pfad ist gesperrt");document.body.appendChild(el)}
+  const wait=Math.ceil((LOCKWAIT-Date.now())/1000),len=db.lock.len||4;
+  el.innerHTML=`<div class="box"><div style="font-size:2.4rem" aria-hidden="true">🔒</div><h1 style="margin:6px 0 4px">Pfad ist gesperrt</h1>
+  <p class="muted" aria-live="polite">${wait>0?`Zu viele Versuche. Warte ${wait} Sekunden.`:esc(msg||"Gib deinen Code ein.")}</p>
+  <div class="pins${msg?" bad":""}" aria-hidden="true">${[...Array(len)].map((_,i)=>`<i class="${i<LOCKIN.length?"on":""}"></i>`).join("")}</div>
+  <div class="keys">${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="lockKey('${n}')">${n}</button>`).join("")}<button class="nb" onclick="lockForgot()">Vergessen?</button><button onclick="lockKey('0')">0</button><button class="nb" aria-label="Ziffer löschen" onclick="LOCKIN=LOCKIN.slice(0,-1);renderLock()">⌫</button></div></div>`;
+  if(wait>0)setTimeout(()=>LOCKED&&renderLock(),1000)}
+async function lockKey(d){if(LOCKWAIT>Date.now())return;const len=db.lock.len||4;if(LOCKIN.length>=len)return;LOCKIN+=d;renderLock();if(LOCKIN.length<len)return;
+  const c=LOCKIN;if(await codeOk(c)){LOCKED=false;LOCKIN="";LOCKFAIL=0;document.body.classList.remove("locked");renderLock();return}
+  LOCKIN="";LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**(LOCKFAIL-5);try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
+async function lockForgot(){if(!await ask("Code vergessen? Ohne Code kommst du nicht an die Daten. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden.",{ok:"Alles löschen",danger:true}))return;
+  db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,bsalt:db.bsalt,yearSY:db.yearSY,classes:[],kids:[]};save();LOCKED=false;document.body.classList.remove("locked");renderLock();go({tab:"profil"});toast("Alles gelöscht. Lade jetzt deine letzte Sicherung.")}
+document.addEventListener("visibilitychange",()=>{if(!db?.lock)return;if(document.hidden){HIDDEN_AT=Date.now();if(!db.lock.after)lockNow()}
+  else if(!LOCKED&&HIDDEN_AT&&Date.now()-HIDDEN_AT>=db.lock.after*6e4)lockNow()});
+document.addEventListener("keydown",e=>{if(!LOCKED)return;if(/^\d$/.test(e.key))lockKey(e.key);else if(e.key==="Backspace"){LOCKIN=LOCKIN.slice(0,-1);renderLock()}});
+
 function demo(quiet){
   if(db.kids.some(k=>k.demo))return quiet?null:toast("Beispielfall ist schon da");
   if(!db.classes.includes("7B"))db.classes.push("7B");
@@ -1129,7 +1324,7 @@ function demo(quiet){
     .map(([o,cat,subj,text],i)=>({id:uid(),date:addDays(t,o),cat,subj,text,rater:"MU",ts:new Date(addDays(t,o)+"T15:00").getTime()+i,gen:true}));
   db.kids.push({id:uid(),code:"DEMO-7B",icon:"🦉",cls:"7B",demo:true,goals:[g1,g2],diary});save();if(quiet)return;toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
 
-load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);render();
+load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();
 </script>
 </body>
 </html>
