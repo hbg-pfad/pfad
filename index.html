@@ -840,7 +840,7 @@ function talkV(){
   const r=view.range||"w4",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),hide=view.hide||[];
   let h=`<div class="talk"><div class="noprint between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px"><button class="btn ghost" onclick="go({tab:'${view.tab}',kid:'${k.id}'})">‹ Zurück</button>
    <span class="row" style="flex-wrap:wrap;gap:8px"><select style="width:auto" onchange="view.range=this.value;render()">${Object.entries(RANGES).map(([key,[t]])=>`<option value="${key}" ${key===r?"selected":""}>${t}</option>`).join("")}</select>
-   <button class="btn pri" onclick="print()">Drucken</button></span></div>
+   <button class="btn pri" onclick="talkPdf()">PDF / Drucken</button></span></div>
   <p class="muted" style="margin:0">Gespräch am ${dDEy(today())} · ${RANGES[r][0]}${from?` (seit ${dDEy(from)})`:""}</p>
   <h1 style="margin-bottom:4px">So läuft es gerade</h1>
   <p style="font-size:1.05rem">${k.icon?`<span class="kic big" style="--kc:${kidColor(k)};vertical-align:middle;margin-right:8px">${esc(k.icon)}</span>`:""}Name: <span style="display:inline-block;min-width:200px;border-bottom:1.5px solid var(--line)">&nbsp;</span> <span class="muted small noprint">(${esc(k.code)}, Name nur auf dem Ausdruck von Hand)</span></p>`;
@@ -865,13 +865,107 @@ function talkV(){
   <p id="planPrint" style="white-space:pre-wrap;font-size:1.05rem" class="printonly">${esc(view.plan||"")}</p><div class="line"></div><div class="line"></div>
   <div class="two" style="margin-top:22px"><div><div class="line"></div><span class="muted small">Kind</span></div><div><div class="line"></div><span class="muted small">Eltern</span></div></div>
   <div class="two" style="margin-top:12px"><div><div class="line"></div><span class="muted small">Lehrkraft</span></div><div></div></div></div></div>
-  <p class="muted small noprint">Tipp: Zeig das Blatt auf dem Tablet oder drucke es aus. Es enthält keine Tagebucheinträge außer den Erfolgen und keine Einzelwerte.</p></div>`;
+  <p class="muted small noprint">Tipp: Zeig das Blatt auf dem Tablet oder erstelle eine PDF. Auf dem iPad öffnet sich dann das Teilen-Fenster mit „Drucken“ und „In Dateien sichern“. Es enthält keine Tagebucheinträge außer den Erfolgen und keine Einzelwerte.</p></div>`;
   return h;
 }
 
-/* ===== Bericht für die Förderakte (über Drucken als PDF) ===== */
-function pdfHint(){return isIOS?"Tippe auf „Als PDF sichern“. Im Druckfenster tippst du auf „Teilen“ und dann auf „In Dateien sichern“. Lege die Datei in die Förderakte, nicht in eine private Cloud."
-  :"Tippe auf „Als PDF sichern“. Wähle im Druckfenster als Ziel „Als PDF speichern“. Lege die Datei in die Förderakte, nicht in eine private Cloud."}
+/* ===== PDF ohne Druckfenster =====
+   Auf dem iPad funktioniert Drucken aus der Home-Bildschirm-App nicht. Pfad baut die PDF deshalb selbst
+   (Helvetica, WinAnsi) und gibt sie übers Teilen-Fenster weiter: dort „In Dateien sichern“ oder „Drucken“. */
+const HW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,350,556,350,222,556,333,1000,556,556,333,1000,667,333,1000,350,611,350,350,222,222,333,333,350,556,1000,333,1000,500,333,944,350,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
+const HBW=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,350,556,350,278,556,500,1000,556,556,333,1000,667,333,1000,350,611,350,350,278,278,500,500,350,556,1000,333,1000,556,333,944,350,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+const WINA={"€":128,"‚":130,"„":132,"…":133,"‘":145,"’":146,"“":147,"”":148,"•":149,"–":150,"—":151};
+function pdfTxt(t){let o="";for(const ch of String(t??"").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/→/g,"->").replace(/\s+/g," ")){let c=WINA[ch]||ch.codePointAt(0);if(!WINA[ch]&&(c>255||(c>=127&&c<160)||c<32))continue;o+=String.fromCharCode(c)}return o}
+const PC={ink:[43,36,32],muted:[110,98,89],acc:[208,100,60],up:[76,138,90],down:[192,72,58],line:[221,210,196],soft:[245,236,224],white:[255,255,255]};
+class Pdf{constructor(w,h,m=40){this.W=w;this.H=h;this.M=m;this.pages=[];this.add()}
+  add(){this.c=[];this.pages.push(this.c);this.y=this.M+8}
+  need(h){if(this.y+h>this.H-this.M-14)this.add()}
+  f(n){return (Math.round(n*100)/100).toString()}
+  col(c,s){c=PC[c]||c;return c.map(x=>this.f(x/255)).join(" ")+(s?" RG":" rg")}
+  tw(s,size,b){const W=b?HBW:HW;let w=0;for(const ch of pdfTxt(s))w+=W[ch.charCodeAt(0)-32]||556;return w*size/1000}
+  text(x,y,s,o={}){const size=o.size||10,t=pdfTxt(s);if(!t)return;if(o.align==="right")x-=this.tw(s,size,o.bold);else if(o.align==="center")x-=this.tw(s,size,o.bold)/2;
+    this.c.push(`BT ${this.col(o.color||"ink")} /${o.bold?"F2":"F1"} ${size} Tf ${this.f(x)} ${this.f(this.H-y)} Td (${t.replace(/[\\()]/g,"\\$&")}) Tj ET`)}
+  lines(s,w,size,b){const out=[];let cur="";for(const word of String(s??"").split(/\s+/).filter(Boolean)){const t=cur?cur+" "+word:word;if(this.tw(t,size,b)<=w||!cur)cur=t;else{out.push(cur);cur=word}}if(cur)out.push(cur);return out}
+  wrap(s,x,w,o={}){const size=o.size||10,lh=o.lh||size*1.38;for(const l of this.lines(s,w,size,o.bold)){this.need(lh);this.text(x,this.y+size,l,o);this.y+=lh}}
+  line(x1,y1,x2,y2,o={}){this.c.push(`${this.col(o.color||"line",1)} ${o.w||1} w ${o.dash?`[${o.dash}] 0 d`:"[] 0 d"} ${this.f(x1)} ${this.f(this.H-y1)} m ${this.f(x2)} ${this.f(this.H-y2)} l S`)}
+  poly(p,o={}){if(p.length<2)return;this.c.push(`${this.col(o.color||"acc",1)} ${o.w||1.6} w [] 0 d 1 j 1 J `+p.map((q,i)=>`${this.f(q[0])} ${this.f(this.H-q[1])} ${i?"l":"m"}`).join(" ")+" S")}
+  rect(x,y,w,h,o={}){this.c.push(`${o.fill?this.col(o.fill):""} ${o.stroke?this.col(o.stroke,1)+" 1 w [] 0 d":""} ${this.f(x)} ${this.f(this.H-y-h)} ${this.f(w)} ${this.f(h)} re ${o.fill&&o.stroke?"B":o.fill?"f":"S"}`)}
+  circle(cx,cy,r,o={}){const k=r*.5523,Y=this.H-cy,f=n=>this.f(n);
+    this.c.push(`${o.fill?this.col(o.fill):""} ${o.stroke?this.col(o.stroke,1)+" 1 w [] 0 d":""} ${f(cx+r)} ${f(Y)} m ${f(cx+r)} ${f(Y+k)} ${f(cx+k)} ${f(Y+r)} ${f(cx)} ${f(Y+r)} c ${f(cx-k)} ${f(Y+r)} ${f(cx-r)} ${f(Y+k)} ${f(cx-r)} ${f(Y)} c ${f(cx-r)} ${f(Y-k)} ${f(cx-k)} ${f(Y-r)} ${f(cx)} ${f(Y-r)} c ${f(cx+k)} ${f(Y-r)} ${f(cx+r)} ${f(Y-k)} ${f(cx+r)} ${f(Y)} c ${o.fill&&o.stroke?"B":o.fill?"f":"S"}`)}
+  bytes(foot){const n=this.pages.length;if(foot)this.pages.forEach((p,i)=>{this.c=p;this.text(this.M,this.H-this.M+16,foot,{size:7.5,color:"muted"});this.text(this.W-this.M,this.H-this.M+16,`Seite ${i+1} von ${n}`,{size:7.5,color:"muted",align:"right"})});
+    const objs=["<< /Type /Catalog /Pages 2 0 R >>","",`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`,`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`],kids=[];
+    this.pages.forEach(p=>{const s=p.join("\n");objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${this.W} ${this.H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${objs.length+2} 0 R >>`);kids.push(objs.length);objs.push(`<< /Length ${s.length} >>\nstream\n${s}\nendstream`)});
+    objs[1]=`<< /Type /Pages /Kids [${kids.map(i=>i+" 0 R").join(" ")}] /Count ${kids.length} >>`;
+    let out="%PDF-1.4\n%\xe2\xe3\xcf\xd3\n";const off=[];objs.forEach((o,i)=>{off.push(out.length);out+=`${i+1} 0 obj\n${o}\nendobj\n`});
+    const x=out.length;out+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`+off.map(o=>String(o).padStart(10,"0")+" 00000 n \n").join("")+`trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${x}\n%%EOF`;
+    return Uint8Array.from(out,c=>c.charCodeAt(0))}}
+const plain=s=>String(s??"").replace(/<[^>]+>/g,"");
+// Verlaufsgraph wie in der App
+function pdfChart(d,g,x,y,w,h){const e=sortE(g.entries);if(!e.length){d.text(x,y+12,"Noch keine Einschätzungen.",{size:9,color:"muted"});return []}
+  const L=x+26,R=x+w-6,T=y+16,B=y+h-16,X=i=>e.length===1?(L+R)/2:L+i*(R-L)/(e.length-1),Y=v=>T+(1-v/10)*(B-T);
+  [0,5,10].forEach(v=>{d.line(L,Y(v),R,Y(v),{w:.6});d.text(L-5,Y(v)+3,sc(g)==="2"?(v===10?"ja":v===0?"nein":""):num(toK(g,v)),{size:7,color:"muted",align:"right"})});
+  if(g.target!==""){d.line(L,Y(g.target),R,Y(g.target),{color:"up",w:1,dash:"3 3"});d.text(R,Y(g.target)-3,"Ziel",{size:7,color:"up",align:"right"})}
+  if(g.start){const i=e.findIndex(q=>q.date>=g.start);if(i>0){const xs=(X(i-1)+X(i))/2;d.line(xs,T,xs,B,{color:"muted",w:.7,dash:"4 3"});d.text(xs+3,T+7,"Förderung",{size:7,color:"muted"})}}
+  d.poly(e.map((q,i)=>q.value==null?null:[X(i),Y(q.value)]).filter(Boolean),{color:"acc",w:1.6});
+  const r=e.length>60?1.3:2.2;e.forEach((q,i)=>q.value==null?d.circle(X(i),B,r,{stroke:"muted"}):d.circle(X(i),Y(q.value),r,{fill:"acc"}));
+  const pins=e.map((q,i)=>({q,i})).filter(p=>p.q.pin);pins.forEach((p,n)=>{d.line(X(p.i),T-4,X(p.i),B,{color:"acc",w:.5});d.circle(X(p.i),T-8,5,{fill:"acc"});d.text(X(p.i),T-5.5,String(n+1),{size:6.5,bold:1,color:"white",align:"center"})});
+  const step=Math.max(1,Math.ceil(e.length/7));e.forEach((q,i)=>{if(i%step===0||i===e.length-1)d.text(X(i),B+11,dDE(q.date),{size:7,color:"muted",align:i===e.length-1?"right":i===0?"left":"center"})});
+  return pins.map(p=>p.q)}
+async function reportPdf(){const k=kidById(view.kid);if(!k)return;
+  const r=view.range||"all",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),inR=q=>!from||q.date>=from;
+  const all=k.goals.flatMap(g=>g.entries).filter(inR),dates=all.map(q=>q.date).sort(),raters=[...new Set(all.map(q=>q.rater).filter(Boolean))];
+  const d=new Pdf(595,842),L=40,W=515;
+  d.text(L,d.y+14,"Verlauf für die Förderakte",{size:18,bold:1});d.y+=30;
+  const meta=[["Kürzel",k.code+(k.cls?` · Klasse ${k.cls}`:"")],["Name",""],["Zeitraum",`${RANGES[r][0]}: ${dates.length?dDEy(dates[0])+" bis "+dDEy(dates.at(-1)):"noch keine Einschätzungen"}`],["Eingeschätzt von",raters.join(", ")||"–"],["Erstellt",dDEy(today())+(db.me?` von ${db.me}`:"")+(k.closed?` · Förderung abgeschlossen am ${dDEy(k.closed)}`:"")]];
+  for(const [a,b] of meta){d.text(L,d.y+10,a,{size:9,color:"muted"});if(a==="Name"){d.line(L+105,d.y+12,L+330,d.y+12,{color:"muted",w:.8});d.text(L+338,d.y+10,"(nur auf dem Ausdruck von Hand)",{size:8,color:"muted"});d.y+=17}else{const y0=d.y;d.wrap(b,L+105,W-105,{size:9.5,bold:a==="Kürzel"});d.y=Math.max(d.y,y0+14)+3}}
+  for(const g0 of k.goals){const g={...g0,entries:g0.entries.filter(inR)},s=summary(k,g),t=trend(g);
+    d.need(240);d.y+=10;d.line(L,d.y,L+W,d.y,{w:.8});d.y+=8;
+    d.wrap(g.title,L,W,{size:12.5,bold:1});
+    d.wrap([g.fp&&`Förderziel: ${g.fp}`,g.dir==="down"?"weniger davon":"mehr davon",scaleName(g),g.target!==""&&`Ziel ${g.dir==="down"?"<=":">="} ${tgt(g)}`,g.start&&`Förderung seit ${dDEy(g.start)}`,`Tendenz: ${t.t}`].filter(Boolean).join(" · "),L,W,{size:8.5,color:"muted"});
+    d.y+=4;const pins=pdfChart(d,g,L,d.y,W,150);d.y+=158;
+    pins.forEach((p,n)=>d.wrap(`(${n+1}) ${dDE(p.date)}: ${p.note||"ohne Kommentar"}`,L,W,{size:8.5,color:"muted"}));
+    d.need(30);d.y+=4;d.wrap("Was zeigt sich?",L,W,{size:10.5,bold:1});s.lines.forEach(l=>d.wrap(plain(l),L,W,{size:9.5}));
+    const m={};rated(g).forEach(q=>{if(q.subj)(m[q.subj]??=[]).push(q.value)});const rows=Object.entries(m).filter(([,v])=>v.length>=2).map(([a,v])=>[a,mean(v),v.length]).sort((a,b)=>g.dir==="down"?a[1]-b[1]:b[1]-a[1]);
+    if(rows.length>=2){d.need(30);d.y+=4;d.wrap("Nach Fach",L,W,{size:10.5,bold:1});rows.forEach(([a,v,n])=>{d.need(14);d.text(L,d.y+9,a,{size:9});d.text(L+120,d.y+9,fm(g,v),{size:9,align:"right"});d.rect(L+132,d.y+2,Math.max(2,v/10*220),7,{fill:"acc"});d.text(L+362,d.y+9,`n = ${n}`,{size:8,color:"muted"});d.y+=13})}}
+  const diary=sortD(k.diary).filter(inR).reverse();d.need(40);d.y+=12;d.line(L,d.y,L+W,d.y,{w:.8});d.y+=8;d.wrap("Tagebuch",L,W,{size:12.5,bold:1});
+  if(!diary.length)d.wrap("Keine Einträge im Zeitraum.",L,W,{size:9,color:"muted"});
+  for(const q of diary){d.need(28);d.wrap([dDEy(q.date),q.subj,q.rater,q.cat].filter(Boolean).join(" · "),L,W,{size:8.5,color:"muted"});d.wrap(q.text,L,W,{size:9.5});d.y+=4}
+  d.y+=8;d.wrap("Die Werte sind Einschätzungen der Lehrkräfte direkt nach der Stunde, kein Test. Sie zeigen Tendenzen und ersetzen nicht das Gespräch im Team. Erstellt mit Pfad (schulinterner Prototyp).",L,W,{size:8,color:"muted"});
+  await givePdf(`pfad-bericht-${k.code.replace(/[^\w-]/g,"_")}-${today()}.pdf`,d.bytes(`Pfad · Bericht ${k.code} · ${dDEy(today())}`))}
+async function talkPdf(){const k=kidById(view.kid);if(!k)return;
+  const r=view.range||"w4",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),hide=view.hide||[];
+  const d=new Pdf(842,595,32),L=32,W=778;
+  d.text(L,d.y+8,`Gespräch am ${dDEy(today())} · ${RANGES[r][0]}${from?` (seit ${dDEy(from)})`:""}`,{size:9,color:"muted"});d.y+=14;
+  d.text(L,d.y+20,"So läuft es gerade",{size:22,bold:1});d.text(L+300,d.y+20,"Name:",{size:12});d.line(L+340,d.y+22,L+560,d.y+22,{color:"muted",w:.8});d.y+=36;
+  const gs=k.goals,n=Math.min(3,gs.length)||1,gap=14,cw=(W-gap*(n-1))/n;
+  for(let row=0;row<gs.length;row+=3){const part=gs.slice(row,row+3);d.need(250);const y0=d.y;let yMax=y0;
+    part.forEach((g,j)=>{const x=L+j*(cw+gap);d.y=y0;d.rect(x,y0,cw,236,{stroke:"line"});d.y+=10;
+      d.wrap(g.title,x+10,cw-20,{size:12.5,bold:1});
+      d.wrap(`Das wollen wir: ${g.dir==="down"?"weniger davon":"mehr davon"} · ${sc(g)==="2"?`ja = ${g.a10}`:`${rng(g)[0]} = ${g.a0}, ${rng(g)[1]} = ${g.a10}`}`,x+10,cw-20,{size:8.5,color:"muted"});
+      const wk=weekBars(g,from);
+      if(wk.length<2){d.y+=6;d.wrap("Wir beobachten noch. Bald sehen wir mehr.",x+10,cw-20,{size:11,bold:1});yMax=Math.max(yMax,y0+236);return}
+      const first=wk[0].v,now=wk.at(-1).v,dd=(now-first)*(g.dir==="down"?-1:1),reached=g.target!==""&&(g.dir==="down"?now<=g.target:now>=g.target);
+      const [c,msg]=dd>=1?["up","Es wird besser!"]:dd<=-1?["acc","Daran üben wir weiter."]:["muted","Es bleibt ungefähr gleich."];
+      d.y+=4;d.circle(x+16,d.y+6,5,{fill:c});d.wrap(msg+(reached?" Das Ziel ist erreicht!":""),x+27,cw-37,{size:11.5,bold:1});
+      d.y+=2;[["Am Anfang",fm(g,first)],["Jetzt",fm(g,now)],...(g.target!==""?[["Ziel",(g.dir==="down"?"<= ":">= ")+tgt(g)]]:[])].forEach(([a,b],i)=>{const bx=x+10+i*70;d.text(bx,d.y+8,a,{size:7.5,color:"muted"});d.text(bx,d.y+22,b,{size:13,bold:1})});d.y+=30;
+      const H=Math.max(60,y0+236-d.y-22),T=d.y+12,B=d.y+H,cnt=wk.length,bw=Math.min(32,(cw-30)/cnt-8),gp=(cw-20-cnt*bw)/(cnt+1),Y=v=>T+(1-v/10)*(B-T),meets=v=>g.target!==""&&(g.dir==="down"?v<=g.target:v>=g.target);
+      d.line(x+10,B,x+cw-10,B,{w:1.2});
+      wk.forEach((q,i)=>{const bx=x+10+gp+i*(bw+gp);d.rect(bx,Y(q.v),bw,B-Y(q.v),{fill:meets(q.v)?"up":i===cnt-1?"acc":[232,177,153]});d.text(bx+bw/2,Y(q.v)-3,fm(g,q.v),{size:8,bold:1,align:"center"});d.text(bx+bw/2,B+9,i===cnt-1?"jetzt":dDE(q.w),{size:6.5,color:"muted",align:"center"})});
+      if(g.target!==""){d.line(x+10,Y(g.target),x+cw-10,Y(g.target),{color:"up",w:1.2,dash:"4 3"});d.text(x+cw-10,Y(g.target)-3,"Ziel",{size:7,bold:1,color:"up",align:"right"})}
+      yMax=Math.max(yMax,y0+236)});
+    d.y=yMax+12}
+  if(!gs.length){d.wrap("Für dieses Kind ist noch kein Verhalten angelegt.",L,W,{size:10,color:"muted"})}
+  d.need(150);const y0=d.y,hw=(W-gap)/2,wins=sortD(k.diary).filter(q=>q.cat==="Erfolg"&&(!from||q.date>=from)&&!hide.includes(q.id));
+  let yl=y0;if(wins.length){d.y=y0;d.wrap("Das hat gut geklappt",L,hw,{size:12.5,bold:1});wins.forEach(q=>d.wrap(`* ${q.text} (${dDE(q.date)})`,L,hw,{size:10.5}));yl=d.y}
+  const x2=wins.length?L+hw+gap:L,w2=wins.length?hw:W;d.y=y0;d.wrap("Das nehmen wir uns vor",x2,w2,{size:12.5,bold:1});if(view.plan)d.wrap(view.plan,x2,w2,{size:10.5});
+  d.y+=18;d.line(x2,d.y,x2+w2,d.y,{color:"muted",w:.7});d.y+=20;d.line(x2,d.y,x2+w2,d.y,{color:"muted",w:.7});d.y+=34;
+  [["Kind",0],["Eltern",1],["Lehrkraft",0]].forEach(([t],i)=>{const sx=x2+(i%2)*(w2/2),sy=d.y+Math.floor(i/2)*32;d.line(sx,sy,sx+w2/2-16,sy,{color:"muted",w:.7});d.text(sx,sy+10,t,{size:8,color:"muted"})});
+  await givePdf(`pfad-gespraech-${k.code.replace(/[^\w-]/g,"_")}-${today()}.pdf`,d.bytes())}
+async function givePdf(name,bytes){if(await giveFile(name,bytes,"application/pdf"))toast("PDF erstellt")}
+
+/* ===== Bericht für die Förderakte ===== */
+function pdfHint(){return isIOS?"„PDF erstellen“ öffnet das Teilen-Fenster. Dort tippst du auf „In Dateien sichern“ oder „Drucken“. Lege die Datei in die Förderakte, nicht in eine private Cloud."
+  :"„PDF erstellen“ lädt die Datei herunter. Lege sie in die Förderakte, nicht in eine private Cloud."}
 function reportV(){
   const k=kidById(view.kid);if(!k){view={tab:"klassen"};return klassenV()}
   const r=view.range||"all",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),inR=x=>!from||x.date>=from;
@@ -880,7 +974,7 @@ function reportV(){
   const raters=[...new Set(k.goals.flatMap(g=>g.entries).filter(inR).map(e=>e.rater).filter(Boolean))];
   let h=`<div class="report"><div class="noprint between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px"><button class="btn ghost" onclick="go({tab:'${view.tab}',kid:'${k.id}'})">‹ Zurück</button>
    <span class="row" style="flex-wrap:wrap;gap:8px"><select style="width:auto" aria-label="Zeitraum" onchange="view.range=this.value;render()">${Object.entries(RANGES).map(([key,[t]])=>`<option value="${key}" ${key===r?"selected":""}>${t}</option>`).join("")}</select>
-   <button class="btn pri" onclick="print()">Als PDF sichern</button></span></div>
+   <button class="btn pri" onclick="reportPdf()">PDF erstellen</button></span></div>
   <p class="noprint small muted">${pdfHint()}</p>
   <h1>Verlauf für die Förderakte</h1>
   <table class="meta"><tr><td>Kürzel</td><td><b>${esc(k.code)}</b>${k.cls?` · Klasse ${esc(k.cls)}`:""}</td></tr>
@@ -965,7 +1059,7 @@ function analyseV(){
   ${notes.length?`<div class="card"><h2 style="margin-top:0">Letzte Kommentare</h2>${notes.map(n=>`<p><span class="muted small">${dDE(n.date)}${n.subj?" · "+esc(n.subj):""}${" · "+esc(dv(g,n.value))}</span><br>${esc(n.note)}</p>`).join("")}</div>`:""}
   ${s.text?`<div class="card"><h2 style="margin-top:0">Für den Förderplan</h2><p class="muted small">Für die Evaluation im Förderplan. Vor dem Einfügen prüfen und ergänzen.</p>
   <textarea id="evt" style="min-height:150px">${esc(s.text)}</textarea>
-  <p class="row noprint" style="margin-top:8px;flex-wrap:wrap"><button class="btn" onclick="copyEval()">Kopieren</button><button class="btn" onclick="print()">Drucken</button><button class="btn" onclick="exportCSV('${k.id}','${g.id}')">Als Tabelle (CSV)</button></p></div>`:""}
+  <p class="row noprint" style="margin-top:8px;flex-wrap:wrap"><button class="btn" onclick="copyEval()">Kopieren</button><button class="btn" onclick="go({tab:'analyse',kid:'${k.id}',report:true,aKid:'${k.id}'})">Bericht (PDF)</button><button class="btn" onclick="exportCSV('${k.id}','${g.id}')">Als Tabelle (CSV)</button></p></div>`:""}
   ${entryEditV(k,g)}
   <details class="card noprint" ${view.openList?"open":""}><summary><b>Alle Einschätzungen (${g.entries.length})</b></summary>
   <table style="margin-top:8px"><tr><th>Datum</th><th>Fach</th><th>Wert</th><th></th></tr>${sortE(g.entries).reverse().map(e=>`<tr><td>${dDE(e.date)} <span class="muted small">${esc(e.slot)}</span></td><td>${esc(e.subj)}</td><td>${esc(dv(g,e.value))}</td><td style="white-space:nowrap"><button class="btn ghost small" style="padding:2px 10px 2px 0" onclick="editEntry('${e.id}')">bearbeiten</button><button class="btn ghost danger small" style="padding:2px 0" onclick="delEntry('${k.id}','${g.id}','${e.id}')">löschen</button></td></tr>`+(e.note?`<tr><td colspan="4" class="muted small" style="padding-top:0">${esc(e.note)}</td></tr>`:"")).join("")}</table></details>
@@ -1047,9 +1141,9 @@ async function openFile(o,name){
       const raw=new Uint8Array(await ungcm(k,o.wrapped));return JSON.parse(dec(await ungcm(await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]),o)))}catch(e){toast("Passwort falsch")}}}
   if(o.kids)return o; // alte, unverschlüsselte Sicherung
   throw new Error("format")}
-async function giveFile(name,txt){const file=new File([txt],name,{type:"application/json"});
+async function giveFile(name,txt,type="application/json"){const file=new File([txt],name,{type});
   if(matchMedia("(pointer:coarse)").matches&&navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file]});return true}catch(e){if(e.name==="AbortError")return false}}
-  download(name,txt,"application/json");return true}
+  download(name,txt,type);return true}
 /* ===== Schulserver (vorbereitet, Schnittstelle siehe server/README.md) =====
    Die App arbeitet immer lokal. Ist ein Server eingetragen und erreichbar (Schul-WLAN), gleicht sie ab:
    eigene Änderungen an freigegebenen Kindern hoch, Änderungen der Kolleg:innen herunter. Offline bleibt alles
