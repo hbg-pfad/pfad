@@ -272,21 +272,15 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
  :root,:root:not([data-theme=light]),:root[data-theme=dark]{--bg:#fff;--card:#fff;--ink:#2b2420;--muted:#6e6259;--line:#ddd2c4;--soft:#f5ece0;--acc:#d0643c;--accs:#fbe6dc;--up:#4c8a5a;--ups:#e4f1e3;--down:#c0483a;--downs:#f9e1dc;--flat:#80736a;--flats:#f1ebe3;--new:#a7790f;--news:#f8edcf;--chart1:#d0643c}
  #lock{display:none!important}}
 
-/* Icons an Überschriften: a = Linie in Akzentfarbe, b = Icon im Plättchen */
+/* Icons an Überschriften (Linie in Akzentfarbe) */
 :is(h2,b,label,summary b):has(>.hic){display:flex;align-items:center;gap:9px}.card .grow>b:has(>.hic){display:inline-flex}
-.hic{display:inline-grid;place-items:center;flex:none}.hic svg{width:20px;height:20px}
-[data-hic=a] .hic{color:var(--acc)}
-[data-hic=b] .hic{width:30px;height:30px;border-radius:9px;background:var(--accs);color:var(--acc)}[data-hic=b] .hic svg{width:18px;height:18px}
-/* Menüleiste: a = ruhig mit Pille, b = Strich oben, c = kompakt */
-[data-nav] nav{justify-content:space-around;padding:0 6px env(safe-area-inset-bottom)}
-[data-nav] nav button{max-width:none;min-width:0}
-[data-nav=a] nav button{padding:8px 0 6px;gap:4px;font-size:.74rem}
-[data-nav=a] nav button svg{width:54px;height:30px;padding:3px 15px;border-radius:15px;transition:background .15s}
-[data-nav=a] nav button.on svg{background:var(--accs)}
-[data-nav=b] nav button{padding:10px 0 7px;gap:4px;font-size:.76rem;position:relative}
-[data-nav=b] nav button.on::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--acc)}
-[data-nav=c] nav{padding-top:4px}[data-nav=c] nav button{padding:6px 0 4px;gap:2px;font-size:.7rem}[data-nav=c] nav svg{width:22px;height:22px}
-@supports (padding:max(0px)){[data-nav] nav{padding-bottom:max(6px,env(safe-area-inset-bottom))}}
+.hic{display:inline-grid;place-items:center;flex:none;color:var(--acc)}.hic svg{width:20px;height:20px}
+/* Menüleiste mit Pille */
+:root nav{justify-content:space-around;padding:0 6px env(safe-area-inset-bottom)}
+:root nav button{max-width:none;min-width:0;padding:8px 0 6px;gap:4px;font-size:.74rem}
+:root nav button svg{width:54px;height:30px;padding:3px 15px;border-radius:15px;transition:background .15s}
+:root nav button.on svg{background:var(--accs)}
+@supports (padding:max(0px)){:root nav{padding-bottom:max(6px,env(safe-area-inset-bottom))}}
 </style>
 <style id="pg"></style>
 </head>
@@ -297,7 +291,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.1",PFAD_STAND="24.10.2026";
+const PFAD_VERSION="1.1.1",PFAD_STAND="24.10.2026";
 const KEY="verlaufsbogen-v2";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -320,7 +314,7 @@ function migrate(){if(!db||!db.kids)db={v:2,me:"",subjects:SUBJECTS.slice(),clas
   if(db.lock?.hash){delete db.lock;setTimeout(()=>toast("Die App-Sperre verschlüsselt jetzt auch die Daten. Bitte in den Einstellungen neu einschalten."),600)}}
 function applyTheme(){const t=db?.theme,r=document.documentElement;if(t==="light"||t==="dark")r.dataset.theme=t;else delete r.dataset.theme;
   if(db?.fs==="l"||db?.fs==="xl")r.dataset.fs=db.fs;else delete r.dataset.fs;
-  const hic=db?.hic??"a",nav=db?.navs??"a";if(hic!=="0")r.dataset.hic=hic;else delete r.dataset.hic;r.dataset.nav=nav;
+  
   const dark=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches);document.querySelector('meta[name=theme-color]')?.setAttribute("content",dark?"#1d1916":"#fbf6ef")}
 let SAVEQ=Promise.resolve(),SAVEN=0;
 function save(){if(ENCWAIT)return; // gesperrt und noch nicht entschlüsselt: nichts überschreiben
@@ -451,7 +445,7 @@ const HI=(()=>{const p={
  const m={"Verhalten":"target","Tagebuch":"book","Wen bewertest du?":"users","Was zeigt sich?":"bulb","Nach Fach":"subj","Nach Stunde":"clock","Letzte Kommentare":"chat","Notizen im Zeitraum":"pin",
   "Stundenraster":"clock","Wochenziel":"flag","Schuljahreswechsel":"year","App-Sperre und Verschlüsselung":"lock","Daten":"data","Datenschutz":"shield","Erscheinungsbild":"look","Anleitung":"help","Schulserver":"server","Dein Kürzel":"me","Das hat gut geklappt":"flag","Das nehmen wir uns vor":"target"};
  const o={};for(const[k,v]of Object.entries(m))o[k]=`<span class="hic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p[v]}</svg></span>`;return o})();
-function decorateHeads(){if(!document.documentElement.dataset.hic)return;
+function decorateHeads(){
   document.querySelectorAll("#app h2, #app .card>b:first-child, #app .card .grow>b:first-child, #app .card>label:first-child, #app summary>b").forEach(h=>{if(h.querySelector(".hic"))return;const t=h.textContent.trim(),ic=HI[t];if(ic)h.insertAdjacentHTML("afterbegin",ic)})}
 
 /* ===== Eigene Dialoge (funktionieren auch in App-Vorschauen, wo confirm/prompt blockiert sind) ===== */
