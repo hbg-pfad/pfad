@@ -250,6 +250,7 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 /* App-Sperre */
 #lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;overflow:auto}
 #lock .box{max-width:340px;width:100%;text-align:center}
+.tdot{display:inline-block;width:20px;height:20px;border-radius:50%;flex:none;vertical-align:-3px}.tdot.sm{width:11px;height:11px;vertical-align:0;margin-right:4px}
 #lock .pins{display:flex;justify-content:center;gap:14px;margin:18px 0 8px}
 #lock .pins i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink)}#lock .pins i.on{background:var(--ink)}
 #lock .pins.bad{animation:shake .35s}
@@ -849,18 +850,18 @@ function talkV(){
   for(const g of k.goals){
     const wk=weekBars(g,from);
     h+=`<div class="tg"><h2>${esc(g.title)}</h2><p class="muted" style="margin:0 0 6px">Das wollen wir: <b style="color:var(--ink)">${g.dir==="down"?"weniger davon":"mehr davon"}</b> · ${sc(g)==="2"?`ja = ${esc(g.a10)}`:`${rng(g)[0]} = ${esc(g.a0)}, ${rng(g)[1]} = ${esc(g.a10)}`}</p>`;
-    if(wk.length<2){h+=`<div class="row"><span class="sym">🔍</span><span class="msg">Wir beobachten noch. Bald sehen wir mehr.</span></div></div>`;continue}
+    if(wk.length<2){h+=`<div class="row"><span class="tdot" style="background:var(--muted)"></span><span class="msg">Wir beobachten noch. Bald sehen wir mehr.</span></div></div>`;continue}
     const first=wk[0].v,now=wk[wk.length-1].v,d=(now-first)*(g.dir==="down"?-1:1);
-    const [sym,msg]=d>=1?["☀️","Es wird besser!"]:d<=-1?["🌱","Daran üben wir weiter."]:["⛅","Es bleibt ungefähr gleich."];
+    const [sym,msg]=d>=1?["--up","Es wird besser!"]:d<=-1?["--acc","Daran üben wir weiter."]:["--muted","Es bleibt ungefähr gleich."];
     const reached=g.target!==""&&(g.dir==="down"?now<=g.target:now>=g.target);
-    h+=`<div class="row"><span class="sym">${sym}</span><span class="msg">${msg}${reached?" Das Ziel ist erreicht!":""}</span></div>
+    h+=`<div class="row"><span class="tdot" style="background:var(${sym})"></span><span class="msg">${msg}${reached?" Das Ziel ist erreicht!":""}</span></div>
     <div class="nums"><div><span class="muted small">Am Anfang</span><b>${fm(g,first)}</b></div><div><span class="muted small">Jetzt</span><b>${fm(g,now)}</b></div>${g.target!==""?`<div><span class="muted small">Ziel</span><b>${g.dir==="down"?"≤":"≥"} ${tgt(g)}</b></div>`:""}</div>
     ${barSvg(g,wk)}<p class="muted small" style="margin:2px 0 0">Jeder Balken ist eine Woche (Durchschnitt).</p></div>`;
   }
   h+=`</div><div class="tbot">`;
   const wins=sortD(k.diary).filter(e=>e.cat==="Erfolg"&&(!from||e.date>=from));
   if(wins.length)h+=`<div class="tg"><h2>Das hat gut geklappt</h2>${wins.map(e=>hide.includes(e.id)?`<p class="noprint muted small">ausgeblendet: ${dDE(e.date)} <button class="btn ghost small" onclick="view.hide=(view.hide||[]).filter(x=>x!=='${e.id}');render()">zeigen</button></p>`:
-    `<p style="font-size:1.05rem">⭐ ${esc(e.text)} <span class="muted small">(${dDE(e.date)})</span> <button class="btn ghost small noprint" onclick="view.hide=[...(view.hide||[]),'${e.id}'];render()">ausblenden</button></p>`).join("")}</div>`;
+    `<p style="font-size:1.05rem"><span class="tdot sm" style="background:var(--up)"></span> ${esc(e.text)} <span class="muted small">(${dDE(e.date)})</span> <button class="btn ghost small noprint" onclick="view.hide=[...(view.hide||[]),'${e.id}'];render()">ausblenden</button></p>`).join("")}</div>`;
   h+=`<div class="tg"><h2>Das nehmen wir uns vor</h2><div class="noprint"><textarea placeholder="z. B. Ich melde mich, bevor ich etwas sage. Frau/Herr … erinnert mit einem Zeichen." oninput="view.plan=this.value;$('#planPrint').textContent=this.value">${esc(view.plan||"")}</textarea></div>
   <p id="planPrint" style="white-space:pre-wrap;font-size:1.05rem" class="printonly">${esc(view.plan||"")}</p><div class="line"></div><div class="line"></div>
   <div class="two" style="margin-top:22px"><div><div class="line"></div><span class="muted small">Kind</span></div><div><div class="line"></div><span class="muted small">Eltern</span></div></div>
