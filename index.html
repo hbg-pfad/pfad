@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fbf6ef">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -250,6 +250,8 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 /* App-Sperre */
 #lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;overflow:auto}
 #lock .box{max-width:340px;width:100%;text-align:center}
+/* Touch: Tippziele mindestens 40 px */
+@media (pointer:coarse){.btn.small,.btn.ghost{min-height:40px}.chip,.chips button,.catpick button{min-height:40px}button[aria-label="Schließen"],button[aria-label="Abbrechen"],.rast .x{min-width:44px;min-height:44px}}
 .tdot{display:inline-block;width:20px;height:20px;border-radius:50%;flex:none;vertical-align:-3px}.tdot.sm{width:11px;height:11px;vertical-align:0;margin-right:4px}
 #lock .pins{display:flex;justify-content:center;gap:14px;margin:18px 0 8px}
 #lock .pins i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink)}#lock .pins i.on{background:var(--ink)}
@@ -276,6 +278,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
+const PFAD_VERSION="1.0",PFAD_STAND="24.10.2026";
 const KEY="verlaufsbogen-v2";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -931,7 +934,7 @@ async function reportPdf(){const k=kidById(view.kid);if(!k)return;
   const diary=sortD(k.diary).filter(inR).reverse();d.need(40);d.y+=12;d.line(L,d.y,L+W,d.y,{w:.8});d.y+=8;d.wrap("Tagebuch",L,W,{size:12.5,bold:1});
   if(!diary.length)d.wrap("Keine Einträge im Zeitraum.",L,W,{size:9,color:"muted"});
   for(const q of diary){d.need(28);d.wrap([dDEy(q.date),q.subj,q.rater,q.cat].filter(Boolean).join(" · "),L,W,{size:8.5,color:"muted"});d.wrap(q.text,L,W,{size:9.5});d.y+=4}
-  d.y+=8;d.wrap("Die Werte sind Einschätzungen der Lehrkräfte direkt nach der Stunde, kein Test. Sie zeigen Tendenzen und ersetzen nicht das Gespräch im Team. Erstellt mit Pfad (schulinterner Prototyp).",L,W,{size:8,color:"muted"});
+  d.y+=8;d.wrap(`Die Werte sind Einschätzungen der Lehrkräfte direkt nach der Stunde, kein Test. Sie zeigen Tendenzen und ersetzen nicht das Gespräch im Team. Erstellt mit Pfad ${PFAD_VERSION}.`,L,W,{size:8,color:"muted"});
   await givePdf(`pfad-bericht-${k.code.replace(/[^\w-]/g,"_")}-${today()}.pdf`,d.bytes(`Pfad · Bericht ${k.code} · ${dDEy(today())}`))}
 async function talkPdf(){const k=kidById(view.kid);if(!k)return;
   const r=view.range||"w4",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),hide=view.hide||[];
@@ -1256,7 +1259,7 @@ function profilV(){
   <p>Lege Kinder nur mit Kürzel an. Schreibe in Kommentare keine Namen.</p>
   <p>Sicherungen und geteilte Stände sind mit Passwort verschlüsselt. Speichere sie trotzdem nur auf dienstlichem Speicher.</p><p>Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Nutze deshalb nur dienstliche Geräte mit Code-Sperre.</p>
   <p>Vor dem Einsatz mit echten Fällen: Absprache mit Schulleitung und Datenschutzbeauftragten.</p></div>
-  <p class="muted small" style="text-align:center">Pfad · schulinterner Prototyp</p>`;
+  <p class="muted small" style="text-align:center">Pfad ${PFAD_VERSION} · Stand ${PFAD_STAND} · schulintern</p>`;
 }
 function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
 /* ===== Sicherung, Teilen, Import mit Auswahl ===== */
