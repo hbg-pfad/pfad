@@ -1,0 +1,1524 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbf6ef">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pfad">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Pfad</title>
+<style>
+:root{--bg:#f5f3ee;--card:#fff;--ink:#1f1d1a;--muted:#6b665e;--line:#e2ddd3;--soft:#efebe3;
+--acc:#2f5d8a;--acc-ink:#fff;--accs:#e3ecf5;--up:#2e7d4f;--ups:#e2f2e8;--down:#b0412e;--downs:#f8e4df;--flat:#6b665e;--flats:#ecebe7;--new:#8a6a1f;--news:#f6edd6;
+--chart1:#2f5d8a;--chart2:#c76b2a}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#161719;--card:#202226;--ink:#ecebe8;--muted:#a19d95;--line:#33363b;--soft:#2a2d32;
+--acc:#8db8e3;--acc-ink:#10151b;--accs:#26323f;--up:#7fcf9c;--ups:#1f3328;--down:#f0957f;--downs:#3d2620;--flat:#b3afa7;--flats:#2c2e31;--new:#e3c06e;--news:#3a3220;
+--chart1:#8db8e3;--chart2:#eba068}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#161719;--card:#202226;--ink:#ecebe8;--muted:#a19d95;--line:#33363b;--soft:#2a2d32;
+--acc:#8db8e3;--acc-ink:#10151b;--accs:#26323f;--up:#7fcf9c;--ups:#1f3328;--down:#f0957f;--downs:#3d2620;--flat:#b3afa7;--flats:#2c2e31;--new:#e3c06e;--news:#3a3220;
+--chart1:#8db8e3;--chart2:#eba068}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px 16px 96px}
+@media (min-width:900px) and (orientation:landscape){main{max-width:860px;padding-left:24px;padding-right:24px}body .rate .inner{max-width:760px}}
+h1{font-size:1.7rem;margin:6px 0 12px;letter-spacing:-.01em}
+h2{font-size:1.1rem;margin:18px 0 8px}
+p{margin:6px 0}
+.muted{color:var(--muted);font-size:.92rem}
+.small{font-size:.85rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.card.tap{cursor:pointer}
+.row{display:flex;gap:10px;align-items:center}
+.grow{flex:1;min-width:0}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;font-weight:600}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.block{width:100%;padding:14px}
+.btn.ghost{background:none;border:none;color:var(--acc);padding:8px 4px}
+.btn.danger{color:var(--down)}
+.btn:disabled{opacity:.45;cursor:default}
+.fab{width:46px;height:46px;border-radius:50%;border:none;background:var(--acc);color:var(--acc-ink);font-size:1.6rem;line-height:1}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.chip{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;font-weight:600;font-size:.92rem}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.dash{border-style:dashed;background:none}
+select.chip{width:auto;appearance:none;-webkit-appearance:none;padding-right:26px;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px;background-repeat:no-repeat;color:var(--ink)}
+select.chip.warnchip{border-color:var(--new);color:var(--new)}
+.avatar{width:46px;height:46px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font:600 .95rem ui-monospace,Menlo,monospace;flex:none}
+.code{font:600 1.05rem ui-monospace,Menlo,monospace}
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 10px;font-size:.82rem;font-weight:700;white-space:nowrap}
+.b-besser{background:var(--ups);color:var(--up)}.b-schlechter{background:var(--downs);color:var(--down)}
+.b-stabil,.b-gemischt{background:var(--flats);color:var(--flat)}.b-neu{background:var(--news);color:var(--new)}
+.tag{display:inline-block;background:var(--accs);color:var(--acc);border-radius:6px;padding:1px 7px;font-size:.8rem;font-weight:600}
+.hint{display:flex;gap:8px;align-items:flex-start;color:var(--muted);font-size:.88rem;margin:4px 0 12px}
+label{display:block;font-weight:600;margin:14px 0 6px}
+.sub{font-weight:400;color:var(--muted);font-size:.86rem;margin:-2px 0 6px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:0}
+textarea{min-height:76px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toggle button{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:13px;font-weight:600}
+.toggle button.on{border-color:var(--acc);background:var(--accs);color:var(--acc)}
+.tip{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:.9rem}
+.tip summary{cursor:pointer;color:var(--acc);font-weight:600}
+.dentry{border-top:1px solid var(--line);padding:10px 0}.dentry:first-of-type{border-top:none}
+.cat{display:inline-block;border-radius:6px;padding:1px 7px;font-size:.78rem;font-weight:700;background:var(--soft);color:var(--muted)}
+.cat.c-Notiz{background:var(--accs);color:var(--chart1)}.cat.c-Erfolg{background:var(--ups);color:var(--up)}.cat.c-Vorfall{background:var(--downs);color:var(--down)}.cat.c-Elternkontakt,.cat.c-Gespräch{background:var(--accs);color:var(--acc)}.cat.c-Absprache{background:var(--news);color:var(--new)}
+.catpick{display:flex;flex-wrap:wrap;gap:6px}.catpick button{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 11px;font-size:.88rem;font-weight:600}.catpick button.on{border-color:var(--acc);background:var(--accs);color:var(--acc)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;max-width:160px;background:none;border:none;padding:9px 0 10px;color:var(--muted);font-size:.78rem;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button.on{color:var(--acc)}
+nav svg{width:24px;height:24px}
+/* Bewerten */
+.rate{position:fixed;inset:0;background:var(--bg);z-index:10;display:flex;flex-direction:column;overflow:auto}
+.rate .inner{max-width:640px;width:100%;margin:0 auto;padding:12px 16px;flex:1;display:flex;flex-direction:column}
+.progress{display:flex;gap:6px;margin:10px 0 12px}.progress i{flex:1;height:5px;border-radius:3px;background:var(--line)}.progress i.on{background:var(--acc)}
+.goalTitle{font-size:1.65rem;font-weight:700;text-align:center;margin:22px 0 4px;line-height:1.2}
+.big{font-size:3rem;font-weight:700;text-align:center;height:64px;margin-top:10px}
+.track{position:relative;height:44px;border-radius:22px;background:var(--soft);margin:8px 0 6px;touch-action:none;cursor:pointer;outline:none}
+.track:focus-visible{outline:2px solid var(--acc)}
+.track .fill{position:absolute;left:0;top:0;bottom:0;border-radius:22px;background:var(--accs)}
+.track .dot{position:absolute;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--muted);opacity:.5}
+.track .thumb{position:absolute;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:var(--acc);box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.ends{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem}
+.na{border:none;background:none;color:var(--acc);font-weight:600;padding:12px;margin:8px auto 0;display:flex;gap:6px;align-items:center}
+.na.on{color:var(--new)}
+.foot{margin-top:auto;padding-top:14px}
+/* Analyse */
+svg.chart{width:100%;height:auto;display:block}
+table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
+.bar{height:8px;border-radius:4px;background:var(--acc)}
+.sum p{margin:8px 0}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.stat div{background:var(--soft);border-radius:12px;padding:10px}.stat b{display:block;font-size:1.35rem}
+.toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);max-width:min(92vw,520px);text-align:center;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;z-index:20}
+@media print{nav,.noprint{display:none!important}main{padding:0}}
+.printonly{display:none}@media print{.printonly{display:block}}
+/* === Gestaltung: warm & freundlich === */
+:root{--bg:#fbf6ef;--card:#fffdf9;--ink:#2b2420;--muted:#80736a;--line:#efe4d6;--soft:#f5ece0;
+--acc:#d0643c;--acc-ink:#fff;--accs:#fbe6dc;--up:#4c8a5a;--ups:#e4f1e3;--down:#c0483a;--downs:#f9e1dc;--flat:#80736a;--flats:#f1ebe3;--new:#a7790f;--news:#f8edcf;--chart1:#d0643c;--sig:#e3a008;--sigt:#8a6200;--sig-ink:#2b2420}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1d1916;--card:#27221e;--ink:#f3ece4;--muted:#b3a69b;--line:#3a332d;--soft:#322b26;
+--acc:#f0936b;--acc-ink:#1d1916;--accs:#43291f;--up:#8ccb98;--ups:#20301f;--down:#f28d7f;--downs:#3b2320;--flat:#b3a69b;--flats:#302a25;--new:#e8c15f;--news:#382d16;--chart1:#f0936b;--sig:#f5c542;--sigt:#f5c542;--sig-ink:#1d1916}}
+:root[data-theme=dark]{color-scheme:dark;--bg:#1d1916;--card:#27221e;--ink:#f3ece4;--muted:#b3a69b;--line:#3a332d;--soft:#322b26;
+--acc:#f0936b;--acc-ink:#1d1916;--accs:#43291f;--up:#8ccb98;--ups:#20301f;--down:#f28d7f;--downs:#3b2320;--flat:#b3a69b;--flats:#302a25;--new:#e8c15f;--news:#382d16;--chart1:#f0936b;--sig:#f5c542;--sigt:#f5c542;--sig-ink:#1d1916}
+html,body{font-family:ui-rounded,"SF Pro Rounded","Nunito","Varela Round",system-ui,sans-serif}
+h1{font-size:1.9rem;font-weight:800}
+.card{border-radius:24px;border:1.5px solid var(--line);padding:16px}
+.btn{border-radius:999px;border-width:1.5px}
+.btn.block{border-radius:18px}
+.avatar{border-radius:16px;background:var(--accs);color:var(--acc);font-family:inherit;font-weight:800}
+.code{font-family:inherit;font-weight:800;letter-spacing:.02em}
+.chip.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.badge{border-radius:10px}
+.stat div{background:var(--card);border:1.5px solid var(--line);border-radius:20px}
+.stat b{font-size:1.6rem;color:var(--acc)}
+nav button.on{color:var(--acc)}
+.goalTitle{font-size:1.75rem}
+.big{font-size:3.4rem;color:var(--acc)}
+.toggle button{border-radius:18px}
+h1{display:flex;align-items:center;gap:10px}
+h1::before{content:"";width:14px;height:14px;border-radius:5px;background:var(--acc);transform:rotate(45deg);flex:none}
+.kcard{border-left:7px solid var(--kc)}
+.kic{display:inline-grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--kc) 22%,var(--card));font-size:1.2rem;line-height:1}
+.kic.big{width:52px;height:52px;font-size:1.8rem}.kic.add{color:var(--muted);font-weight:700;border:2px dashed var(--line);background:none}
+.icbtn{border:none;background:none;padding:0}.icpick{border:2px solid var(--line);--kc:var(--acc)}
+.icgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:50vh;overflow:auto}.icgrid button{font-size:1.6rem;padding:6px 0;border:1.5px solid var(--line);border-radius:12px;background:var(--card)}
+.icgrid .used{opacity:.35}.icgrid .on{border:2px solid var(--acc);background:var(--accs)}
+.kdot{width:14px;height:14px;border-radius:50%;background:var(--kc);display:inline-block;flex:none}
+.trend{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;font-weight:700;white-space:nowrap;color:var(--muted)}
+.trend i{width:9px;height:9px;border-radius:50%;background:currentColor}
+.t-besser{color:var(--up)}.t-schlechter{color:var(--down)}.t-neu{color:var(--new)}
+.when{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:8px;background:var(--soft);border-radius:18px;padding:10px}
+.when .sub{margin:0 0 3px 4px;font-size:.78rem}
+.when select{padding:8px 10px;border-radius:12px}
+.when.past{outline:2px dashed var(--new)}
+.step{text-align:center;color:var(--muted);font-weight:700;font-size:.88rem;margin:4px 0 10px}
+.ruler{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;touch-action:none;user-select:none;-webkit-user-select:none;margin:10px 0 6px}
+.ruler button{height:54px;border:none;border-radius:12px;background:var(--soft);font:inherit;font-weight:800;font-size:1.05rem;color:var(--muted);padding:0}
+.ruler button.lit{background:var(--accs);color:var(--acc)}
+.ruler button.sel{background:var(--acc);color:var(--acc-ink);transform:scale(1.1);box-shadow:0 4px 12px -4px var(--acc)}
+.ruler.off{opacity:.35;pointer-events:none}
+.duo{display:grid;grid-template-columns:1fr 1.3fr;gap:10px}
+.duo .btn{padding:14px 10px}
+.btn.na-on{border-color:var(--new);color:var(--new)}
+
+
+/* Motivation */
+.ring{position:relative;width:86px;height:86px;flex:none}.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:1.15rem;line-height:1.05;text-align:center}
+.ring b small{display:block;font-size:.7rem;color:var(--muted);font-weight:600}
+.streak{font-size:1.5rem;font-weight:800;color:var(--acc)}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.28)}100%{transform:scale(1.1)}}
+.ruler button.sel{animation:pop .22s ease-out}
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+.goalTitle.anim{animation:rise .28s ease-out}
+.cele{position:fixed;inset:0;z-index:31;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 45%,transparent)}
+.cele .box{background:var(--card);border-radius:28px;padding:26px 24px;text-align:center;max-width:320px;width:86%;box-shadow:0 20px 50px -20px rgba(0,0,0,.35);animation:rise .3s ease-out}
+.cele h2{margin:10px 0 4px;font-size:1.4rem}
+.cele circle.c{stroke-dasharray:190;stroke-dashoffset:190;animation:draw .5s .05s ease-out forwards}
+.cele path{stroke-dasharray:50;stroke-dashoffset:50;animation:draw .35s .45s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.conf{position:fixed;top:-12px;width:9px;height:14px;border-radius:3px;z-index:30;animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){.ruler button.sel,.goalTitle.anim,.cele .box,.cele circle.c,.cele path{animation:none;stroke-dashoffset:0}.conf{display:none}}
+
+/* Gesprächsblatt */
+.talk h1::before{display:none}
+.talk .tg{border:2px solid var(--line);border-radius:24px;padding:16px;margin-bottom:14px;break-inside:avoid;background:var(--card)}
+.talk .tg h2{margin:0 0 4px;font-size:1.3rem}
+.talk .sym{font-size:2.6rem;line-height:1}
+.talk .msg{font-size:1.15rem;font-weight:800}
+.talk .nums{display:flex;gap:10px;margin:10px 0}
+.talk .nums div{flex:1;background:var(--soft);border-radius:16px;padding:8px 10px;text-align:center}
+.talk .nums b{display:block;font-size:1.6rem}
+.talk .line{border-bottom:1.5px solid var(--line);height:34px}
+@media (min-width:900px){.talk .tgs{display:grid;gap:14px;grid-template-columns:repeat(2,1fr)}.talk .tgs.n1{grid-template-columns:1fr}.talk .tgs.n3{grid-template-columns:repeat(3,1fr)}.talk .tbot{display:grid;gap:14px;grid-template-columns:1fr 1fr}.talk .tgs .tg,.talk .tbot .tg{margin:0}.talk .tbot{margin-top:14px}}
+@media print{@page{size:A4 landscape;margin:9mm 11mm}
+ html,body,main,.talk{background:#fff!important;min-height:0!important;height:auto!important}
+ body{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:11pt}main{padding:0!important;max-width:none!important}
+ .talk h1{font-size:1.5rem;margin:0 0 2px}.talk>p{margin:2px 0}
+ .talk .tgs{display:grid;gap:8px;grid-template-columns:repeat(2,1fr)}.talk .tgs.n1{grid-template-columns:1fr}.talk .tgs.n3{grid-template-columns:repeat(3,1fr)}
+ .talk .tbot{display:grid;gap:8px;grid-template-columns:1fr 1fr;margin-top:8px}
+ .talk .tg{border-color:#ccc;padding:8px 12px;margin:0;border-radius:16px}.talk .tg h2{font-size:1.1rem}.talk svg{max-height:40mm}.talk .tgs.n1 svg{max-height:55mm}
+ .talk .nums{margin:4px 0}.talk .nums div{padding:4px 8px}.talk .nums b{font-size:1.15rem}.talk .sym{font-size:1.5rem}.talk .msg{font-size:1rem}.talk .line{height:24px}
+ .talk .tbot .tg p{margin:3px 0}#overlay,.toast,.cele,.conf,nav{display:none!important}}
+.talk .btn.ghost{white-space:nowrap}
+
+.rast{display:grid;grid-template-columns:28px 1fr 1fr;gap:6px;align-items:center;margin-top:6px}.rast input{min-width:0}.rast.r4{grid-template-columns:28px 1fr 1fr 34px}.rast input.dev{border-color:var(--acc);background:var(--accs)}
+.rast .x{border:none;background:none;color:var(--muted);font-size:1rem;padding:6px}.pick.theme{grid-template-columns:repeat(3,1fr)}.pick.theme button{padding:11px 4px;font-size:.92rem}.pick.days5{grid-template-columns:1.6fr repeat(5,1fr)}
+.swr{display:flex;align-items:center;gap:12px;margin:10px 0;font-weight:600;cursor:pointer}.swr .sub{display:block;font-weight:400;margin-top:2px}
+input.sw{appearance:none;-webkit-appearance:none;width:50px!important;min-width:50px;height:30px;border-radius:15px;background:var(--line);border:none;position:relative;margin:0;padding:0;transition:background .15s;flex:none}
+input.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+input.sw:checked{background:var(--acc)}input.sw:checked::after{left:23px}
+.gopts{display:grid;gap:8px}.gopts button{text-align:left;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:11px 13px;font:inherit}
+.gopts button b{display:block}.gopts button span{display:block;font-size:.85rem;color:var(--muted);margin-top:2px}.gopts button.on{border:2px solid var(--acc);background:var(--accs)}
+.dots{display:flex;justify-content:center;gap:8px;margin:12px 0}.dots button{width:10px;height:10px;border-radius:50%;border:none;padding:0;background:var(--line)}.dots .on{background:var(--acc);width:24px;border-radius:5px}
+body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
+#tour{position:fixed;left:8px;right:8px;bottom:calc(72px + env(safe-area-inset-bottom,0px));max-width:620px;margin:0 auto;max-height:46vh;overflow:auto;z-index:15;background:var(--card);border:2.5px solid var(--sig);border-radius:22px;padding:12px 14px;box-shadow:0 10px 30px rgba(40,25,15,.22)}
+#tour ul{padding-left:18px;margin:4px 0 0}#tour li{margin:4px 0}
+#nav.mark{outline-offset:-4px}
+.help ul{padding-left:20px;margin:10px 0 0}.help li{margin:8px 0}.help p{font-size:1.05rem}
+.stepr{margin:12px 0 4px;gap:10px}.stepr button{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:1.3rem;font-weight:700}.stepr button:disabled{opacity:.35}.stepr b{min-width:22px;text-align:center;font-size:1.2rem}
+.mem{display:inline-flex;gap:6px;align-items:center;background:var(--accs);color:var(--ink);border-radius:999px;padding:6px 6px 6px 12px;font-weight:700}.mem .small{font-weight:400;color:var(--muted)}
+.mem button{border:none;background:var(--card);color:var(--down);border-radius:999px;width:26px;height:26px;font-weight:800;cursor:pointer}
+.ctx{background:var(--soft);border-radius:18px;padding:10px;display:grid;gap:8px}
+.ctx.past{outline:2px dashed var(--new)}
+.pick{display:grid;gap:5px}
+.pick.days{grid-template-columns:1fr 1fr 1.2fr}.pick.pauses{grid-template-columns:repeat(3,1fr)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}
+.tile{text-align:left;border:1.5px solid color-mix(in srgb,var(--acc) 45%,var(--line));background:var(--accs);color:var(--ink);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:2px;font:inherit}
+.tile svg{width:30px;height:30px;color:var(--acc);margin-bottom:6px}.tile b{font-size:1.02rem}.tile span{font-size:.85rem;color:var(--muted)}.pick.slots{grid-template-columns:repeat(7,1fr)}.pick.subjs{grid-template-columns:repeat(4,1fr)}
+.pick button,.pick select{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:11px;padding:8px 2px;font:inherit;font-weight:700;font-size:.82rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pick select{padding:8px 6px}
+.pick .on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.ctxline{width:100%;border:none;background:var(--soft);border-radius:14px;padding:10px 12px;font:inherit;font-weight:700;color:var(--ink);text-align:left}
+.ctxline span{float:right;color:var(--acc)}
+.ruler.s5{grid-template-columns:repeat(5,1fr);gap:8px}.ruler.s5 button,.ruler.sc button{height:64px;font-size:1.4rem}.ruler.sc{gap:6px}
+.ruler.s2{grid-template-columns:1fr 1fr;gap:10px}.ruler.s2 button{height:72px;font-size:1.05rem;padding:0 6px;white-space:normal}
+/* Einrichtung: rot markiert, wo man tippen soll */
+.mark{outline:4px solid var(--sig)!important;outline-offset:3px;animation:markp 1.6s ease-out infinite}
+@keyframes markp{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--sig) 60%,transparent)}70%{box-shadow:0 0 0 14px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.marktip{color:var(--sigt);font-weight:800;margin:12px 0 8px;display:flex;gap:8px;align-items:center}
+.marktip::before{content:"↓";font-size:1.2rem;line-height:1;flex:none}
+
+.setup{list-style:none;padding:0;margin:14px 0;display:grid;gap:10px}
+.setup li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:12px 14px}
+.setup li.now{border:2.5px solid var(--sig)}
+.setup .n{width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--ink);display:grid;place-items:center;font-weight:800;flex:none}
+.setup li.now .n{background:var(--sig);color:var(--sig-ink)}
+.setup .do{display:block;color:var(--sigt);font-weight:800;font-size:1.08rem}
+.setup .wo{display:block;color:var(--muted);font-size:.92rem;margin-top:2px}
+.sym{display:inline-grid;place-items:center;vertical-align:-6px;width:26px;height:26px;border-radius:8px;background:var(--soft);color:var(--ink);margin-left:2px}
+.sym svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chk{list-style:none;padding:0;margin:8px 0 12px;display:grid;gap:4px}.chk li.ok{color:var(--muted);text-decoration:line-through}
+.pointer{position:fixed;z-index:20;display:flex;flex-direction:column;align-items:center;gap:0;color:var(--sigt);font-weight:800;font-size:.95rem;pointer-events:none;animation:bob 1.2s ease-in-out infinite;text-shadow:0 0 6px var(--bg)}
+.pointer svg{width:44px;height:44px;stroke:var(--sig);stroke-width:3.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.pointer.down{bottom:calc(4px + env(safe-area-inset-bottom,0px))}.pointer.up{top:calc(4px + env(safe-area-inset-top,0px));animation-name:bobup}
+.pointer.left{left:8px}.pointer.right{right:8px}
+@keyframes bob{50%{transform:translateY(7px)}}@keyframes bobup{50%{transform:translateY(-7px)}}
+@media (prefers-reduced-motion:reduce){.mark,.pointer{animation:none}}
+/* Schriftgröße */
+:root{font-size:16px}:root[data-fs=l]{font-size:18px}:root[data-fs=xl]{font-size:20px}
+/* Rückgängig-Hinweis */
+.toast.undo{display:flex;gap:14px;align-items:center;z-index:35;text-align:left}
+.toast.undo button{border:none;background:none;color:var(--bg);font-weight:800;text-decoration:underline;padding:4px 2px;flex:none}
+.kcard .late{color:var(--new);font-weight:700}
+/* App-Sperre */
+#lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;overflow:auto}
+#lock .box{max-width:340px;width:100%;text-align:center}
+/* Touch: Tippziele mindestens 40 px */
+@media (pointer:coarse){.btn.small,.btn.ghost{min-height:40px}.chip,.chips button,.catpick button{min-height:40px}button[aria-label="Schließen"],button[aria-label="Abbrechen"],.rast .x{min-width:44px;min-height:44px}}
+.tdot{display:inline-block;width:20px;height:20px;border-radius:50%;flex:none;vertical-align:-3px}.tdot.sm{width:11px;height:11px;vertical-align:0;margin-right:4px}
+#lock .pins{display:flex;justify-content:center;gap:14px;margin:18px 0 8px}
+#lock .pins i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink)}#lock .pins i.on{background:var(--ink)}
+#lock .pins.bad{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#lock .keys{display:grid;grid-template-columns:repeat(3,70px);justify-content:center;gap:14px 22px;margin:12px auto 0}
+#lock .keys button{height:64px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:1.5rem;font-weight:700}
+#lock .keys button{width:70px;height:70px;padding:0}#lock .keys button.nb{border:none;background:none;font-size:.8rem;font-weight:600;color:var(--muted)}#lock .keys button.nb:last-child{font-size:1.3rem;color:var(--ink)}
+body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.locked .cele:not(.lockdlg),body.locked .toast{visibility:hidden}
+/* Bericht für die Förderakte */
+.report .meta{width:100%;margin:6px 0 10px}.report .meta td{padding:3px 8px 3px 0;vertical-align:top}.report .meta td:nth-child(odd){color:var(--muted);white-space:nowrap}
+.report .rg{break-inside:avoid}
+.report .dentry{break-inside:avoid}
+@media print{.report h1{font-size:1.4rem;margin:0 0 4px}.report .card{border-color:#ccc;padding:10px 12px}.report svg.chart{max-height:62mm}
+ :root,:root:not([data-theme=light]),:root[data-theme=dark]{--bg:#fff;--card:#fff;--ink:#2b2420;--muted:#6e6259;--line:#ddd2c4;--soft:#f5ece0;--acc:#d0643c;--accs:#fbe6dc;--up:#4c8a5a;--ups:#e4f1e3;--down:#c0483a;--downs:#f9e1dc;--flat:#80736a;--flats:#f1ebe3;--new:#a7790f;--news:#f8edcf;--chart1:#d0643c}
+ #lock{display:none!important}}
+
+/* Icons an Überschriften (Linie in Akzentfarbe) */
+:is(h2,b,label,summary b):has(>.hic){display:flex;align-items:center;gap:9px}.card .grow>b:has(>.hic){display:inline-flex}
+.hic{display:inline-grid;place-items:center;flex:none;color:var(--acc)}.hic svg{width:20px;height:20px}
+/* Menüleiste mit Pille */
+:root nav{justify-content:space-around;padding:0 6px env(safe-area-inset-bottom)}
+:root nav button{max-width:none;min-width:0;padding:8px 0 6px;gap:4px;font-size:.74rem}
+:root nav button svg{width:54px;height:30px;padding:3px 15px;border-radius:15px;transition:background .15s}
+:root nav button.on svg{background:var(--accs)}
+@supports (padding:max(0px)){:root nav{padding-bottom:max(6px,env(safe-area-inset-bottom))}}
+</style>
+<style id="pg"></style>
+</head>
+<body>
+<main id="app"></main>
+<nav id="nav" class="noprint"></nav>
+<div id="overlay"></div>
+<script>
+"use strict";
+/* ===== Speicher ===== */
+const PFAD_VERSION="1.1.3",PFAD_STAND="26.10.2026";
+const KEY="verlaufsbogen-v2";
+const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
+// Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
+const SUBJECTS=["Deutsch","Mathe","Englisch","Franz.","Spanisch","Latein","Türkisch","GL","NW","Bio","Chemie","Physik","WAW","Technik","HW","Info","Kunst","Musik","Sport","D&G","Rel. ev.","Rel. kath.","PP","FUF"];
+// Stundenraster HBG (Schulkonferenz 11.02.2020): Name, Beginn, Ende, optional {Wochentag:[Beginn,Ende]} für abweichende Tage
+const RASTER=[["0.","08:00","08:20"],["1.","08:20","09:28"],["2.","09:35","10:42"],["3.","11:10","12:18"],["4.","12:25","13:32"],["5.","14:35","15:42"]];
+const OLD_RASTER=JSON.stringify([...RASTER.slice(0,5),["5.","14:35","15:42","14:00","15:07"]]);
+let db;
+// Mit App-Sperre liegt im Speicher nur ein verschlüsselter Umschlag {pfadEnc,salt,iv,ct}; db bleibt bis zum Entsperren leer
+let ENCWAIT=null,LKEY=null;
+function load(){try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(db?.pfadEnc){ENCWAIT=db;db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[],lock:{salt:ENCWAIT.salt,after:ENCWAIT.after??1,len:ENCWAIT.len||4}}}
+  migrate()}
+function migrate(){if(!db||!Array.isArray(db.kids))db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[]};
+  {const bad=db.kids.filter(k=>!okKid(k));if(bad.length){db.kids=db.kids.filter(okKid);(db.quarantine??=[]).push(...bad);setTimeout(()=>toast(`${bad.length} beschädigte Einträge wurden beiseitegelegt.`),600)}}
+  if(JSON.stringify(db.subjects)===JSON.stringify(OLD_SUBJECTS))db.subjects=SUBJECTS.slice();db.raster??=RASTER.map(r=>r.slice());
+  if(JSON.stringify(db.raster)===OLD_RASTER)db.raster=RASTER.map(r=>r.slice());
+  db.raster.forEach(r=>{if(typeof r[3]==="string"||typeof r[4]==="string"){const d=[r[3]||"",r[4]||""];r.length=3;r[3]={2:d,5:d.slice()}}});
+  db.yearSY??=syNow();
+  db.kids.forEach(k=>k.goals.forEach(g=>g.entries.forEach(e=>{if(e.slot==="Pause")e.slot="Große Pause"})));
+  if(db.lock?.hash){delete db.lock;setTimeout(()=>toast("Die App-Sperre verschlüsselt jetzt auch die Daten. Bitte in den Einstellungen neu einschalten."),600)}}
+function applyTheme(){const t=db?.theme,r=document.documentElement;if(t==="light"||t==="dark")r.dataset.theme=t;else delete r.dataset.theme;
+  if(db?.fs==="l"||db?.fs==="xl")r.dataset.fs=db.fs;else delete r.dataset.fs;
+  
+  const dark=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches);document.querySelector('meta[name=theme-color]')?.setAttribute("content",dark?"#1d1916":"#fbf6ef")}
+let SAVEQ=Promise.resolve(),SAVEN=0;
+function save(){if(ENCWAIT)return; // gesperrt und noch nicht entschlüsselt: nichts überschreiben
+  if(db.lock&&LKEY){const n=++SAVEN,key=LKEY,json=JSON.stringify(db),meta={pfadEnc:1,salt:db.lock.salt,after:db.lock.after,len:db.lock.len};
+    SAVEQ=SAVEQ.then(async()=>{const body=await gcm(key,enc(json));if(n===SAVEN)localStorage.setItem(KEY,JSON.stringify({...meta,...body}))}).catch(()=>toast("Speichern nicht möglich. Bitte exportieren."))}
+  else try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast("Speichern nicht möglich. Bitte exportieren.")}
+  window.autoSoon?.()}
+/* ===== Helfer ===== */
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+const today=()=>iso(new Date());
+const addDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d)};
+// Kennungen in onclick immer über ja(): als JS-Text verpackt und für das HTML-Attribut maskiert
+const ja=s=>esc(JSON.stringify(String(s??"")));
+// Daten aus Dateien und vom Server: nur gültige Kennungen und Typen, sonst wird das Kind abgelehnt
+const okId=s=>typeof s==="string"&&/^[A-Za-z0-9_-]{1,40}$/.test(s),okDate=s=>typeof s==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(s);
+const okStr=(s,n=4000)=>s==null||typeof s==="string"&&s.length<=n,okNum=v=>v==null||typeof v==="number"&&isFinite(v);
+const okTime=t=>t===""||typeof t==="string"&&/^\d{2}:\d{2}$/.test(t);
+const okSetting={subjects:a=>Array.isArray(a)&&a.length<=60&&a.every(x=>typeof x==="string"&&x.length<=40),
+  raster:a=>Array.isArray(a)&&a.length<=20&&a.every(r=>Array.isArray(r)&&typeof r[0]==="string"&&/^[\w .()\/äöüÄÖÜß-]{1,12}$/.test(r[0])&&okTime(r[1])&&okTime(r[2])&&(r[3]==null||typeof r[3]==="object"&&Object.values(r[3]).every(d=>Array.isArray(d)&&d.every(okTime)))),
+  game:g=>!!g&&typeof g==="object"&&(g.type==null||Object.hasOwn(GOALTYPES,g.type))&&(g.n==null||Number.isInteger(g.n)&&g.n>=1&&g.n<=99)};
+function okKid(k){try{if(!k||!okId(k.id)||typeof k.code!=="string"||k.code.length>40||!okStr(k.cls,20)||!okStr(k.icon,16)||!Array.isArray(k.goals))return false;
+  if(k.diary!=null&&!Array.isArray(k.diary)||k.del!=null&&!(Array.isArray(k.del)&&k.del.every(okId)))return false;
+  for(const t of [k.team,k.pending])if(t!=null&&!(Array.isArray(t)&&t.every(x=>okStr(x,40))))return false;
+  for(const g of k.goals){if(!g||!okId(g.id)||!Array.isArray(g.entries)||!okStr(g.title,400))return false;
+    for(const e of g.entries)if(!e||!okId(e.id)||!okDate(e.date)||!okNum(e.value)||!okStr(e.note)||!okStr(e.slot,40)||!okStr(e.subj,40)||!okStr(e.rater,40))return false}
+  for(const e of k.diary||[])if(!e||!okId(e.id)||!okDate(e.date)||!okStr(e.text,20000)||!okStr(e.cat,20)||!okStr(e.subj,40)||!okStr(e.rater,40))return false;
+  return true}catch(e){return false}}
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=(x,d=1)=>x==null||isNaN(x)?"–":x.toFixed(d).replace(".",",");
+const dDE=s=>s?s.slice(8,10)+"."+s.slice(5,7)+".":"";
+const dDEy=s=>s?dDE(s)+s.slice(0,4):"";
+const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+const kidById=id=>db.kids.find(k=>k.id===id);
+const goalById=(k,id)=>k.goals.find(g=>g.id===id);
+const looksLikeName=s=>/^[A-ZÄÖÜ][a-zäöüß]{2,}([ -][A-ZÄÖÜ][a-zäöüß]+)*$/.test(s.trim());
+function toast(t){document.querySelectorAll(".toast").forEach(x=>x.remove());const el=document.createElement("div");el.className="toast";el.setAttribute("role","status");el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),Math.max(1800,t.length*45))}
+// Hinweis mit „Rückgängig“, verschwindet nach ein paar Sekunden
+let UNDO_T;
+function undoToast(msg,fn,ms=8000){document.querySelectorAll(".toast").forEach(x=>x.remove());const el=document.createElement("div");el.className="toast undo";el.setAttribute("role","status");
+  el.innerHTML=`<span class="grow">${esc(msg)}</span><button>Rückgängig</button>`;el.querySelector("button").onclick=()=>{el.remove();clearTimeout(UNDO_T);fn()};document.body.appendChild(el);clearTimeout(UNDO_T);UNDO_T=setTimeout(()=>el.remove(),ms)}
+const sortE=e=>[...e].sort((a,b)=>(a.date+(a.slot||"")+a.ts).localeCompare(b.date+(b.slot||"")+b.ts));
+const rated=g=>sortE(g.entries).filter(e=>e.value!=null);
+const SCALES={"10":"10-stufig (0 bis 10)","5":"5-stufig (1 bis 5)","2":"ja / nein","c":"eigene Skala"};
+const sc=g=>g.scale||"10";
+// Intern immer 0–10. rng = sichtbarer Bereich der Skala (eigene Skala: lo bis hi)
+const rng=g=>{const x=sc(g);return x==="5"?[1,5]:x==="c"?[+(g.lo??1),+(g.hi??7)]:[0,10]};
+const toK=(g,v)=>{const [a,b]=rng(g);return a+v/10*(b-a)},fromK=(g,k)=>{const [a,b]=rng(g);return (k-a)/(b-a)*10};
+const scaleName=g=>sc(g)==="c"?`eigene Skala (${rng(g).join(" bis ")})`:SCALES[sc(g)];
+function scaleOpts(g){const x=sc(g);if(x==="2")return [{v:0,l:g.a0||"nein"},{v:10,l:g.a10||"ja"}];const [a,b]=rng(g);return [...Array(b-a+1)].map((_,i)=>({v:fromK(g,a+i),l:String(a+i)}))}
+function dv(g,v){if(v==null)return "nicht beobachtet";return sc(g)==="2"?(v>=5?(g.a10||"ja"):(g.a0||"nein")):String(Math.round(toK(g,v)))}
+function fm(g,m){if(m==null||isNaN(m))return "–";return sc(g)==="2"?Math.round(m*10)+" %":num(toK(g,m))}
+function tgt(g){if(g.target==="")return "";return sc(g)==="2"?Math.round(g.target*10)+" %":String(Math.round(toK(g,g.target)))}
+const better=(g,x,y)=>g.dir==="down"?x<y:x>y; // ist x besser als y?
+
+/* ===== Einfache Trends ===== */
+function trend(g){
+  const v=rated(g).map(e=>e.value);
+  if(v.length<6)return {k:"neu",t:"noch zu wenig Daten",n:v.length};
+  // Mit Förderbeginn: vorher vs. seitdem (je bis zu 5 Werte), sonst: letzte 5 vs. 5 davor
+  const r=rated(g),pre=g.start?r.filter(e=>e.date<g.start).map(e=>e.value):[],post=g.start?r.filter(e=>e.date>=g.start).map(e=>e.value):[];
+  const byStart=pre.length>=3&&post.length>=3;
+  const mL=byStart?mean(post.slice(-5)):mean(v.slice(-5)),mP=byStart?mean(pre.slice(-5)):mean(v.slice(-10,-5)),d=(mL-mP)*(g.dir==="down"?-1:1);
+  const k=d>=1?"besser":d<=-1?"schlechter":"stabil";
+  return {k,t:{besser:"läuft besser",schlechter:"wird schwieriger",stabil:"gleichbleibend"}[k],mL,mP,byStart};
+}
+function kidTrend(k){
+  const t=k.goals.map(trend).filter(x=>x.k!=="neu").map(x=>x.k);
+  if(!t.length)return {k:"neu",t:k.goals.length?"noch zu wenig Daten":"ohne Ziel"};
+  if(t.includes("besser")&&t.includes("schlechter"))return {k:"gemischt",t:"unterschiedlich"};
+  if(t.includes("besser"))return {k:"besser",t:"läuft besser"};
+  if(t.includes("schlechter"))return {k:"schlechter",t:"wird schwieriger"};
+  return {k:"stabil",t:"gleichbleibend"};
+}
+const ARROW={besser:"↗",schlechter:"↘",stabil:"→",gemischt:"↕",neu:"…"};
+const badge=t=>`<span class="trend t-${t.k}"><i></i>${t.t}</span>`;
+// Neutrale Symbole: nichts, was auf Hobby, Herkunft, Religion oder Aussehen eines Kindes schließen lässt
+const ICONS=["🦊","🐢","🦉","🐝","🐬","🦋","🐙","🦒","🐧","🦔","🐳","🦜","🐌","🐞","🦁","🐼","🐨","🦓","🦩","🐸","🐠","🦀","🐘","🦭","🐿","🌻","🌵","🍀","🌲","🍄","🌈","⭐","🌙","🚀","⛵","🎈","🪁","🔑","🧭","💎","🍐","🍋","🍉","🫐","🥕","🍒"];
+function freeIcon(){const used=new Set(db.kids.map(k=>k.icon)),free=ICONS.filter(i=>!used.has(i));const pool=free.length?free:ICONS;return pool[Math.floor(Math.random()*pool.length)]}
+const kidIcon=(k,big)=>k.icon?`<span class="kic${big?" big":""}" style="--kc:${kidColor(k)}" aria-hidden="true">${esc(k.icon)}</span>`:`<span class="kdot" style="--kc:${kidColor(k)}${big?";width:22px;height:22px":""}"></span>`;
+async function pickIcon(cur){const used=new Set(db.kids.map(k=>k.icon));
+  return dlg(`<p style="font-weight:700;margin:0 0 4px">Symbol wählen</p><p class="small muted" style="margin:0 0 10px">Bitte zufällig wählen, nicht passend zum Kind. Grau = schon vergeben.</p>
+  <div class="icgrid">${ICONS.map(i=>`<button data-i="${i}" class="${i===cur?"on":""}${used.has(i)&&i!==cur?" used":""}">${i}</button>`).join("")}</div>
+  <div class="duo" style="margin-top:12px"><button class="btn" data-a="0">Abbrechen</button><button class="btn" data-a="r">Zufällig</button></div>`,
+  (el,done)=>{el.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>done(b.dataset.i));el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="r"]').onclick=()=>done(freeIcon())})}
+async function setKidIcon(id){const k=kidById(id),i=await pickIcon(k.icon);if(!i)return;k.icon=i;k.upd=Date.now();save();render()}
+async function newKidIcon(){const b=$("#nicon"),i=await pickIcon(b.dataset.i);if(i){b.dataset.i=i;b.textContent=i}}
+const kidColor=k=>{let h=0;for(const c of k.id+k.code)h=(h*31+c.charCodeAt(0))%360;return `hsl(${h} 55% 60%)`};
+
+/* ===== Navigation ===== */
+let view={tab:"heute"};
+const ICON={
+heute:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+klassen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.4-.2 4 1.3 4.5 4.3"/></svg>',
+analyse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4v16h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>',
+profil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.9-4 3.8-6 7.5-6s6.6 2 7.5 6"/></svg>'};
+function renderNav(){$("#nav").innerHTML=[["heute","Heute"],["klassen","Kinder"],["analyse","Verlauf"],["profil","Einstellungen"]].map(([k,t])=>`<button class="${view.tab===k?"on":""}" ${view.tab===k?'aria-current="page"':""} onclick="navTo('${k}')">${ICON[k].replace("<svg ",'<svg aria-hidden="true" ')}${t}</button>`).join("")}
+// Verlauf der Ansichten: „Zurück“ führt dorthin, wo man herkam. Kommt eine Ansicht erneut, wird bis dorthin gekürzt.
+let HIST=[];const vkey=v=>JSON.stringify([v.tab,v.kid,!!v.talk,!!v.report,v.goal,v.aKid,v.aGoal,!!v.imp]);
+function go(v){const i=HIST.findIndex(h=>vkey(h)===vkey(v));if(i>=0)HIST.length=i;else if(view&&view.tour==null&&vkey(view)!==vkey(v))HIST.push(view);view=v;render();window.scrollTo(0,0)}
+function back(fb){view=HIST.pop()||fb||{tab:view.tab};render();window.scrollTo(0,0)}
+function navTo(k){HIST=[];draft=null;go({tab:k})}
+const TI={talk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
+ report:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 17l2-3 2 2 3-4"/></svg>'};
+const docTiles=(k,tab)=>`<div class="tiles noprint"><button class="tile" onclick="go({tab:'${tab}',kid:${ja(k.id)},talk:true,aKid:${ja(k.id)}})">${TI.talk}<b>Gesprächsblatt</b><span>für Kind und Eltern</span></button><button class="tile" onclick="go({tab:'${tab}',kid:${ja(k.id)},report:true,aKid:${ja(k.id)}})">${TI.report}<b>Bericht</b><span>PDF für die Förderakte</span></button></div>`;
+function render(){
+  renderNav();
+  const a=$("#app"),inst=setupMode();$("#nav").style.display=inst?"none":"";
+  if(inst)a.innerHTML=installV();
+  else if(view.report)a.innerHTML=reportV();
+  else if(view.talk)a.innerHTML=talkV();
+  else if(view.goal!==undefined)a.innerHTML=goalEditV();
+  else if(view.imp)a.innerHTML=importV();
+  else if(view.kid)a.innerHTML=kidV();
+  else a.innerHTML={heute:heuteV,klassen:klassenV,analyse:analyseV,profil:profilV}[view.tab]();
+  if(view.mark)requestAnimationFrame(()=>$("#app .mark")?.scrollIntoView({block:"center",behavior:"smooth"}));
+  decorateHeads();
+  $("#pg").textContent=view.report?"@page{size:A4 portrait;margin:12mm 14mm}":"";
+  tourApply();
+}
+
+
+
+// Icons an Überschriften (Linien-Stil wie die Menüleiste)
+const HI=(()=>{const p={
+ target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/>',
+ book:'<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h10"/>',
+ users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.4-.2 4 1.3 4.5 4.3"/>',
+ bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/>',
+ subj:'<path d="M4 5h6v14H4zM10 5h4v14h-4zM15 6l4-1 2 13-4 1z"/>',
+ clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+ chat:'<path d="M4 5h16v10H9l-5 4z"/>',
+ flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+ year:'<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M12 17v-4M10 15l2-2 2 2"/>',
+ lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+ data:'<ellipse cx="12" cy="6" rx="7" ry="2.8"/><path d="M5 6v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8V6M5 12v6c0 1.5 3.1 2.8 7 2.8s7-1.3 7-2.8v-6"/>',
+ shield:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+ look:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+ help:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.3 2.4c-.6.3-.9.7-.9 1.4v.4M12 16.8v.2"/>',
+ pin:'<path d="M12 21s-6-5.4-6-10a6 6 0 0 1 12 0c0 4.6-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/>',
+ server:'<rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/><path d="M8 7.5h.01M8 16.5h.01"/>',
+ me:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.9-4 3.8-6 7.5-6s6.6 2 7.5 6"/>'};
+ const m={"Verhalten":"target","Tagebuch":"book","Wen bewertest du?":"users","Was zeigt sich?":"bulb","Nach Fach":"subj","Nach Stunde":"clock","Letzte Kommentare":"chat","Notizen im Zeitraum":"pin",
+  "Stundenraster":"clock","Wochenziel":"flag","Schuljahreswechsel":"year","App-Sperre und Verschlüsselung":"lock","Daten":"data","Datenschutz":"shield","Erscheinungsbild":"look","Anleitung":"help","Schulserver":"server","Dein Kürzel":"me","Das hat gut geklappt":"flag","Das nehmen wir uns vor":"target"};
+ const o={};for(const[k,v]of Object.entries(m))o[k]=`<span class="hic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p[v]}</svg></span>`;return o})();
+function decorateHeads(){
+  document.querySelectorAll("#app h2, #app .card>b:first-child, #app .card .grow>b:first-child, #app .card>label:first-child, #app summary>b").forEach(h=>{if(h.querySelector(".hic"))return;const t=h.textContent.trim(),ic=HI[t];if(ic)h.insertAdjacentHTML("afterbegin",ic)})}
+
+/* ===== Eigene Dialoge (funktionieren auch in App-Vorschauen, wo confirm/prompt blockiert sind) ===== */
+function dlg(html,onMount){return new Promise(res=>{const el=document.createElement("div");el.className="cele"+(LOCKED?" lockdlg":"");el.style.zIndex=LOCKED?120:40;
+  el.innerHTML=`<div class="box" role="dialog" aria-modal="true" style="text-align:left">${html}</div>`;document.body.appendChild(el);
+  const done=v=>{el.remove();res(v)};el.onclick=e=>{if(e.target===el)done(null)};onMount(el,done)})}
+async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 16px">${esc(msg)}</p>
+  <div class="duo"><button class="btn" data-a="0">${esc(o.cancel||"Abbrechen")}</button><button class="btn pri" data-a="1" style="${o.danger?"background:var(--down);border-color:var(--down)":""}">${esc(o.ok||"OK")}</button></div>`,
+  (el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"));el.querySelector('[data-a="1"]').focus()});return r===true}
+async function askText(msg,ph,type){return dlg(`<p style="font-weight:700;margin:0 0 10px">${esc(msg)}</p><input id="dlgIn" type="${type||"text"}" autocomplete="${type==="password"?"current-password":"off"}" placeholder="${esc(ph||"")}">
+  <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">OK</button></div>`,
+  (el,done)=>{const i=el.querySelector("#dlgIn");i.focus();i.onkeydown=e=>{if(e.key==="Enter")done(i.value)};el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done(i.value)})}
+
+/* ===== Motivation: ein Wochenziel, sonst nichts ===== */
+const G=()=>{const g=db.game??={};g.on??=true;g.sound??=false;g.type??="kids";g.n??=2;return g};
+const own=()=>db.kids.flatMap(k=>k.goals.flatMap(g=>g.entries)).filter(e=>!e.gen);
+const dayOf=ts=>iso(new Date(ts));
+function weekStart(d=today()){while(new Date(d+"T12:00").getDay()!==1)d=addDays(d,-1);return d}
+const GOALTYPES={
+ kids:{t:"Jedes Kind regelmäßig im Blick",d:n=>`Jedes Kind mindestens ${n}× pro Woche einschätzen`,def:2},
+ days:{t:"Feste Gewohnheit",d:n=>`An mindestens ${n} Schultagen pro Woche einschätzen`,def:3},
+ good:{t:"Auf das Gelingen schauen",d:()=>"Für jedes Kind einen Erfolg pro Woche ins Tagebuch",def:1}};
+function weekProgress(w=weekStart()){
+  const end=addDays(w,7),g=G(),inW=ts=>{const d=dayOf(ts);return d>=w&&d<end};
+  const kids=db.kids.filter(k=>!k.demo&&k.goals.some(x=>x.entries.some(e=>!e.gen&&dayOf(e.ts)<end)));
+  const any=kids.some(k=>k.goals.some(x=>x.entries.some(e=>!e.gen&&inW(e.ts)))||(k.diary||[]).some(e=>!e.gen&&inW(e.ts)));
+  if(g.type==="days"){const ds=new Set(own().filter(e=>inW(e.ts)).map(e=>dayOf(e.ts)));return {have:ds.size,need:g.n,any,unit:"Tage"}}
+  const ok=k=>g.type==="good"?(k.diary||[]).some(e=>!e.gen&&e.cat==="Erfolg"&&inW(e.ts)):k.goals.flatMap(x=>x.entries).filter(e=>!e.gen&&inW(e.ts)).length>=g.n;
+  return {have:kids.filter(ok).length,need:kids.length,any,unit:"Kinder"}}
+const weekDone=p=>p.need>0&&p.have>=p.need;
+function weeksInRow(){let w=weekStart(),n=weekDone(weekProgress(w))?1:0;
+  for(let i=0;i<60;i++){w=addDays(w,-7);const p=weekProgress(w);if(!p.any)continue;if(!weekDone(p))break;n++}return n}
+function motivationV(){
+  if(!G().on)return "";
+  const p=weekProgress(),done=weekDone(p),pct=p.need?Math.min(1,p.have/p.need):0,row=weeksInRow(),C=2*Math.PI*36;
+  if(!p.need)return "";
+  return `<div class="card"><div class="row" style="gap:16px">
+  <div class="ring"><svg width="86" height="86" viewBox="0 0 86 86"><circle cx="43" cy="43" r="36" fill="none" stroke="var(--soft)" stroke-width="9"/><circle cx="43" cy="43" r="36" fill="none" stroke="var(--${done?"up":"acc"})" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" style="transition:stroke-dashoffset .6s"/></svg><b><span>${done?"✓":p.have}<small>${done?"geschafft":"von "+p.need}</small></span></b></div>
+  <div class="grow"><div class="muted small">Wochenziel</div><div style="font-weight:700">${GOALTYPES[G().type].d(G().n)}</div>
+  ${row>1?`<div class="muted small" style="margin-top:6px"><span class="streak">${row}</span> Wochen in Folge</div>`:""}</div></div></div>`;
+}
+function fb(kind){
+  try{navigator.vibrate?.(kind==="big"?[12,60,18]:8)}catch(e){}
+  if(!G().sound)return;
+  try{const A=fb.ctx??=new (window.AudioContext||window.webkitAudioContext)();const now=A.currentTime;
+    (kind==="big"?[660,880,1320]:[880]).forEach((f,i)=>{const o=A.createOscillator(),g=A.createGain();o.type="sine";o.frequency.value=f;
+      g.gain.setValueAtTime(0,now+i*.09);g.gain.linearRampToValueAtTime(.08,now+i*.09+.01);g.gain.exponentialRampToValueAtTime(.0001,now+i*.09+.25);o.connect(g).connect(A.destination);o.start(now+i*.09);o.stop(now+i*.09+.3)})}catch(e){}
+}
+function confetti(n=22){const cols=["var(--acc)","var(--up)","var(--new)","var(--chart1)","var(--sig)"];
+  for(let i=0;i<n;i++){const c=document.createElement("i");c.className="conf";c.style.left=Math.random()*100+"vw";c.style.background=cols[i%5];c.style.animationDuration=(1.1+Math.random()*.9)+"s";c.style.animationDelay=Math.random()*.25+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),2600)}}
+// Abschluss der Einrichtung feiern, dann zur Anleitung
+function setupDoneV(){confetti(40);fb("big");
+  dlg(`<div style="text-align:center"><svg width="72" height="72" viewBox="0 0 72 72" class="setok"><circle class="c" cx="36" cy="36" r="30" fill="none" stroke="var(--up)" stroke-width="6"/><path d="M23 37l9 9 17-19" fill="none" stroke="var(--up)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h2 style="margin:8px 0 4px">Geschafft, Pfad ist eingerichtet!</h2><p class="muted" style="margin:0 0 14px">Kürzel, Beispielfall und erste Sicherung sind erledigt. Jetzt zeigt dir die Anleitung in 8 Schritten, wo du was findest.</p></div>
+  <div class="duo"><button class="btn" data-a="0">Später</button><button class="btn pri" data-a="1">Anleitung starten</button></div>`,
+  (el,done)=>{el.querySelector(".box").classList.add("pop");el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))}).then(v=>v===true?openHelp():go({tab:"heute"}))}
+// Ende der Anleitung genauso feiern wie die Einrichtung
+function tourDoneV(){confetti(40);fb("big");
+  dlg(`<div style="text-align:center"><svg width="72" height="72" viewBox="0 0 72 72" class="setok"><circle class="c" cx="36" cy="36" r="30" fill="none" stroke="var(--up)" stroke-width="6"/><path d="M23 37l9 9 17-19" fill="none" stroke="var(--up)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h2 style="margin:8px 0 4px">Super, du kennst dich jetzt aus!</h2><p class="muted" style="margin:0 0 14px">Du hast alle 8 Schritte geschafft. Lege jetzt dein erstes Kind an. Den Beispielfall löschst du beim Kind, wenn du ihn nicht mehr brauchst.</p></div>
+  <div class="duo"><button class="btn" data-a="0">Zu Heute</button><button class="btn pri" data-a="1">Kind anlegen</button></div>`,
+  (el,done)=>{el.querySelector(".box").classList.add("pop");el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))}).then(v=>{go(v===true?{tab:"klassen",adding:true}:{tab:"heute"});if(v===true)$("#ncode")?.focus()})}
+function celebrate(k,n,kn=1){
+  const msg=`${n} Einschätzung${n===1?"":"en"} für ${kn>1?kn+" Kinder":esc(k.code)} gespeichert`;
+  if(!G().on){fb("small");toast(msg);return}
+  const p=weekProgress(),now=weekDone(p),first=now&&G().doneWeek!==weekStart();
+  if(now)G().doneWeek=weekStart();save();fb(first?"big":"small");
+  if(first){const cols=["var(--acc)","var(--up)","var(--new)","var(--chart1)","var(--down)"];
+    for(let i=0;i<22;i++){const c=document.createElement("i");c.className="conf";c.style.left=Math.random()*100+"vw";c.style.background=cols[i%5];c.style.animationDuration=(1.1+Math.random()*.9)+"s";c.style.animationDelay=Math.random()*.25+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),2600)}}
+  const el=document.createElement("div");el.className="cele";el.onclick=()=>el.remove();
+  el.innerHTML=`<div class="box"><svg width="72" height="72" viewBox="0 0 72 72"><circle class="c" cx="36" cy="36" r="30" fill="none" stroke="var(--up)" stroke-width="6"/><path d="M23 37l9 9 17-19" fill="none" stroke="var(--up)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h2>${first?"Wochenziel geschafft!":"Gespeichert"}</h2><p class="muted">${msg}.</p>
+  ${p.need?`<p style="font-weight:700">${first?"Stark, das ist echte Routine.":now?"Wochenziel schon erreicht.":`Wochenziel: ${p.have} von ${p.need} ${p.unit}`}</p>`:""}
+  <p class="muted small" style="margin-top:12px">Tippen zum Schließen</p></div>`;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),first?3600:1500);
+}
+
+/* ===== Heute ===== */
+/* ===== Gerät: dauerhafter Speicher, Offline, Home-Bildschirm, Sicherung ===== */
+const isWeb=/^https?:$/.test(location.protocol),standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+try{navigator.storage?.persist?.().then(p=>{PERSIST=p})}catch(e){}let PERSIST=null;
+if(isWeb&&"serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+function envHint(){if(sessionStorage.getItem("hideEnv"))return "";
+  const x=`<button class="btn ghost small" onclick="sessionStorage.setItem('hideEnv',1);render()">Ausblenden</button>`;
+  if(!isWeb)return `<div class="card" style="border:2px solid var(--new)"><b>Achtung: Vorschau-Modus</b><p class="small" style="margin:6px 0">Die App läuft gerade als Datei (z. B. in der Vorschau der Dateien-App). Dort kann das Gerät die Daten jederzeit löschen. Öffne sie über die Internetadresse eurer Schule und speichere regelmäßig eine Sicherung.</p>${x}</div>`;
+  if(isIOS&&!standalone)return `<div class="card"><b>Tipp: Als App installieren</b><p class="small" style="margin:6px 0">Tippe in Safari auf „Teilen“ <span aria-hidden="true">⬆︎</span> und dann „Zum Home-Bildschirm“. Mit iOS 27 findest du „Teilen“ im Seitenmenü links neben der Adresse (drei Striche), mit iOS 26 unter „···“. Dann startet Pfad wie eine App, funktioniert offline und Safari löscht die Daten nicht nach einigen Wochen ohne Nutzung.</p><p class="row" style="margin:0;flex-wrap:wrap"><button class="btn pri small" onclick="sessionStorage.removeItem('browse');render()">Einrichtung zeigen</button>${x}</p></div>`;
+  return ""}
+
+/* ===== Einrichtung im Browser-Tab: Pfad auf den Home-Bildschirm legen (keine zweite Seite nötig) ===== */
+const isAndroid=/Android/.test(navigator.userAgent);
+const DEV=isIOS?(/iPad/.test(navigator.userAgent)||navigator.platform==="MacIntel"?"ipad":"iphone"):isAndroid?"android":"";
+let IOSV=(()=>{const v=+(navigator.userAgent.match(/Version\/(\d+)/)||[])[1]||0;return v&&v<27?"26":"27"})();
+let INSTALL_EVT=null,INSTALLED=false;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();INSTALL_EVT=e;if(setupMode())render()});
+addEventListener("appinstalled",()=>{INSTALL_EVT=null;INSTALLED=true;if(setupMode())render()});
+async function doInstall(){if(!INSTALL_EVT)return;INSTALL_EVT.prompt();const r=await INSTALL_EVT.userChoice.catch(()=>({}));INSTALL_EVT=null;if(r.outcome==="accepted")INSTALLED=true;render()}
+const setupMode=()=>isWeb&&!standalone&&!!DEV&&!sessionStorage.getItem("browse");
+const SYM={
+ share:'<svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4M7 11H5v9h14v-9h-2"/></svg>',
+ page:'<svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg>',
+ more:'<svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg>',
+ dots:'<svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="18" r="1.2"/></svg>',
+ plus:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg>'};
+const sym=k=>`<span class="sym" aria-hidden="true">${SYM[k]}</span>`;
+function pointer(cls){const up=cls.includes("up"),arr=`<svg viewBox="0 0 24 24"><path d="${up?"M12 20V4M5 11l7-7 7 7":"M12 4v16M5 13l7 7 7-7"}"/></svg>`;
+  return `<div class="pointer ${cls}" aria-hidden="true">${up?arr+"hier":"hier"+arr}</div>`}
+function installV(){
+  const ios=DEV!=="android",v27=IOSV==="27",home=ios?"Home-Bildschirm":"Startbildschirm";
+  let st,ptr="";
+  if(DEV==="android"){
+    st=INSTALLED?[]:INSTALL_EVT?[["„Pfad installieren“","den roten Knopf hier unten"],["„Installieren“","im Fenster, das sich öffnet"]]
+     :[["die drei Punkte"+sym("dots"),"oben rechts in Chrome"],["„App installieren“","im Menü etwas weiter unten. Heißt es bei dir „Zum Startbildschirm hinzufügen“, nimm das."],["„Installieren“","danach auf „Automatisch hinzufügen“"]];
+    if(!INSTALL_EVT&&!INSTALLED)ptr=pointer("up right");
+  }else{
+    st=DEV==="ipad"?[["das Teilen-Symbol"+sym("share"),`oben rechts neben der Adresse. Nicht zu sehen? Links neben der Adresse auf das Seitenmenü${sym("page")} und dann auf „Teilen“.`]]
+     :v27?[["das Seitenmenü"+sym("page"),"unten links neben der Adresse (drei Striche)"],["„Teilen“"+sym("share"),"oben im Menü"]]
+     :[["„···“"+sym("more"),"unten rechts neben der Adresse. Bei älteren iOS-Versionen tippst du direkt unten in der Leiste auf das Teilen-Symbol."],["„Teilen“"+sym("share"),"im Menü"]];
+    st.push(["„Zum Home-Bildschirm“"+sym("plus"),"Nicht zu sehen? Im Menü nach oben wischen oder „Mehr anzeigen“ tippen."],
+            ["„Hinzufügen“","oben rechts. Den Schalter „Als Web-App öffnen“ lässt du an."]);
+    ptr=pointer(DEV==="ipad"?"up right":v27?"down left":"down right");
+  }
+  st.push(["das neue Pfad-Symbol",`auf dem ${home}. Ab jetzt startest du Pfad nur noch dort. ${ios?"Safari":"Chrome"} kannst du schließen.`]);
+  const cur=0;
+  return `<h1>Pfad einrichten</h1>
+  <p>Lege Pfad einmal auf den ${home}. Dann startet Pfad wie eine App, läuft ohne Internet und deine Daten bleiben auf dem Gerät.</p>
+  ${DEV==="iphone"?`<p class="row small" style="gap:6px;flex-wrap:wrap"><span class="muted">Dein iOS:</span><button class="chip ${v27?"on":""}" onclick="IOSV='27';render()">iOS 27</button><button class="chip ${v27?"":"on"}" onclick="IOSV='26';render()">iOS 26 oder älter</button></p>`:""}
+  ${INSTALLED?`<div class="card" style="border:2px solid var(--up)"><b>Installiert.</b> Öffne Pfad jetzt über das neue Symbol auf dem Startbildschirm.</div>`:""}
+  <ol class="setup">${st.map(([tap,wo],i)=>`<li class="${i===cur?"now":""}"><span class="n">${i+1}</span><div><span class="do">Tippe auf ${tap}</span><span class="wo">${wo}</span></div></li>`).join("")}</ol>
+  ${INSTALL_EVT?`<button class="btn pri block mark" style="width:100%;padding:16px;font-size:1.1rem" onclick="doInstall()">Pfad installieren</button>`:""}
+  <div class="card" style="border-left:6px solid var(--new);margin-top:16px"><b>Wichtig</b><p class="small" style="margin:6px 0 0">${ios?"Trag hier im Safari-Tab nichts ein. Das Symbol hat einen eigenen Speicher. Was du im Tab einträgst, siehst du in der App nicht.":"Werden die Chrome-Daten gelöscht, sind auch die Pfad-Daten weg. Deshalb später regelmäßig sichern."}</p></div>
+  <p class="small muted">Danach führt dich Pfad durch drei kurze Schritte: Kürzel, Beispielfall, Sicherung.</p>
+  <p><button class="btn ghost small" onclick="sessionStorage.setItem('browse',1);render()">Nur ansehen, ohne Einrichtung</button></p>
+  ${ptr}`}
+
+/* ===== Einrichtung nach dem ersten Start: drei Schritte, rot markiert ===== */
+const SETUP=[
+ {k:"me",t:"Dein Kürzel eintragen",done:()=>!!db.me,tip:"Trag hier dein Lehrkraft-Kürzel ein."},
+ {k:"demo",t:"Fiktiven Beispielfall laden",done:()=>db.kids.length>0,tip:"Tippe auf „Fiktiven Beispielfall laden“."},
+ {k:"backup",t:"Erste Sicherung speichern",done:()=>!!db.lastBackup,tip:"Tippe auf „Sicherung speichern“ und lege ein Passwort fest."}];
+const setupOpen=()=>isWeb&&!db.setupDone&&!(DEV&&!standalone)?SETUP.filter(s=>!s.done()):[];
+function setupCard(){const open=setupOpen();if(!open.length)return "";const nx=open[0];
+  return `<div class="card" style="border:2px solid var(--line)"><b>Einrichtung: noch ${open.length} von ${SETUP.length} Schritten</b>
+  <ul class="chk">${SETUP.map(s=>`<li class="${s.done()?"ok":""}">${s.done()?"✓":"○"} ${s.t}</li>`).join("")}</ul>
+  <div class="marktip">Tippe auf „${nx.t}“.</div>
+  <p class="row" style="margin:0;flex-wrap:wrap"><button class="btn pri mark" onclick="go({tab:'profil',mark:'${nx.k}'})">${nx.t}</button><span class="grow"></span><button class="btn ghost small" onclick="db.setupDone=1;save();render()">Später</button></p></div>`}
+function markFor(k){if(view.tab!=="profil"||!view.mark)return null;
+  const s=SETUP.find(x=>x.k===view.mark);
+  if(s&&s.done()){const nx=SETUP.find(x=>!x.done());view.mark=nx?nx.k:null;
+    if(!nx){db.setupDone=1;save();setTimeout(setupDoneV,2400)}}
+  return view.mark===k?SETUP.find(x=>x.k===k).tip:null}
+const mk=k=>markFor(k)?` mark`:"";
+const mtip=k=>{const t=markFor(k);return t?`<div class="marktip">${t}</div>`:""};
+const ownCount=()=>db.kids.filter(k=>!k.demo).reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0)+(k.diary||[]).length,0);
+function backupHint(){const n=ownCount(),last=db.lastBackup||0,days=(Date.now()-last)/864e5;
+  if(n<5||days<5)return "";
+  return `<div class="card row"><div class="grow small"><b>Sicherung fällig.</b> ${last?`Letzte vor ${Math.floor(days)} Tagen.`:"Noch keine Sicherung."} Ohne Sicherung sind die Daten weg, wenn das Gerät verloren geht, das App-Symbol gelöscht oder der Browserspeicher geleert wird.</div><button class="btn pri" onclick="exportJSON()">Sichern</button></div>`}
+function heuteV(){
+  const t=today(),wk=addDays(t,-6);
+  const all=db.kids.flatMap(k=>k.goals.flatMap(g=>g.entries));
+  const week=all.filter(e=>e.date>=wk).length,todayN=all.filter(e=>e.date===t).length;
+  const kids=db.kids.filter(k=>k.goals.length&&!k.closed);
+  const dateLong=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
+  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${setupCard()}${invitesV()}${backupHint()}${yearHint()}${closedHint()}${db.seenHelp||db.kids.some(k=>!k.demo)||setupOpen().length?"":`<div class="card" style="border:2px solid var(--sig)"><b>${db.setupDone?"Einrichtung fertig. Jetzt die Anleitung":"Neu hier?"}</b><p class="small" style="margin:6px 0 10px">Pfad führt dich in 8 kurzen Schritten durch die App und zeigt dir, wo du was findest.</p>${db.setupDone?`<div class="marktip">Tippe auf „Anleitung starten“.</div>`:""}<button class="btn pri${db.setupDone?" mark":""}" onclick="openHelp()">Anleitung starten</button></div>`}
+  ${G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`}`+motivationV();
+  if(!kids.length)return h+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button><button class="btn" onclick="openHelp()">Anleitung ansehen</button></p></div>`;
+  h+=`<div class="between"><h2>Wen bewertest du?</h2>${kids.length>1?`<button class="btn ghost" onclick="pickMulti()">Mehrere nacheinander</button>`:""}</div>`;
+  for(const k of kids){
+    const done=k.goals.filter(g=>g.entries.some(e=>e.date===t)).length,gap=daysSince(k);
+    h+=`<div class="card row kcard" style="--kc:${kidColor(k)}">${kidIcon(k)}<div class="grow"><div class="code">${esc(k.code)}</div>
+    <div class="muted small">${k.cls?esc(k.cls)+" · ":""}${done===k.goals.length?"✓ heute erledigt":`heute ${done} von ${k.goals.length} Verhalten`}</div>${gap>=7?`<div class="small late">seit ${gap} Tagen keine Einschätzung</div>`:""}</div>
+    <button class="btn ghost" aria-label="Notiz zu ${esc(k.code)}" onclick="openDiary(${ja(k.id)})">Notiz</button><button class="btn ${done===k.goals.length?"":"pri"}" aria-label="${esc(k.code)} bewerten" onclick="startRate(${ja(k.id)})">Bewerten</button></div>`;
+  }
+  return h+`<p class="muted small">Tipp: Direkt nach der Stunde bewerten. Das dauert pro Ziel nur wenige Sekunden.</p>`;
+}
+
+// Tage seit der letzten Einschätzung (oder seit dem Anlegen)
+function daysSince(k){const last=k.goals.flatMap(g=>g.entries.map(e=>e.date)).sort().pop()||(k.ts?iso(new Date(k.ts)):today());
+  return Math.round((new Date(today()+"T12:00")-new Date(last+"T12:00"))/864e5)}
+function closedHint(){const due=db.kids.filter(k=>k.closed&&k.delAt&&k.delAt<=today());if(!due.length)return "";
+  return `<div class="card" style="border:2px solid var(--new)"><b>Löschen fällig</b><p class="small" style="margin:6px 0 8px">Die Förderung ist abgeschlossen bei: ${due.map(k=>esc(k.code)).join(", ")}. Liegt der Bericht in der Förderakte? Dann lösche die Daten von diesem Gerät.</p>
+  <p class="row" style="flex-wrap:wrap;margin:0">${due.map(k=>`<button class="btn" onclick="go({tab:'klassen',kid:${ja(k.id)}})">${esc(k.code)} ansehen</button>`).join("")}</p></div>`}
+function yearHint(){if(db.yearSY===syNow()||!db.kids.some(k=>!k.demo&&upCls(k.cls||"")))return "";
+  return `<div class="card" style="border:2px solid var(--sig)"><b>Neues Schuljahr ${syNow()}</b><p class="small" style="margin:6px 0 10px">Sollen alle Klassen eine Stufe hoch? Aus 7B wird 8B, aus 7B-01 wird 8B-01.</p>
+  <p class="row" style="flex-wrap:wrap;margin:0"><button class="btn pri" onclick="yearUp()">Klassen hochsetzen</button><button class="btn ghost" onclick="db.yearSY=syNow();save();render()">Nicht nötig</button></p></div>`}
+
+/* ===== Anleitung ===== */
+const HELP=[
+ {t:"Willkommen bei Pfad",p:"Die Anleitung zeigt dir die App mit einem fiktiven Beispielfall. Mit Pfad schätzt du das Verhalten einzelner Kinder direkt nach der Stunde ein. Das dauert wenige Sekunden. Mit der Zeit siehst du, ob sich etwas verbessert, und hast Belege für Förderplan und Gespräche.",l:["Alles bleibt auf deinem Gerät.","Kinder haben nur ein Kürzel, keinen Namen.","Unten (markiert) wechselst du zwischen Heute, Kinder, Verlauf und Einstellungen."]},
+ {t:"Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen: Die App schlägt ein Kürzel vor, z. B. 8A-01, und ein zufälliges Symbol wie 🦊 zum schnellen Wiedererkennen.","Keine Namen oder Initialen eintragen.","Welches Kürzel zu welchem Kind gehört, steht nur in der Förderakte."]},
+ {t:"Verhalten festlegen",p:"Pro Kind legst du ein bis drei Verhalten fest, die du beobachten willst.",l:["So formulieren, dass man es sehen kann: „Ruft ohne Melden in die Klasse“ statt „ist unruhig“.","Richtung wählen: Soll es weniger oder mehr werden?","Skala wählen: 0 bis 10, 1 bis 5 oder ja/nein."]},
+ {t:"Nach der Stunde bewerten",p:"Auf „Heute“ tippst du beim Kind auf „Bewerten“.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
+ {t:"Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
+ {t:"Verlauf ansehen",p:"Unter „Verlauf“ siehst du jedes Verhalten als Kurve mit Ziel und Förderbeginn.",l:["Die App sagt in Worten, ob es eher besser, stabil oder eher schwieriger wird.","Der Text für die Evaluation im Förderplan lässt sich kopieren.","Gesprächsblatt für Kind und Eltern und Bericht für die Förderakte gibt es als PDF."]},
+ {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Spätestens alle 5 Tage: Einstellungen → „Sicherung speichern“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt. Mit „Sicherung prüfen“ siehst du, ob sie sich öffnen lässt.","Mit Kolleg:innen: „Kinder teilen“ und nur die Kinder auswählen, um die es geht.","Über „Dateien laden“ führst du Sicherungen und geteilte Stände zusammen, auch mehrere auf einmal. Neues kommt dazu, deine Einträge bleiben."]},
+ {t:"Sicher arbeiten",p:"Ein paar Regeln, damit die Daten geschützt bleiben.",l:["Nur auf dem Dienstgerät mit Gerätecode und automatischer Sperre.","Auf iPad und iPhone: In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Mit iOS 27 liegt „Teilen“ im Seitenmenü links neben der Adresse.","Das Symbol nicht löschen, ohne vorher zu sichern. Sonst sind die Daten weg."]}];
+// Geführte Anleitung: zeigt die echten Bildschirme mit dem fiktiven Beispielfall und markiert die Stelle
+const demoKid=()=>db.kids.find(k=>k.demo);
+const findBtn=(t,root=$("#app"))=>[...(root?.querySelectorAll("button")||[])].find(b=>b.textContent.trim().startsWith(t));
+const demoCard=()=>[...document.querySelectorAll("#app .kcard")].find(c=>c.textContent.includes(demoKid()?.code||"\u0000"));
+const TOUR=[
+ {v:()=>({tab:"heute"}),sel:()=>$("#nav")},
+ {v:()=>({tab:"klassen"}),sel:()=>findBtn("+ Kind anlegen")},
+ {v:()=>({tab:"klassen",kid:demoKid().id}),sel:()=>findBtn("+ Verhalten")},
+ {v:()=>({tab:"heute"}),sel:()=>findBtn("Bewerten",demoCard())},
+ {v:()=>({tab:"heute"}),sel:()=>findBtn("Notiz",demoCard())},
+ {v:()=>({tab:"analyse",aKid:demoKid().id}),sel:()=>$("#app svg.chart")},
+ {v:()=>({tab:"profil"}),sel:()=>findBtn("Sicherung speichern")},
+ {v:()=>({tab:"profil"}),sel:()=>[...document.querySelectorAll("#app h2")].find(h=>h.textContent.trim()==="Datenschutz")?.closest(".card")}];
+function openHelp(){db.seenHelp=1;demo(true);save();tourGo(0)}
+function tourGo(i){if(i<0)return;if(i>=TOUR.length)return tourEnd(true);if(!demoKid())demo(true);go({...TOUR[i].v(),tour:i})}
+function tourEnd(done){const back=view.tour!=null?view.tab:"heute";view={tab:"heute"};render();window.scrollTo(0,0);if(done)tourDoneV()}
+function tourApply(){let el=$("#tour");document.body.classList.toggle("touring",view.tour!=null);
+  document.querySelectorAll(".tmark").forEach(x=>x.classList.remove("tmark","mark"));
+  if(view.tour==null){el?.remove();return}
+  const i=view.tour,h=HELP[i],last=i===TOUR.length-1;
+  if(!el){el=document.createElement("div");el.id="tour";el.setAttribute("role","dialog");el.setAttribute("aria-label","Anleitung");document.body.appendChild(el)}
+  el.innerHTML=`<div class="between"><span class="small muted">Anleitung · Schritt ${i+1} von ${TOUR.length}</span><button class="btn ghost small" onclick="tourEnd()">Beenden</button></div>
+  <div class="dots" style="margin:6px 0 8px">${TOUR.map((_,j)=>`<button class="${j===i?"on":""}" aria-label="Schritt ${j+1}" onclick="tourGo(${j})"></button>`).join("")}</div>
+  <b style="font-size:1.1rem">${h.t}</b><p class="small" style="margin:6px 0">${h.p}</p><ul class="small">${h.l.map(x=>`<li>${x}</li>`).join("")}</ul>
+  <p class="row" style="margin:10px 0 0">${i?`<button class="btn ghost" onclick="tourGo(${i-1})">Zurück</button>`:""}<span class="grow"></span><button class="btn pri" onclick="tourGo(${i+1})">${last?"Fertig":"Weiter"}</button></p>`;
+  requestAnimationFrame(()=>{const t=TOUR[i].sel?.();if(!t)return;t.classList.add("tmark","mark");
+    if(t.id!=="nav"){const r=t.getBoundingClientRect(),room=innerHeight-el.offsetHeight-70;window.scrollTo({top:Math.max(0,r.top+scrollY-Math.max(16,(room-r.height)/2)),behavior:"smooth"})}})}
+
+/* ===== Klassen ===== */
+function klassenV(){
+  const f=view.filter??"alle";
+  const count=c=>db.kids.filter(k=>c==="alle"||(c===""?!k.cls:k.cls===c)).length;
+  const list=db.kids.filter(k=>f==="alle"||(f===""?!k.cls:k.cls===f)).sort((a,b)=>a.code.localeCompare(b.code));
+  let h=`<h1>Kinder</h1>
+  <div class="row" style="margin-bottom:12px"><select style="flex:1" onchange="view.filter=this.value;render()"><option value="alle" ${f==="alle"?"selected":""}>Alle Klassen (${count("alle")})</option>
+  ${db.classes.map(c=>`<option value="${esc(c)}" ${f===c?"selected":""}>Klasse ${esc(c)} (${count(c)})</option>`).join("")}
+  ${count("")?`<option value="" ${f===""?"selected":""}>ohne Klasse (${count("")})</option>`:""}</select>
+  <button class="btn noprint" onclick="addClass()">Neue Klasse</button></div>`;
+  if(view.adding)h+=`<div class="card"><div style="display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center"><label style="margin-top:0">Symbol</label><label style="margin-top:0">Kürzel</label><button id="nicon" class="kic big icpick" data-i="${view.newIcon||(view.newIcon=freeIcon())}" onclick="newKidIcon()" aria-label="Symbol ändern">${view.newIcon}</button><div><input id="ncode" value="${f&&f!=="alle"?newCode(f):""}" placeholder="z. B. 8A-01" oninput="this.dataset.auto='';$('#nw').hidden=!looksLikeName(this.value)" data-auto="1"></div></div>
+  <div class="sub" style="margin-top:4px">Symbol zum schnellen Wiedererkennen, zufällig gewählt. Kürzel: Klasse und laufende Nummer, keine Namen oder Initialen. Die Zuordnung steht nur in der Förderakte.</div>
+  <p id="nw" class="small" style="color:var(--down)" hidden>Das sieht nach einem Namen aus. Bitte ein Kürzel verwenden.</p>
+  <label>Klasse</label><select id="ncls" onchange="const i=$('#ncode');if(this.value&&(i.dataset.auto||!i.value)){i.value=newCode(this.value);i.dataset.auto='1'}"><option value="">Ohne Klasse</option>${db.classes.map(c=>`<option ${c===f?"selected":""}>${esc(c)}</option>`).join("")}</select>
+  <p style="margin-top:12px" class="row"><button class="btn pri" onclick="addKid()">Anlegen</button><button class="btn ghost" onclick="view.adding=false;render()">Abbrechen</button></p></div>`;
+  if(!list.length&&!view.adding)h+=`<p class="muted">Hier ist noch niemand. Lege unten ein Kind mit Kürzel an.</p>`;
+  for(const k of list)h+=`<div class="card tap row kcard" style="--kc:${kidColor(k)}" onclick="go({tab:'klassen',kid:${ja(k.id)}})">${kidIcon(k)}
+  <div class="grow"><div class="code">${esc(k.code)} ${k.demo?'<span class="tag">fiktiv</span>':""}${k.closed?'<span class="tag">abgeschlossen</span>':""}</div><div class="muted small">${k.cls?esc(k.cls)+" · ":""}${k.goals.length} ${k.goals.length===1?"Verhalten":"Verhalten"}</div></div>${badge(kidTrend(k))}</div>`;
+  if(!view.adding)h+=`<p style="margin-top:14px"><button class="btn block noprint" onclick="view.adding=true;render();$('#ncode').focus()">+ Kind anlegen</button></p>`;
+  h+=`<p class="muted small" style="text-align:center">Nur Kürzel verwenden, keine Namen.</p>`;
+  return h;
+}
+async function addClass(){const c=((await askText("Name der neuen Klasse","z. B. 7B"))||"").trim();if(!c)return;if(!db.classes.includes(c))db.classes.push(c);db.classes.sort();save();view.filter=c;render()}
+function newCode(cls){let n=1,c;do{c=`${cls}-${String(n++).padStart(2,"0")}`}while(db.kids.some(k=>k.code.toLowerCase()===c.toLowerCase()));return c}
+async function addKid(){const code=$("#ncode").value.trim();if(!code)return toast("Bitte ein Kürzel eingeben.");
+  if(looksLikeName(code)&&!await ask("Das Kürzel sieht nach einem Namen aus. Trotzdem speichern?",{ok:"Trotzdem speichern"}))return;
+  const k={id:uid(),code,icon:$("#nicon").dataset.i,cls:$("#ncls").value,goals:[],diary:[],ts:Date.now()};db.yearSY??=syNow();delete view.newIcon;db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
+
+/* ===== Kind ===== */
+function spark(g){
+  const v=rated(g).slice(-12).map(e=>e.value);if(v.length<2)return "";
+  const W=90,H=28,x=i=>i*(W-4)/(v.length-1)+2,y=val=>H-2-val/10*(H-4);
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline fill="none" stroke="var(--acc)" stroke-width="2" stroke-linejoin="round" points="${v.map((a,i)=>x(i)+","+y(a)).join(" ")}"/></svg>`;
+}
+function kidV(){
+  const k=kidById(view.kid);if(!k){view={tab:"klassen"};return klassenV()}
+  let h=`<button class="btn ghost noprint" onclick="back({tab:'${view.tab}'})">‹ Zurück</button>
+  <div class="row" style="margin:6px 0 4px"><button class="icbtn" aria-label="Symbol ändern" onclick="setKidIcon(${ja(k.id)})">${k.icon?kidIcon(k,1):`<span class="kic big add" style="--kc:${kidColor(k)}">+</span>`}</button><div class="grow"><div class="code" style="font-size:1.4rem">${esc(k.code)}</div>
+  <select class="chip" style="margin-top:4px;width:auto" onchange="Object.assign(kidById(${ja(k.id)}),{cls:this.value,upd:Date.now()});save();render()"><option value="">Ohne Klasse</option>${db.classes.map(c=>`<option ${c===k.cls?"selected":""}>${esc(c)}</option>`).join("")}</select></div>${badge(kidTrend(k))}</div>
+  ${k.closed?`<div class="card" style="border:2px solid var(--new);margin-top:12px"><b>Förderung abgeschlossen am ${dDEy(k.closed)}</b><p class="small" style="margin:6px 0 10px">Das Kind erscheint nicht mehr auf „Heute“. Lege den Bericht in die Förderakte und lösche die Daten danach von diesem Gerät.${k.delAt?` Pfad erinnert dich am ${dDEy(k.delAt)}.`:""}</p>
+  <p class="row" style="flex-wrap:wrap;margin:0"><button class="btn pri" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},report:true})">Bericht (PDF)</button><button class="btn danger" onclick="delKid(${ja(k.id)})">Jetzt löschen</button><button class="btn ghost" onclick="reopenKid(${ja(k.id)})">Wieder aufnehmen</button></p></div>`:""}
+  ${k.goals.length&&!k.closed?`<p style="margin:14px 0 0"><button class="btn pri block" onclick="startRate(${ja(k.id)})">Jetzt bewerten</button></p>`:""}${k.goals.length?docTiles(k,view.tab):""}
+  <h2>Verhalten</h2>`;
+  if(!k.goals.length)h+=`<p class="muted">Noch kein Verhalten angelegt. Übernimm am besten ein Förderziel aus dem Förderplan.</p>`;
+  for(const g of k.goals){const t=trend(g),n=rated(g).length;
+    h+=`<div class="card"><div class="between"><div class="grow"><b>${esc(g.title)}</b><div class="muted small">${g.dir==="down"?"weniger davon":"mehr davon"} · ${n} Einschätzung${n===1?"":"en"}</div></div>${spark(g)}</div>
+    <div class="between" style="margin-top:8px">${badge(t)}<span><button class="btn ghost" onclick="go({tab:'analyse',aKid:${ja(k.id)},aGoal:${ja(g.id)}})">Verlauf</button><button class="btn ghost" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},goal:${ja(g.id)}})">Bearbeiten</button></span></div></div>`}
+  h+=`<p><button class="btn block" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},goal:''})">+ Verhalten</button></p>`+diaryV(k)+`
+  <div class="card noprint row"><div class="grow small"><b>Mit Kolleg:in teilen</b><br><span class="muted">Verschlüsselte Datei nur mit diesem Kind.</span></div><button class="btn" onclick="shareKids(${ja(k.id)})">Teilen</button></div>
+  ${srvKidCard(k)}
+  ${k.closed||k.demo?"":`<div class="card noprint row"><div class="grow small"><b>Förderung abschließen</b><br><span class="muted">Zum Beispiel am Schuljahresende oder bei Schulwechsel.</span></div><button class="btn" onclick="closeKid(${ja(k.id)})">Abschließen</button></div>`}
+  <p class="noprint" style="margin-top:24px"><button class="btn ghost danger" onclick="delKid(${ja(k.id)})">Kind und alle Einschätzungen löschen</button></p>`;
+  return h;
+}
+async function closeKid(id){const k=kidById(id);
+  const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Förderung für ${esc(k.code)} abschließen?</p>
+  <ol class="small" style="padding-left:20px;margin:0 0 10px"><li style="margin:5px 0">Pfad erstellt den Bericht mit Verlauf, Auswertung und Tagebuch. Speichere ihn als PDF und lege ihn in die Förderakte.</li><li style="margin:5px 0">Danach löschst du ${esc(k.code)} von diesem Gerät. Pfad erinnert dich in 4 Wochen daran.</li></ol>
+  <p class="small muted" style="margin:0 0 14px">Bis dahin erscheint ${esc(k.code)} nicht mehr auf „Heute“. Du kannst die Förderung jederzeit wieder aufnehmen.</p>
+  <div class="duo"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Abschließen</button></div>`,(el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))});
+  if(r!==true)return;Object.assign(k,{closed:today(),delAt:addDays(today(),28),upd:Date.now()});save();go({tab:view.tab,kid:id,report:true});toast("Abgeschlossen. Jetzt den Bericht als PDF sichern.")}
+function reopenKid(id){const k=kidById(id);delete k.closed;delete k.delAt;k.upd=Date.now();save();render();toast(`${k.code} ist wieder aktiv`)}
+async function delKid(id){if(!await ask(`Kind mit allen Zielen, Einschätzungen und Tagebucheinträgen von diesem Gerät löschen? ${kidById(id)?.srv?"Auf dem Schulserver bleibt es für die anderen erhalten.":""}`,{ok:"Löschen",danger:true}))return;db.kids=db.kids.filter(k=>k.id!==id);save();go({tab:"klassen"})}
+
+/* ===== Verhalten bearbeiten ===== */
+let draft=null;
+function goalEditV(){
+  const k=kidById(view.kid);
+  if(!draft||draft._for!==view.goal+k.id){const g=view.goal?goalById(k,view.goal):null;
+    draft=g?{...g,locked:g.entries.length>0}:{title:"",fp:"",how:"",dir:"down",a0:"nie",a10:"ständig",target:"",start:"",scale:"10"};draft._for=view.goal+k.id}
+  const d=draft;
+  return `<div class="between"><button class="btn ghost" aria-label="Abbrechen" style="font-size:1.3rem" onclick="draft=null;go({tab:'${view.tab}',kid:${ja(k.id)}})">✕</button><b>${view.goal?"Verhalten bearbeiten":"Neues Verhalten"}</b><span style="width:30px"></span></div>
+  <label>Verhalten</label><div class="sub">Kurz, so wie es beim Bewerten oben stehen soll.</div>
+  <input id="ft" value="${esc(d.title)}" placeholder="z. B. Stört den Unterricht" oninput="draft.title=this.value">
+  <label>Woran erkennst du es?</label><div class="sub">Damit alle, die bewerten, dasselbe meinen.</div>
+  <textarea id="fh" placeholder="z. B. Ruft rein, verlässt den Platz ohne Erlaubnis, lenkt Mitschüler:innen ab." oninput="draft.how=this.value">${esc(d.how)}</textarea>
+  <details class="tip" style="margin-top:8px"><summary>So wird das Verhalten gut beobachtbar</summary>
+  <p>Beschreibe, was man sehen oder hören kann. Nicht „ist unkonzentriert“, sondern „arbeitet 10 Minuten am Platz, ohne aufzustehen“.</p>
+  <p>Lieber zwei kleine Verhaltensweisen als eine große.</p></details>
+  <label>Was soll sich ändern?</label>
+  <div class="toggle"><button class="${d.dir==="down"?"on":""}" onclick="setDir('down')">Weniger davon</button><button class="${d.dir==="up"?"on":""}" onclick="setDir('up')">Mehr davon</button></div>
+  <label>Skala</label>${d.locked?`<input value="${scaleName(d)}" disabled><div class="sub" style="margin-top:6px">Die Skala ist fest, weil es schon Einschätzungen gibt. So bleibt alles vergleichbar.</div>`
+   :`<div class="toggle">${Object.entries(SCALES).map(([key,t])=>`<button class="${sc(d)===key?"on":""}" onclick="setScale('${key}')">${t.replace(/ \(.*\)/,"")}<br><span class="small" style="font-weight:400">${key==="10"?"0 bis 10":key==="5"?"1 bis 5":key==="2"?"zwei Knöpfe":"Bereich selbst wählen"}</span></button>`).join("")}</div>
+   ${sc(d)==="c"?`<div class="two" style="margin-top:10px"><div><div class="sub">Kleinster Wert</div><select onchange="draft.lo=+this.value;if(draft.hi-draft.lo<2)draft.hi=draft.lo+2;draft.tIn=undefined;draft.target='';render()">${[0,1].map(v=>`<option ${+d.lo===v?"selected":""}>${v}</option>`).join("")}</select></div>
+   <div><div class="sub">Größter Wert</div><select onchange="draft.hi=+this.value;draft.tIn=undefined;draft.target='';render()">${[...Array(9)].map((_,i)=>i+2).filter(v=>v-d.lo>=2&&v-d.lo<=10).map(v=>`<option ${+d.hi===v?"selected":""}>${v}</option>`).join("")}</select></div></div>
+   <div class="sub" style="margin-top:6px">Beim Bewerten gibt es dann die Knöpfe ${rng(d)[0]} bis ${rng(d)[1]}.</div>`:""}`}
+  <label>${sc(d)==="2"?"Beschriftung der Knöpfe":`Was bedeuten ${rng(d)[0]} und ${rng(d)[1]}?`}</label>
+  <div class="two"><div><div class="sub">${sc(d)==="2"?"Knopf „nicht gezeigt“":rng(d)[0]+" heißt …"}</div><input value="${esc(d.a0)}" oninput="draft.a0=this.value"></div><div><div class="sub">${sc(d)==="2"?"Knopf „gezeigt“":rng(d)[1]+" heißt …"}</div><input value="${esc(d.a10)}" oninput="draft.a10=this.value"></div></div>
+  <label>Bezug zum Förderplan <span class="sub">(optional)</span></label>
+  <textarea placeholder="Förderziel aus dem Förderplan einfügen" oninput="draft.fp=this.value">${esc(d.fp)}</textarea>
+  <div class="two"><div><label>Ziel ist erreicht bei <span class="sub">(optional${sc(d)==="2"?", in % der Stunden":""})</span></label><input type="number" min="${sc(d)==="2"?0:rng(d)[0]}" max="${sc(d)==="2"?100:rng(d)[1]}" inputmode="numeric" value="${esc(d.tIn??(d.target===""?"":tgt(d).replace(" %","")))}" placeholder="${sc(d)==="2"?(d.dir==="down"?"z. B. höchstens 20":"z. B. mindestens 80"):sc(d)==="5"?(d.dir==="down"?"z. B. höchstens 2":"z. B. mindestens 4"):(d.dir==="down"?"z. B. höchstens 3":"z. B. mindestens 7")}" oninput="draft.tIn=this.value"></div>
+  <div><label>Förderung startet am <span class="sub">(optional)</span></label><input type="date" value="${esc(d.start)}" oninput="draft.start=this.value"></div></div>
+  <div class="sub" style="margin-top:6px"><b>Förderung startet am:</b> der Tag, ab dem eine neue Maßnahme gilt, z. B. ein Verstärkerplan oder ein neuer Sitzplatz. Davor beobachtest du nur, wie es ist. Pfad zieht im Verlauf eine Linie an diesem Tag und vergleicht die Werte davor und danach. Leer lassen, wenn es keinen festen Beginn gibt.</div>
+  <p style="margin-top:18px"><button class="btn pri block" onclick="saveGoal()">Speichern</button></p>
+  ${view.goal?`<p><button class="btn ghost danger" onclick="delGoal()">Verhalten löschen</button></p>`:""}`;
+}
+function setScale(x){const d=draft,was=sc(d);d.scale=x;d.tIn=undefined;d.target="";if(x==="c"){d.lo??=1;d.hi??=7}
+  if(x==="2"&&was!=="2"){d._a=[d.a0,d.a10];d.a0="nicht gezeigt";d.a10="gezeigt"}else if(was==="2"&&x!=="2"&&d._a){[d.a0,d.a10]=d._a}render()}
+function setDir(x){draft.dir=x;if(x==="up"&&draft.a0==="nie"&&draft.a10==="ständig"){draft.a0="gar nicht";draft.a10="durchgehend"} if(x==="down"&&draft.a0==="gar nicht"&&draft.a10==="durchgehend"){draft.a0="nie";draft.a10="ständig"} render()}
+function saveGoal(){const k=kidById(view.kid),d=draft;if(!d.title.trim())return toast("Bitte das Verhalten benennen.");
+  const x=sc(d),raw=d.tIn===undefined?(d.target===""?"":null):d.tIn;let t;
+  if(raw===null)t=d.target;else if(raw===""||raw==null)t="";else{const r=+raw;{const [a,b]=rng(d);t=x==="2"?Math.max(0,Math.min(100,r))/10:fromK(d,Math.max(a,Math.min(b,Math.round(r))))}}
+  const data={title:d.title.trim(),how:d.how.trim(),fp:d.fp.trim(),dir:d.dir,a0:d.a0.trim()||"0",a10:d.a10.trim()||"10",target:t,start:d.start||"",scale:x,...(x==="c"?{lo:+d.lo,hi:+d.hi}:{})};
+  data.upd=Date.now();if(view.goal)Object.assign(goalById(k,view.goal),data);else k.goals.push({id:uid(),...data,entries:[]});
+  save();draft=null;toast("Gespeichert");go({tab:view.tab,kid:k.id})}
+async function delGoal(){if(!await ask("Verhalten mit allen Einschätzungen löschen?",{ok:"Löschen",danger:true}))return;const k=kidById(view.kid);k.goals=k.goals.filter(g=>g.id!==view.goal);tomb(k,view.goal);save();draft=null;go({tab:view.tab,kid:k.id})}
+
+/* ===== Bewerten ===== */
+let rs=null;
+const slotName=r=>r[0].replace(/\.$/,"")+". Std.";
+const PAUSES=["Kleine Pause","Große Pause","Mittagspause"];
+const SLOTS_ALL=()=>[...db.raster.map(slotName),...PAUSES];
+const hm=t=>{const[a,b]=t.split(":");return +a*60+ +b};
+const rTime=(r,wd)=>{const d=r[3]?.[wd];return [d?.[0]||r[1],d?.[1]||r[2]]};
+function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getMinutes();if(wd===0||wd===6)return "";
+  let best="";for(const r of db.raster){const [a,b]=rTime(r,wd),st=hm(a),en=hm(b);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
+function startRate(kidId,queue=[]){const k=kidById(kidId);if(!k.goals.length)return;
+  const cs=currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
+  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:true,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
+// Mehrere Kinder nacheinander, z. B. alle aus 8A
+async function pickMulti(){const ks=db.kids.filter(k=>k.goals.length&&!k.closed).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true}));
+  const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))];
+  const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Wen bewertest du nacheinander?</p>
+    ${cls.length?`<p class="row" style="flex-wrap:wrap;gap:6px;margin:0 0 8px">${cls.map(c=>`<button class="btn small" data-c="${esc(c)}">Alle aus ${esc(c)}</button>`).join("")}</p>`:""}
+    <div style="max-height:46vh;overflow:auto">${ks.map(k=>`<label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" value="${esc(k.id)}" data-k="${esc(k.cls||"")}"> ${kidIcon(k)} ${esc(k.code)}</label>`).join("")}</div>
+    <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Los geht's</button></div>`,
+    (el,done)=>{el.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>el.querySelectorAll("input").forEach(i=>i.checked=i.dataset.k===b.dataset.c));
+      el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done([...el.querySelectorAll("input:checked")].map(i=>i.value))});
+  if(!sel?.length)return;startRate(sel[0],sel.slice(1))}
+function renderRate(){
+  const o=$("#overlay");if(!rs){o.innerHTML="";return}
+  const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur,t=today();
+  const days=[...Array(7)].map((_,i)=>addDays(t,-i));
+  const dayLbl=d=>d===t?"Heute":d===addDays(t,-1)?"Gestern":new Date(d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"numeric"});
+  o.innerHTML=`<div class="rate" role="dialog" aria-label="Bewerten"><div class="inner">
+  <div class="between"><button class="btn ghost" style="font-size:1.3rem" aria-label="Schließen" onclick="closeRate()">✕</button><div class="row">${kidIcon(k)}<span class="code">${esc(k.code)}</span></div>${rs.qn>1?`<button class="btn ghost small" onclick="skipKid()">${rs.queue.length?"Überspringen":"Beenden"}</button>`:`<span style="width:40px"></span>`}</div>
+  <div class="step">${[rs.qn>1&&`Kind ${rs.qi} von ${rs.qn}`,k.goals.length>1&&`Verhalten ${rs.i+1} von ${k.goals.length}`].filter(Boolean).join(" · ")||"&nbsp;"}</div>
+  ${rs.ctxOpen?`<div class="ctx ${rs.date!==t?"past":""}">
+   <div class="pick days">${days.slice(0,2).map(d=>`<button class="${d===rs.date?"on":""}" onclick="rs.date='${d}';renderRate()">${dayLbl(d)}</button>`).join("")}<select class="${days.slice(2).includes(rs.date)?"on":""}" onchange="rs.date=this.value;renderRate()"><option value="">früher …</option>${days.slice(2).map(d=>`<option value="${d}" ${d===rs.date?"selected":""}>${dayLbl(d)}</option>`).join("")}</select></div>
+   <div class="pick slots">${db.raster.map(slotName).map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x.replace(" Std.",""))}</button>`).join("")}</div>
+   <div class="pick pauses">${PAUSES.map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x)}</button>`).join("")}</div>
+   <div class="pick subjs">${db.subjects.map(x=>`<button class="${x===rs.subj?"on":""}" onclick="rs.subj=rs.subj===this.textContent?'':this.textContent;renderRate()">${esc(x)}</button>`).join("")}</div></div>`
+  :`<button class="ctxline" onclick="rs.ctxOpen=true;renderRate()">${dayLbl(rs.date)} · ${rs.slot||"ohne Stunde"} · ${esc(rs.subj||"ohne Fach")} <span>ändern</span></button>`}
+  ${rs.date!==t?`<p class="small" style="text-align:center;color:var(--new)">Eintrag für einen vergangenen Tag (${dDEy(rs.date)})</p>`:""}
+  <div class="goalTitle">${esc(g.title)}</div>
+  ${g.how?`<p class="muted small" style="text-align:center">${esc(g.how)}</p>`:""}
+  <div class="big" id="big">${c.na?'<span class="muted" style="font-size:1.1rem">Nicht beobachtet</span>':c.value==null?`<span class="muted" style="font-size:1.05rem;font-weight:400">${sc(g)==="2"?"Wurde das Verhalten gezeigt?":"Wie stark war es? Tippe eine Zahl an."}</span>`:esc(dv(g,c.value))}</div>
+  <div class="ruler s${sc(g)==="c"&&scaleOpts(g).length>7?"10":sc(g)} ${c.na?"off":""}" style="${sc(g)==="c"?`grid-template-columns:repeat(${scaleOpts(g).length},1fr)`:""}" id="ruler" role="radiogroup" aria-label="Einschätzung: ${esc(g.title)}">${scaleOpts(g).map(o=>`<button data-v="${o.v}" role="radio" aria-label="${esc(o.l)}${sc(g)==="2"?"":` von ${rng(g)[1]}`}" aria-checked="${c.value===o.v}" class="${c.value===o.v?"sel":sc(g)!=="2"&&c.value!=null&&o.v<c.value?"lit":""}">${esc(o.l)}</button>`).join("")}</div>
+  ${sc(g)==="2"?"":`<div class="ends"><span>${rng(g)[0]} = ${esc(g.a0)}</span><span>${esc(g.a10)} = ${rng(g)[1]}</span></div>`}
+  <label>Kommentar <span class="sub">(optional)</span></label>
+  <textarea id="note" placeholder="Was war los? Was hat geholfen? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
+  <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" id="pin" style="width:auto" ${c.pin?"checked":""} onchange="rs.cur.pin=this.checked"> Im Verlauf markieren <span class="sub" style="font-weight:400">(erscheint als Markierung im Graphen)</span></label>
+  <div class="foot duo"><button class="btn ${c.na?"na-on":""}" onclick="rs.cur.na=!rs.cur.na;if(rs.cur.na)rs.cur.value=null;renderRate()">${c.na?"✓ Heute nicht gesehen":"Heute nicht gesehen"}</button>
+  <button class="btn pri" ${c.value==null&&!c.na?"disabled":""} onclick="nextRate()">${rs.i<k.goals.length-1?"Weiter":"Speichern"}</button></div>
+  </div></div>`;
+  const ru=$("#ruler");let down=false;
+  const pick=e=>{const el=document.elementFromPoint(e.clientX,e.clientY);if(!el||el.dataset.v==null)return;const v=+el.dataset.v;if(v!==rs.cur.value){rs.cur.value=v;markRuler();try{navigator.vibrate?.(5)}catch(e){}}};
+  ru.onpointerdown=e=>{down=true;ru.setPointerCapture(e.pointerId);pick(e)};
+  ru.onpointermove=e=>{if(down)pick(e)};
+  ru.onpointerup=ru.onpointercancel=()=>{if(down){down=false;renderRate()}};
+  ru.onkeydown=e=>{const vs=scaleOpts(g).map(o=>o.v);let i=vs.indexOf(rs.cur.value);if(i<0)i=Math.floor(vs.length/2);if(e.key==="ArrowRight"||e.key==="ArrowUp")i=Math.min(vs.length-1,i+1);else if(e.key==="ArrowLeft"||e.key==="ArrowDown")i=Math.max(0,i-1);else if(e.key===" "||e.key==="Enter")i=vs.indexOf(+e.target.dataset.v);else return;rs.cur.value=vs[i];e.preventDefault();renderRate();$(`#ruler [data-v="${rs.cur.value}"]`).focus()};
+}
+function markRuler(){const g=kidById(rs.kid).goals[rs.i],v=rs.cur.value;$("#big").textContent=dv(g,v);document.querySelectorAll("#ruler button").forEach(b=>{const i=+b.dataset.v;b.className=i===v?"sel":sc(g)!=="2"&&i<v?"lit":"";b.setAttribute("aria-checked",i===v)})}
+function nextRate(){const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur;
+  const id=uid();g.entries.push({id,date:rs.date,slot:rs.slot,subj:rs.subj,value:c.na?null:c.value,note:c.note.trim(),...(c.pin?{pin:true}:{}),rater:db.me||"",ts:Date.now()});
+  save();rs.count++;rs.saved.push({kid:k.id,gid:g.id,id});
+  if(rs.i<k.goals.length-1){rs.i++;rs.ctxOpen=false;rs.cur={value:null,na:false,note:"",pin:false};fb("small");renderRate();$(".goalTitle")?.classList.add("anim")}
+  else if(rs.queue.length)nextKid();else finishRate()}
+function nextKid(){rs.kid=rs.queue.shift();rs.i=0;rs.qi++;rs.ctxOpen=false;rs.cur={value:null,na:false,note:"",pin:false};fb("small");renderRate();$(".goalTitle")?.classList.add("anim")}
+function skipKid(){if(rs.queue.length)nextKid();else finishRate()}
+function finishRate(){const k=kidById(rs.kid),n=rs.count,saved=rs.saved,kn=new Set(saved.map(x=>x.kid)).size;
+  lastCtx={slot:rs.slot,subj:rs.subj,day:today(),ts:Date.now()};rs=null;$("#overlay").innerHTML="";render();if(!n)return;
+  celebrate(kidById(saved[0].kid)||k,n,kn);undoToast(`${n} Einschätzung${n===1?"":"en"} gespeichert`,()=>undoRate(saved))}
+function undoRate(saved){for(const x of saved){const k=kidById(x.kid),g=k&&goalById(k,x.gid);if(!g)continue;g.entries=g.entries.filter(e=>e.id!==x.id);tomb(k,x.id)}
+  document.querySelectorAll(".cele").forEach(x=>x.remove());save();render();toast(`${saved.length} Einschätzung${saved.length===1?"":"en"} zurückgenommen`)}
+let lastCtx=null;
+async function closeRate(){if(rs.count&&!await ask("Bewerten beenden? Bereits gespeicherte Einschätzungen bleiben erhalten.",{ok:"Beenden"}))return;if(rs.count)return finishRate();rs=null;$("#overlay").innerHTML="";render()}
+
+/* ===== Tagebuch ===== */
+const CATS=["Beobachtung","Gespräch","Elternkontakt","Absprache","Vorfall","Erfolg"];
+const sortD=d=>[...(d||[])].sort((a,b)=>(b.date+b.ts).localeCompare(a.date+a.ts));
+const dItem=e=>`<div class="dentry"><div class="between"><span class="muted small">${dDEy(e.date)}${e.subj?" · "+esc(e.subj):""}${e.rater?" · "+esc(e.rater):""}${e.edited?" · bearbeitet":""}</span>${e.cat?`<span class="cat c-${esc(e.cat)}">${esc(e.cat)}</span>`:""}</div><div style="white-space:pre-wrap;margin-top:3px">${esc(e.text)}</div></div>`;
+let dd=null;
+function openDiary(kid){dd={date:today(),cat:"Beobachtung",subj:"",text:""};go({tab:view.tab,kid,diaryOpen:true});const t=$("#dtext");if(t){t.scrollIntoView({block:"center"});t.focus()}}
+function diaryV(k){
+  const list=sortD(k.diary),show=view.diaryAll?list:list.slice(0,5);
+  let h=`<div class="between"><h2>Tagebuch</h2>${view.diaryOpen?"":`<button class="btn ghost" onclick="dd={date:today(),cat:'Beobachtung',subj:'',text:''};view.diaryOpen=true;render();$('#dtext').focus()">+ Eintrag</button>`}</div>`;
+  if(view.diaryOpen){dd??={date:today(),cat:"Beobachtung",subj:"",text:""};
+    h+=`<div class="card" id="dform">${dd.id?'<p style="margin:0 0 8px"><b>Eintrag bearbeiten</b></p>':""}<div class="catpick">${CATS.map(c=>`<button class="${dd.cat===c?"on":""}" onclick="dd.cat='${c}';render()">${c}</button>`).join("")}</div>
+    <textarea id="dtext" style="margin-top:10px;min-height:100px" placeholder="Was ist passiert? Was hast du beobachtet oder vereinbart? (ohne Namen anderer Kinder)" oninput="dd.text=this.value">${esc(dd.text)}</textarea>
+    <div class="two" style="margin-top:8px"><input type="date" value="${dd.date}" max="${today()}" onchange="dd.date=this.value||today()"><select onchange="dd.subj=this.value"><option value="">Ohne Fach</option>${db.subjects.map(x=>`<option ${x===dd.subj?"selected":""}>${esc(x)}</option>`).join("")}</select></div>
+    <p class="row" style="margin-top:10px"><button class="btn pri" onclick="saveDiary(${ja(k.id)})">Speichern</button><button class="btn ghost" onclick="dd=null;view.diaryOpen=false;render()">Abbrechen</button></p></div>`}
+  if(!list.length&&!view.diaryOpen)h+=`<p class="muted">Freie Notizen ohne Skala: Beobachtungen, Gespräche, Absprachen, Erfolge. Hilft später beim Deuten des Verlaufs.</p>`;
+  if(list.length)h+=`<div class="card">${show.map(e=>dItem(e).replace('</div></div>',`</div><span class="noprint"><button class="btn ghost small" style="padding:2px 12px 2px 0" onclick="editDiary(${ja(k.id)},${ja(e.id)})">bearbeiten</button><button class="btn ghost danger small" style="padding:2px 0" onclick="delDiary(${ja(k.id)},${ja(e.id)})">löschen</button></span></div>`)).join("")}
+    ${list.length>5?`<button class="btn ghost" onclick="view.diaryAll=!view.diaryAll;render()">${view.diaryAll?"weniger anzeigen":`alle ${list.length} anzeigen`}</button>`:""}</div>`;
+  return h;
+}
+function saveDiary(kid){const k=kidById(kid);if(!dd.text.trim())return toast("Bitte etwas eintragen.");
+  const ex=dd.id&&(k.diary||[]).find(e=>e.id===dd.id);
+  if(ex)Object.assign(ex,{date:dd.date,cat:dd.cat,subj:dd.subj,text:dd.text.trim(),edited:Date.now()});
+  else (k.diary??=[]).push({id:uid(),date:dd.date,cat:dd.cat,subj:dd.subj,text:dd.text.trim(),rater:db.me||"",ts:Date.now()});
+  save();dd=null;view.diaryOpen=false;toast("Notiz gespeichert");render()}
+function editDiary(kid,id){const e=kidById(kid).diary.find(x=>x.id===id);dd={...e};go({tab:view.tab,kid,diaryOpen:true,diaryAll:true});const f=$("#dform");if(f){f.scrollIntoView({block:"center"});$("#dtext").focus()}}
+async function delDiary(kid,id){if(!await ask("Tagebucheintrag löschen?",{ok:"Löschen",danger:true}))return;const k=kidById(kid);k.diary=k.diary.filter(e=>e.id!==id);tomb(k,id);save();render()}
+
+
+/* ===== Gesprächsblatt für Kind und Eltern ===== */
+const RANGES={w4:["letzte 4 Wochen",27],w8:["letzte 8 Wochen",55],all:["gesamter Zeitraum",null]};
+const wkStart=d=>{while(new Date(d+"T12:00").getDay()!==1)d=addDays(d,-1);return d};
+function weekBars(g,from){
+  const m={};rated(g).filter(e=>!from||e.date>=from).forEach(e=>{(m[wkStart(e.date)]??=[]).push(e.value)});
+  return Object.keys(m).sort().slice(-8).map(w=>({w,v:mean(m[w]),n:m[w].length}));
+}
+function barSvg(g,wk){
+  const W=340,H=170,T=22,B=26,n=wk.length,bw=Math.min(46,(W-20)/n-10),gap=(W-n*bw)/(n+1),Y=v=>T+(1-v/10)*(H-T-B);
+  const meets=v=>g.target!==""&&(g.dir==="down"?v<=g.target:v>=g.target);
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Wochenwerte">`;
+  s+=`<line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line)" stroke-width="2"/>`;
+  wk.forEach((x,i)=>{const X=gap+i*(bw+gap),y=Y(x.v);
+    s+=`<rect x="${X}" y="${y}" width="${bw}" height="${Y(0)-y}" rx="10" fill="${meets(x.v)?"var(--up)":"var(--acc)"}" opacity="${i===n-1?1:.55}"/>
+    <text x="${X+bw/2}" y="${y-6}" text-anchor="middle" font-size="14" font-weight="800" fill="var(--ink)">${fm(g,x.v)}</text>
+    <text x="${X+bw/2}" y="${H-7}" text-anchor="middle" font-size="11" fill="var(--muted)">${i===n-1?"jetzt":dDE(x.w)}</text>`});
+  if(g.target!==""){const y=Y(g.target);s+=`<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--up)" stroke-width="2.5" stroke-dasharray="6 5"/><text x="${W}" y="${y-5}" text-anchor="end" font-size="12" font-weight="700" fill="var(--up)">Ziel</text>`}
+  return s+"</svg>";
+}
+function talkV(){
+  const k=kidById(view.kid);if(!k){view={tab:"klassen"};return klassenV()}
+  const r=view.range||"w4",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),hide=view.hide||[];
+  let h=`<div class="talk"><div class="noprint between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px"><button class="btn ghost" onclick="back({tab:'${view.tab}',kid:${ja(k.id)}})">‹ Zurück</button>
+   <span class="row" style="flex-wrap:wrap;gap:8px"><select style="width:auto" onchange="view.range=this.value;render()">${Object.entries(RANGES).map(([key,[t]])=>`<option value="${key}" ${key===r?"selected":""}>${t}</option>`).join("")}</select>
+   <button class="btn pri" onclick="talkPdf()">PDF / Drucken</button></span></div>
+  <p class="muted" style="margin:0">Gespräch am ${dDEy(today())} · ${RANGES[r][0]}${from?` (seit ${dDEy(from)})`:""}</p>
+  <h1 style="margin-bottom:4px">So läuft es gerade</h1>
+  <p style="font-size:1.05rem">${k.icon?`<span class="kic big" style="--kc:${kidColor(k)};vertical-align:middle;margin-right:8px">${esc(k.icon)}</span>`:""}Name: <span style="display:inline-block;min-width:200px;border-bottom:1.5px solid var(--line)">&nbsp;</span> <span class="muted small noprint">(${esc(k.code)}, Name nur auf dem Ausdruck von Hand)</span></p>`;
+  if(!k.goals.length)h+=`<p class="muted">Für dieses Kind ist noch kein Verhalten angelegt.</p>`;
+  h+=`<div class="tgs n${Math.min(3,k.goals.length)}">`;
+  for(const g of k.goals){
+    const wk=weekBars(g,from);
+    h+=`<div class="tg"><h2>${esc(g.title)}</h2><p class="muted" style="margin:0 0 6px">Das wollen wir: <b style="color:var(--ink)">${g.dir==="down"?"weniger davon":"mehr davon"}</b> · ${sc(g)==="2"?`ja = ${esc(g.a10)}`:`${rng(g)[0]} = ${esc(g.a0)}, ${rng(g)[1]} = ${esc(g.a10)}`}</p>`;
+    if(wk.length<2){h+=`<div class="row"><span class="tdot" style="background:var(--muted)"></span><span class="msg">Wir beobachten noch. Bald sehen wir mehr.</span></div></div>`;continue}
+    const first=wk[0].v,now=wk[wk.length-1].v,d=(now-first)*(g.dir==="down"?-1:1);
+    const [sym,msg]=d>=1?["--up","Es wird besser!"]:d<=-1?["--acc","Daran üben wir weiter."]:["--muted","Es bleibt ungefähr gleich."];
+    const reached=g.target!==""&&(g.dir==="down"?now<=g.target:now>=g.target);
+    h+=`<div class="row"><span class="tdot" style="background:var(${sym})"></span><span class="msg">${msg}${reached?" Das Ziel ist erreicht!":""}</span></div>
+    <div class="nums"><div><span class="muted small">Am Anfang</span><b>${fm(g,first)}</b></div><div><span class="muted small">Jetzt</span><b>${fm(g,now)}</b></div>${g.target!==""?`<div><span class="muted small">Ziel</span><b>${g.dir==="down"?"≤":"≥"} ${tgt(g)}</b></div>`:""}</div>
+    ${barSvg(g,wk)}<p class="muted small" style="margin:2px 0 0">Jeder Balken ist eine Woche (Durchschnitt).</p></div>`;
+  }
+  h+=`</div><div class="tbot">`;
+  const wins=sortD(k.diary).filter(e=>e.cat==="Erfolg"&&(!from||e.date>=from));
+  if(wins.length)h+=`<div class="tg"><h2>Das hat gut geklappt</h2>${wins.map(e=>hide.includes(e.id)?`<p class="noprint muted small">ausgeblendet: ${dDE(e.date)} <button class="btn ghost small" onclick="view.hide=(view.hide||[]).filter(x=>x!==${ja(e.id)});render()">zeigen</button></p>`:
+    `<p style="font-size:1.05rem"><span class="tdot sm" style="background:var(--up)"></span> ${esc(e.text)} <span class="muted small">(${dDE(e.date)})</span> <button class="btn ghost small noprint" onclick="view.hide=[...(view.hide||[]),${ja(e.id)}];render()">ausblenden</button></p>`).join("")}</div>`;
+  h+=`<div class="tg"><h2>Das nehmen wir uns vor</h2><div class="noprint"><textarea placeholder="z. B. Ich melde mich, bevor ich etwas sage. Frau/Herr … erinnert mit einem Zeichen." oninput="view.plan=this.value;$('#planPrint').textContent=this.value">${esc(view.plan||"")}</textarea></div>
+  <p id="planPrint" style="white-space:pre-wrap;font-size:1.05rem" class="printonly">${esc(view.plan||"")}</p><div class="line"></div><div class="line"></div>
+  <div class="two" style="margin-top:22px"><div><div class="line"></div><span class="muted small">Kind</span></div><div><div class="line"></div><span class="muted small">Eltern</span></div></div>
+  <div class="two" style="margin-top:12px"><div><div class="line"></div><span class="muted small">Lehrkraft</span></div><div></div></div></div></div>
+  <p class="muted small noprint">Tipp: Zeig das Blatt auf dem Tablet oder erstelle eine PDF. Auf dem iPad öffnet sich dann das Teilen-Fenster mit „Drucken“ und „In Dateien sichern“. Es enthält keine Tagebucheinträge außer den Erfolgen und keine Einzelwerte.</p></div>`;
+  return h;
+}
+
+/* ===== PDF ohne Druckfenster =====
+   Auf dem iPad funktioniert Drucken aus der Home-Bildschirm-App nicht. Pfad baut die PDF deshalb selbst
+   (Helvetica, WinAnsi) und gibt sie übers Teilen-Fenster weiter: dort „In Dateien sichern“ oder „Drucken“. */
+const HW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,350,556,350,222,556,333,1000,556,556,333,1000,667,333,1000,350,611,350,350,222,222,333,333,350,556,1000,333,1000,500,333,944,350,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
+const HBW=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,350,556,350,278,556,500,1000,556,556,333,1000,667,333,1000,350,611,350,350,278,278,500,500,350,556,1000,333,1000,556,333,944,350,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+const WINA={"€":128,"‚":130,"„":132,"…":133,"‘":145,"’":146,"“":147,"”":148,"•":149,"–":150,"—":151};
+function pdfTxt(t){let o="";for(const ch of String(t??"").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/→/g,"->").replace(/\s+/g," ")){let c=WINA[ch]||ch.codePointAt(0);if(!WINA[ch]&&(c>255||(c>=127&&c<160)||c<32))continue;o+=String.fromCharCode(c)}return o}
+const PC={ink:[43,36,32],muted:[110,98,89],acc:[208,100,60],up:[76,138,90],down:[192,72,58],line:[221,210,196],soft:[245,236,224],white:[255,255,255]};
+class Pdf{constructor(w,h,m=40){this.W=w;this.H=h;this.M=m;this.pages=[];this.add()}
+  add(){this.c=[];this.pages.push(this.c);this.y=this.M+8}
+  need(h){if(this.y+h>this.H-this.M-14)this.add()}
+  f(n){return (Math.round(n*100)/100).toString()}
+  col(c,s){c=PC[c]||c;return c.map(x=>this.f(x/255)).join(" ")+(s?" RG":" rg")}
+  tw(s,size,b){const W=b?HBW:HW;let w=0;for(const ch of pdfTxt(s))w+=W[ch.charCodeAt(0)-32]||556;return w*size/1000}
+  text(x,y,s,o={}){const size=o.size||10,t=pdfTxt(s);if(!t)return;if(o.align==="right")x-=this.tw(s,size,o.bold);else if(o.align==="center")x-=this.tw(s,size,o.bold)/2;
+    this.c.push(`BT ${this.col(o.color||"ink")} /${o.bold?"F2":"F1"} ${size} Tf ${this.f(x)} ${this.f(this.H-y)} Td (${t.replace(/[\\()]/g,"\\$&")}) Tj ET`)}
+  lines(s,w,size,b){const out=[];let cur="";for(const word of String(s??"").split(/\s+/).filter(Boolean)){const t=cur?cur+" "+word:word;if(this.tw(t,size,b)<=w||!cur)cur=t;else{out.push(cur);cur=word}}if(cur)out.push(cur);return out}
+  wrap(s,x,w,o={}){const size=o.size||10,lh=o.lh||size*1.38;for(const l of this.lines(s,w,size,o.bold)){this.need(lh);this.text(x,this.y+size,l,o);this.y+=lh}}
+  line(x1,y1,x2,y2,o={}){this.c.push(`${this.col(o.color||"line",1)} ${o.w||1} w ${o.dash?`[${o.dash}] 0 d`:"[] 0 d"} ${this.f(x1)} ${this.f(this.H-y1)} m ${this.f(x2)} ${this.f(this.H-y2)} l S`)}
+  poly(p,o={}){if(p.length<2)return;this.c.push(`${this.col(o.color||"acc",1)} ${o.w||1.6} w [] 0 d 1 j 1 J `+p.map((q,i)=>`${this.f(q[0])} ${this.f(this.H-q[1])} ${i?"l":"m"}`).join(" ")+" S")}
+  rect(x,y,w,h,o={}){this.c.push(`${o.fill?this.col(o.fill):""} ${o.stroke?this.col(o.stroke,1)+" 1 w [] 0 d":""} ${this.f(x)} ${this.f(this.H-y-h)} ${this.f(w)} ${this.f(h)} re ${o.fill&&o.stroke?"B":o.fill?"f":"S"}`)}
+  circle(cx,cy,r,o={}){const k=r*.5523,Y=this.H-cy,f=n=>this.f(n);
+    this.c.push(`${o.fill?this.col(o.fill):""} ${o.stroke?this.col(o.stroke,1)+" 1 w [] 0 d":""} ${f(cx+r)} ${f(Y)} m ${f(cx+r)} ${f(Y+k)} ${f(cx+k)} ${f(Y+r)} ${f(cx)} ${f(Y+r)} c ${f(cx-k)} ${f(Y+r)} ${f(cx-r)} ${f(Y+k)} ${f(cx-r)} ${f(Y)} c ${f(cx-r)} ${f(Y-k)} ${f(cx-k)} ${f(Y-r)} ${f(cx)} ${f(Y-r)} c ${f(cx+k)} ${f(Y-r)} ${f(cx+r)} ${f(Y-k)} ${f(cx+r)} ${f(Y)} c ${o.fill&&o.stroke?"B":o.fill?"f":"S"}`)}
+  bytes(foot){const n=this.pages.length;if(foot)this.pages.forEach((p,i)=>{this.c=p;this.text(this.M,this.H-this.M+16,foot,{size:7.5,color:"muted"});this.text(this.W-this.M,this.H-this.M+16,`Seite ${i+1} von ${n}`,{size:7.5,color:"muted",align:"right"})});
+    const objs=["<< /Type /Catalog /Pages 2 0 R >>","",`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`,`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`],kids=[];
+    this.pages.forEach(p=>{const s=p.join("\n");objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${this.W} ${this.H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${objs.length+2} 0 R >>`);kids.push(objs.length);objs.push(`<< /Length ${s.length} >>\nstream\n${s}\nendstream`)});
+    objs[1]=`<< /Type /Pages /Kids [${kids.map(i=>i+" 0 R").join(" ")}] /Count ${kids.length} >>`;
+    let out="%PDF-1.4\n%\xe2\xe3\xcf\xd3\n";const off=[];objs.forEach((o,i)=>{off.push(out.length);out+=`${i+1} 0 obj\n${o}\nendobj\n`});
+    const x=out.length;out+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`+off.map(o=>String(o).padStart(10,"0")+" 00000 n \n").join("")+`trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${x}\n%%EOF`;
+    return Uint8Array.from(out,c=>c.charCodeAt(0))}}
+const plain=s=>String(s??"").replace(/<[^>]+>/g,"");
+// Verlaufsgraph wie in der App
+function pdfChart(d,g,x,y,w,h){const e=sortE(g.entries);if(!e.length){d.text(x,y+12,"Noch keine Einschätzungen.",{size:9,color:"muted"});return []}
+  const L=x+26,R=x+w-6,T=y+16,B=y+h-16,X=i=>e.length===1?(L+R)/2:L+i*(R-L)/(e.length-1),Y=v=>T+(1-v/10)*(B-T);
+  [0,5,10].forEach(v=>{d.line(L,Y(v),R,Y(v),{w:.6});d.text(L-5,Y(v)+3,sc(g)==="2"?(v===10?"ja":v===0?"nein":""):num(toK(g,v)),{size:7,color:"muted",align:"right"})});
+  if(g.target!==""){d.line(L,Y(g.target),R,Y(g.target),{color:"up",w:1,dash:"3 3"});d.text(R,Y(g.target)-3,"Ziel",{size:7,color:"up",align:"right"})}
+  if(g.start){const i=e.findIndex(q=>q.date>=g.start);if(i>0){const xs=(X(i-1)+X(i))/2;d.line(xs,T,xs,B,{color:"muted",w:.7,dash:"4 3"});d.text(xs+3,T+7,"Förderung",{size:7,color:"muted"})}}
+  d.poly(e.map((q,i)=>q.value==null?null:[X(i),Y(q.value)]).filter(Boolean),{color:"acc",w:1.6});
+  const r=e.length>60?1.3:2.2;e.forEach((q,i)=>q.value==null?d.circle(X(i),B,r,{stroke:"muted"}):d.circle(X(i),Y(q.value),r,{fill:"acc"}));
+  const pins=e.map((q,i)=>({q,i})).filter(p=>p.q.pin);pins.forEach((p,n)=>{d.line(X(p.i),T-4,X(p.i),B,{color:"acc",w:.5});d.circle(X(p.i),T-8,5,{fill:"acc"});d.text(X(p.i),T-5.5,String(n+1),{size:6.5,bold:1,color:"white",align:"center"})});
+  const step=Math.max(1,Math.ceil(e.length/7));e.forEach((q,i)=>{if(i%step===0||i===e.length-1)d.text(X(i),B+11,dDE(q.date),{size:7,color:"muted",align:i===e.length-1?"right":i===0?"left":"center"})});
+  return pins.map(p=>p.q)}
+async function reportPdf(){const k=kidById(view.kid);if(!k)return;
+  const r=view.range||"all",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),inR=q=>!from||q.date>=from;
+  const all=k.goals.flatMap(g=>g.entries).filter(inR),dates=all.map(q=>q.date).sort(),raters=[...new Set(all.map(q=>q.rater).filter(Boolean))];
+  const d=new Pdf(595,842),L=40,W=515;
+  d.text(L,d.y+14,"Verlauf für die Förderakte",{size:18,bold:1});d.y+=30;
+  const meta=[["Kürzel",k.code+(k.cls?` · Klasse ${k.cls}`:"")],["Name",""],["Zeitraum",`${RANGES[r][0]}: ${dates.length?dDEy(dates[0])+" bis "+dDEy(dates.at(-1)):"noch keine Einschätzungen"}`],["Eingeschätzt von",raters.join(", ")||"–"],["Erstellt",dDEy(today())+(db.me?` von ${db.me}`:"")+(k.closed?` · Förderung abgeschlossen am ${dDEy(k.closed)}`:"")]];
+  for(const [a,b] of meta){d.text(L,d.y+10,a,{size:9,color:"muted"});if(a==="Name"){d.line(L+105,d.y+12,L+330,d.y+12,{color:"muted",w:.8});d.text(L+338,d.y+10,"(nur auf dem Ausdruck von Hand)",{size:8,color:"muted"});d.y+=17}else{const y0=d.y;d.wrap(b,L+105,W-105,{size:9.5,bold:a==="Kürzel"});d.y=Math.max(d.y,y0+14)+3}}
+  for(const g0 of k.goals){const g={...g0,entries:g0.entries.filter(inR)},s=summary(k,g),t=trend(g);
+    d.need(240);d.y+=10;d.line(L,d.y,L+W,d.y,{w:.8});d.y+=8;
+    d.wrap(g.title,L,W,{size:12.5,bold:1});
+    d.wrap([g.fp&&`Förderziel: ${g.fp}`,g.dir==="down"?"weniger davon":"mehr davon",scaleName(g),g.target!==""&&`Ziel ${g.dir==="down"?"<=":">="} ${tgt(g)}`,g.start&&`Förderung seit ${dDEy(g.start)}`,`Tendenz: ${t.t}`].filter(Boolean).join(" · "),L,W,{size:8.5,color:"muted"});
+    d.y+=4;const pins=pdfChart(d,g,L,d.y,W,150);d.y+=158;
+    pins.forEach((p,n)=>d.wrap(`(${n+1}) ${dDE(p.date)}: ${p.note||"ohne Kommentar"}`,L,W,{size:8.5,color:"muted"}));
+    d.need(30);d.y+=4;d.wrap("Was zeigt sich?",L,W,{size:10.5,bold:1});s.lines.forEach(l=>d.wrap(plain(l),L,W,{size:9.5}));
+    const m={};rated(g).forEach(q=>{if(q.subj)(m[q.subj]??=[]).push(q.value)});const rows=Object.entries(m).filter(([,v])=>v.length>=2).map(([a,v])=>[a,mean(v),v.length]).sort((a,b)=>g.dir==="down"?a[1]-b[1]:b[1]-a[1]);
+    if(rows.length>=2){d.need(30);d.y+=4;d.wrap("Nach Fach",L,W,{size:10.5,bold:1});rows.forEach(([a,v,n])=>{d.need(14);d.text(L,d.y+9,a,{size:9});d.text(L+120,d.y+9,fm(g,v),{size:9,align:"right"});d.rect(L+132,d.y+2,Math.max(2,v/10*220),7,{fill:"acc"});d.text(L+362,d.y+9,`n = ${n}`,{size:8,color:"muted"});d.y+=13})}}
+  const diary=sortD(k.diary).filter(inR).reverse();d.need(40);d.y+=12;d.line(L,d.y,L+W,d.y,{w:.8});d.y+=8;d.wrap("Tagebuch",L,W,{size:12.5,bold:1});
+  if(!diary.length)d.wrap("Keine Einträge im Zeitraum.",L,W,{size:9,color:"muted"});
+  for(const q of diary){d.need(28);d.wrap([dDEy(q.date),q.subj,q.rater,q.cat].filter(Boolean).join(" · "),L,W,{size:8.5,color:"muted"});d.wrap(q.text,L,W,{size:9.5});d.y+=4}
+  d.y+=8;d.wrap(`Die Werte sind Einschätzungen der Lehrkräfte direkt nach der Stunde, kein Test. Sie zeigen Tendenzen und ersetzen nicht das Gespräch im Team. Erstellt mit Pfad ${PFAD_VERSION}.`,L,W,{size:8,color:"muted"});
+  await givePdf(`pfad-bericht-${k.code.replace(/[^\w-]/g,"_")}-${today()}.pdf`,d.bytes(`Pfad · Bericht ${k.code} · ${dDEy(today())}`))}
+async function talkPdf(){const k=kidById(view.kid);if(!k)return;
+  const r=view.range||"w4",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),hide=view.hide||[];
+  const d=new Pdf(842,595,32),L=32,W=778;
+  d.text(L,d.y+8,`Gespräch am ${dDEy(today())} · ${RANGES[r][0]}${from?` (seit ${dDEy(from)})`:""}`,{size:9,color:"muted"});d.y+=14;
+  d.text(L,d.y+20,"So läuft es gerade",{size:22,bold:1});d.text(L+300,d.y+20,"Name:",{size:12});d.line(L+340,d.y+22,L+560,d.y+22,{color:"muted",w:.8});d.y+=36;
+  const gs=k.goals,n=Math.min(3,gs.length)||1,gap=14,cw=(W-gap*(n-1))/n;
+  for(let row=0;row<gs.length;row+=3){const part=gs.slice(row,row+3);d.need(250);const y0=d.y;let yMax=y0;
+    part.forEach((g,j)=>{const x=L+j*(cw+gap);d.y=y0;d.rect(x,y0,cw,236,{stroke:"line"});d.y+=10;
+      d.wrap(g.title,x+10,cw-20,{size:12.5,bold:1});
+      d.wrap(`Das wollen wir: ${g.dir==="down"?"weniger davon":"mehr davon"} · ${sc(g)==="2"?`ja = ${g.a10}`:`${rng(g)[0]} = ${g.a0}, ${rng(g)[1]} = ${g.a10}`}`,x+10,cw-20,{size:8.5,color:"muted"});
+      const wk=weekBars(g,from);
+      if(wk.length<2){d.y+=6;d.wrap("Wir beobachten noch. Bald sehen wir mehr.",x+10,cw-20,{size:11,bold:1});yMax=Math.max(yMax,y0+236);return}
+      const first=wk[0].v,now=wk.at(-1).v,dd=(now-first)*(g.dir==="down"?-1:1),reached=g.target!==""&&(g.dir==="down"?now<=g.target:now>=g.target);
+      const [c,msg]=dd>=1?["up","Es wird besser!"]:dd<=-1?["acc","Daran üben wir weiter."]:["muted","Es bleibt ungefähr gleich."];
+      d.y+=4;d.circle(x+16,d.y+6,5,{fill:c});d.wrap(msg+(reached?" Das Ziel ist erreicht!":""),x+27,cw-37,{size:11.5,bold:1});
+      d.y+=2;[["Am Anfang",fm(g,first)],["Jetzt",fm(g,now)],...(g.target!==""?[["Ziel",(g.dir==="down"?"<= ":">= ")+tgt(g)]]:[])].forEach(([a,b],i)=>{const bx=x+10+i*70;d.text(bx,d.y+8,a,{size:7.5,color:"muted"});d.text(bx,d.y+22,b,{size:13,bold:1})});d.y+=30;
+      const H=Math.max(60,y0+236-d.y-22),T=d.y+12,B=d.y+H,cnt=wk.length,bw=Math.min(32,(cw-30)/cnt-8),gp=(cw-20-cnt*bw)/(cnt+1),Y=v=>T+(1-v/10)*(B-T),meets=v=>g.target!==""&&(g.dir==="down"?v<=g.target:v>=g.target);
+      d.line(x+10,B,x+cw-10,B,{w:1.2});
+      wk.forEach((q,i)=>{const bx=x+10+gp+i*(bw+gp);d.rect(bx,Y(q.v),bw,B-Y(q.v),{fill:meets(q.v)?"up":i===cnt-1?"acc":[232,177,153]});d.text(bx+bw/2,Y(q.v)-3,fm(g,q.v),{size:8,bold:1,align:"center"});d.text(bx+bw/2,B+9,i===cnt-1?"jetzt":dDE(q.w),{size:6.5,color:"muted",align:"center"})});
+      if(g.target!==""){d.line(x+10,Y(g.target),x+cw-10,Y(g.target),{color:"up",w:1.2,dash:"4 3"});d.text(x+cw-10,Y(g.target)-3,"Ziel",{size:7,bold:1,color:"up",align:"right"})}
+      yMax=Math.max(yMax,y0+236)});
+    d.y=yMax+12}
+  if(!gs.length){d.wrap("Für dieses Kind ist noch kein Verhalten angelegt.",L,W,{size:10,color:"muted"})}
+  d.need(150);const y0=d.y,hw=(W-gap)/2,wins=sortD(k.diary).filter(q=>q.cat==="Erfolg"&&(!from||q.date>=from)&&!hide.includes(q.id));
+  let yl=y0;if(wins.length){d.y=y0;d.wrap("Das hat gut geklappt",L,hw,{size:12.5,bold:1});wins.forEach(q=>d.wrap(`* ${q.text} (${dDE(q.date)})`,L,hw,{size:10.5}));yl=d.y}
+  const x2=wins.length?L+hw+gap:L,w2=wins.length?hw:W;d.y=y0;d.wrap("Das nehmen wir uns vor",x2,w2,{size:12.5,bold:1});if(view.plan)d.wrap(view.plan,x2,w2,{size:10.5});
+  d.y+=18;d.line(x2,d.y,x2+w2,d.y,{color:"muted",w:.7});d.y+=20;d.line(x2,d.y,x2+w2,d.y,{color:"muted",w:.7});d.y+=34;
+  [["Kind",0],["Eltern",1],["Lehrkraft",0]].forEach(([t],i)=>{const sx=x2+(i%2)*(w2/2),sy=d.y+Math.floor(i/2)*32;d.line(sx,sy,sx+w2/2-16,sy,{color:"muted",w:.7});d.text(sx,sy+10,t,{size:8,color:"muted"})});
+  await givePdf(`pfad-gespraech-${k.code.replace(/[^\w-]/g,"_")}-${today()}.pdf`,d.bytes())}
+async function givePdf(name,bytes){if(await giveFile(name,bytes,"application/pdf"))toast("PDF erstellt")}
+
+/* ===== Bericht für die Förderakte ===== */
+function pdfHint(){return isIOS?"„PDF erstellen“ öffnet das Teilen-Fenster. Dort tippst du auf „In Dateien sichern“ oder „Drucken“. Lege die Datei in die Förderakte, nicht in eine private Cloud."
+  :"„PDF erstellen“ lädt die Datei herunter. Lege sie in die Förderakte, nicht in eine private Cloud."}
+function reportV(){
+  const k=kidById(view.kid);if(!k){view={tab:"klassen"};return klassenV()}
+  const r=view.range||"all",from=RANGES[r][1]==null?"":addDays(today(),-RANGES[r][1]),inR=x=>!from||x.date>=from;
+  const all=k.goals.flatMap(g=>g.entries).filter(inR).map(e=>e.date).sort(),diary=sortD(k.diary).filter(inR).reverse();
+  const span=all.length?`${dDEy(all[0])} bis ${dDEy(all.at(-1))}`:"noch keine Einschätzungen";
+  const raters=[...new Set(k.goals.flatMap(g=>g.entries).filter(inR).map(e=>e.rater).filter(Boolean))];
+  let h=`<div class="report"><div class="noprint between" style="margin-bottom:8px;flex-wrap:wrap;gap:8px"><button class="btn ghost" onclick="back({tab:'${view.tab}',kid:${ja(k.id)}})">‹ Zurück</button>
+   <span class="row" style="flex-wrap:wrap;gap:8px"><select style="width:auto" aria-label="Zeitraum" onchange="view.range=this.value;render()">${Object.entries(RANGES).map(([key,[t]])=>`<option value="${key}" ${key===r?"selected":""}>${t}</option>`).join("")}</select>
+   <button class="btn pri" onclick="reportPdf()">PDF erstellen</button></span></div>
+  <p class="noprint small muted">${pdfHint()}</p>
+  <h1>Verlauf für die Förderakte</h1>
+  <table class="meta"><tr><td>Kürzel</td><td><b>${esc(k.code)}</b>${k.cls?` · Klasse ${esc(k.cls)}`:""}</td></tr>
+  <tr><td>Name</td><td><span style="display:inline-block;min-width:220px;border-bottom:1.5px solid var(--line)">&nbsp;</span> <span class="muted small">(nur auf dem Ausdruck von Hand)</span></td></tr>
+  <tr><td>Zeitraum</td><td>${RANGES[r][0]}: ${span}</td></tr>
+  <tr><td>Eingeschätzt von</td><td>${raters.length?raters.map(esc).join(", "):"–"}</td></tr>
+  <tr><td>Erstellt</td><td>${dDEy(today())}${db.me?` von ${esc(db.me)}`:""}${k.closed?` · Förderung abgeschlossen am ${dDEy(k.closed)}`:""}</td></tr></table>`;
+  if(!k.goals.length)h+=`<p class="muted">Für dieses Kind ist noch kein Verhalten angelegt.</p>`;
+  for(const g0 of k.goals){const g={...g0,entries:g0.entries.filter(inR)},s=summary(k,g);
+    h+=`<div class="card rg"><div class="between"><div><b style="font-size:1.1rem">${esc(g.title)}</b><div class="muted small">${g.fp?`Förderziel: ${esc(g.fp)} · `:""}${g.dir==="down"?"weniger davon":"mehr davon"} · ${esc(scaleName(g))}${g.target!==""?` · Ziel ${g.dir==="down"?"≤":"≥"} ${tgt(g)}`:""}${g.start?` · Förderung seit ${dDEy(g.start)}`:""}</div></div>${badge(trend(g))}</div>
+    ${chart(g,{...k,diary:[]},400)}
+    <h2 style="font-size:1rem;margin:12px 0 4px">Was zeigt sich?</h2>${s.lines.map(l=>`<p class="small">${l}</p>`).join("")}
+    ${s.bs?.html?`<h2 style="font-size:1rem;margin:12px 0 4px">Nach Fach</h2>${s.bs.html}`:""}</div>`}
+  h+=`<div class="card"><h2 style="margin-top:0">Tagebuch</h2>${diary.length?diary.map(dItem).join(""):`<p class="muted small">Keine Einträge im Zeitraum.</p>`}</div>
+  <p class="muted small">Die Werte sind Einschätzungen der Lehrkräfte direkt nach der Stunde, kein Test. Sie zeigen Tendenzen und ersetzen nicht das Gespräch im Team. Erstellt mit Pfad (schulinterner Prototyp).</p></div>`;
+  return h}
+
+/* ===== Analyse ===== */
+const CATCOL={Notiz:"--chart1",Erfolg:"--up",Vorfall:"--down",Gespräch:"--acc",Elternkontakt:"--acc",Absprache:"--new",Beobachtung:"--muted"};
+function chart(g,k,max=30){
+  const e=sortE(g.entries).slice(-max);if(!e.length)return '<p class="muted">Noch keine Einschätzungen.</p>';
+  const W=innerWidth<600?420:600,H=236,L=26,R=8,T=30,B=26;
+  const X=i=>e.length===1?(L+W-R)/2:L+i*(W-L-R)/(e.length-1),Y=v=>T+(1-v/10)*(H-T-B);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Verlauf: ${esc(g.title)}, ${e.length} Einschätzungen, Tendenz ${esc(trend(g).t)}">`;
+  [0,5,10].forEach(v=>s+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="var(--muted)">${sc(g)==="2"?(v===10?"ja":v===0?"nein":""):num(toK(g,v))}</text>`);
+  if(g.target!==""){s+=`<line x1="${L}" x2="${W-R}" y1="${Y(g.target)}" y2="${Y(g.target)}" stroke="var(--up)" stroke-dasharray="3 4" stroke-width="1.5"/><text x="${W-R}" y="${Y(g.target)-5}" font-size="11" text-anchor="end" fill="var(--up)">Ziel</text>`}
+  if(g.start){const i=e.findIndex(x=>x.date>=g.start);if(i>0){const xs=(X(i-1)+X(i))/2;s+=`<line x1="${xs}" x2="${xs}" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-dasharray="5 4"/><text x="${xs+5}" y="${T+10}" font-size="11" fill="var(--muted)">Förderung</text>`}}
+  const pts=e.map((x,i)=>x.value==null?null:[X(i),Y(x.value)]);
+  s+=`<polyline fill="none" stroke="var(--chart1)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts.filter(Boolean).map(p=>p.join(",")).join(" ")}"/>`;
+  e.forEach((x,i)=>{if(x.value==null)s+=`<circle cx="${X(i)}" cy="${H-B}" r="4" fill="none" stroke="var(--muted)"><title>${dDE(x.date)}: nicht beobachtet</title></circle>`;
+    else s+=`<circle cx="${X(i)}" cy="${Y(x.value)}" r="4.5" fill="var(--chart1)" stroke="var(--card)" stroke-width="1.5"><title>${dDE(x.date)} ${esc(x.subj)}: ${esc(dv(g,x.value))}</title></circle>`});
+  // Tagebucheinträge im Zeitraum als nummerierte Markierungen
+  const xDate=d=>{const i=e.findIndex(x=>x.date>=d);if(i<0)return d===e[e.length-1].date?X(e.length-1):null;if(e[i].date===d)return X(i);return i===0?null:(X(i-1)+X(i))/2};
+  const pins=g.entries.filter(x=>x.pin).map(x=>({id:x.id,date:x.date,ts:x.ts,cat:"Notiz",text:x.note||"(ohne Kommentar)",subj:x.subj,rater:x.rater,edited:x.edited,_e:1}));
+  const marks=sortD([...(k?.diary||[]),...pins]).reverse().map(d=>({d,x:xDate(d.date)})).filter(m=>m.x!=null),used={};
+  marks.forEach((m,n)=>{const col=`var(${CATCOL[m.d.cat]||"--muted"})`,key=Math.round(m.x),off=(used[key]=(used[key]||0)+1)-1,cx=Math.min(W-9,Math.max(L+9,m.x+off*15));
+    s+=`<line x1="${m.x}" x2="${m.x}" y1="${T-4}" y2="${H-B}" stroke="${col}" stroke-width="1" opacity=".45"/>
+    <g style="cursor:pointer" onclick="const el=document.getElementById('dn${n+1}');el.scrollIntoView({block:'center'});el.animate([{background:'var(--accs)'},{background:'transparent'}],1200)"><circle cx="${cx}" cy="${T-14}" r="8" fill="${col}"/><text x="${cx}" y="${T-10.5}" font-size="10" font-weight="700" text-anchor="middle" fill="var(--card)">${n+1}</text><title>${dDE(m.d.date)} ${esc(m.d.cat)}: ${esc(m.d.text)}</title></g>`});
+  chart.marks=marks;
+  const step=Math.max(1,Math.ceil(e.length/6));
+  e.forEach((x,i)=>{if(i%step===0||i===e.length-1)s+=`<text x="${X(i)}" y="${H-7}" font-size="11" text-anchor="${i===e.length-1?"end":i===0?"start":"middle"}" fill="var(--muted)">${dDE(x.date)}</text>`});
+  s+="</svg>"+(e.some(x=>x.value==null)?'<p class="muted small">○ auf der Grundlinie = nicht beobachtet</p>':"");
+  if(marks.length)s+=`<h2 style="margin:14px 0 4px;font-size:1rem">Notizen im Zeitraum</h2>`+marks.map((m,n)=>`<div class="dentry" id="dn${n+1}" style="display:flex;gap:10px"><span style="flex:none;width:20px;height:20px;border-radius:50%;background:var(${CATCOL[m.d.cat]||"--muted"});color:var(--card);font-size:.75rem;font-weight:700;display:grid;place-items:center;margin-top:2px">${n+1}</span><div class="grow">${dItem(m.d).replace('<div class="dentry">','<div>')}<button class="btn ghost small noprint" style="padding:2px 0" onclick="${m.d._e?`editEntry(${ja(m.d.id)})`:`editDiary(${ja(k.id)},${ja(m.d.id)})`}">bearbeiten</button></div></div>`).join("");
+  return s;
+}
+function groupTable(g,key,label){
+  const m={};rated(g).forEach(e=>{const k=e[key]||"";if(!k)return;(m[k]??=[]).push(e.value)});
+  const rows=Object.entries(m).filter(([,v])=>v.length>=2).map(([k,v])=>[k,mean(v),v.length]);
+  if(rows.length<2)return {html:"",best:null,worst:null};
+  rows.sort((a,b)=>g.dir==="down"?a[1]-b[1]:b[1]-a[1]);
+  return {best:rows[0],worst:rows[rows.length-1],html:`<table><tr><th>${label}</th><th>Ø</th><th style="width:40%"></th><th>n</th></tr>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${fm(g,r[1])}</td><td><div class="bar" style="width:${r[1]*10}%"></div></td><td class="muted">${r[2]}</td></tr>`).join("")}</table>`};
+}
+function summary(k,g){
+  const r=rated(g),all=g.entries,na=all.filter(e=>e.value==null).length,t=trend(g),out=[];
+  if(!r.length)return {lines:["Noch keine Einschätzungen."],text:""};
+  const first=sortE(all)[0].date,last=sortE(all).slice(-1)[0].date;
+  out.push(`${r.length} Einschätzung${r.length===1?"":"en"} vom ${dDEy(first)} bis ${dDEy(last)}${na?`, dazu ${na}-mal nicht beobachtet`:""}.`);
+  if(t.k==="neu")out.push(`Für einen Trend braucht es mindestens 6 Einschätzungen. Bisher sind es ${r.length}.`);
+  else out.push(`${t.byStart?`Die letzten 5 Einschätzungen vor Förderbeginn (${dDEy(g.start)}) lagen im Schnitt bei ${fm(g,t.mP)}, die letzten 5 seitdem bei ${fm(g,t.mL)}.`:`Die letzten 5 Einschätzungen liegen im Schnitt bei ${fm(g,t.mL)}, die 5 davor bei ${fm(g,t.mP)}.`} <b>${t.k==="besser"?"Das Verhalten entwickelt sich eher in die gewünschte Richtung.":t.k==="schlechter"?"Das Verhalten entwickelt sich eher in die falsche Richtung.":"Das Verhalten ist ungefähr gleich geblieben."}</b>`);
+  if(g.target!==""){const l5=r.slice(-5),hit=l5.filter(e=>g.dir==="down"?e.value<=g.target:e.value>=g.target).length;
+    out.push(`Ziel (${g.dir==="down"?"höchstens":"mindestens"} ${tgt(g)}): in ${hit} der letzten ${l5.length} Einschätzungen erreicht.${hit>=4&&l5.length>=5?" <b>Das Ziel kann als erreicht gelten.</b>":""}`)}
+  const bs=groupTable(g,"subj","Fach"),bt=groupTable(g,"slot","Stunde");
+  if(bs.best)out.push(`Am besten läuft es in ${esc(bs.best[0])} (Ø ${fm(g,bs.best[1])}), am schwierigsten in ${esc(bs.worst[0])} (Ø ${fm(g,bs.worst[1])}).`);
+  const plain=s=>s.replace(/<[^>]+>/g,"");
+  const text=`Evaluation: ${g.fp||g.title}\n`+out.map(plain).join("\n")+`\nWeiteres Vorgehen: `;
+  return {lines:out,text,bs,bt};
+}
+function analyseV(){
+  const kids=db.kids.filter(k=>k.goals.length);
+  if(!kids.length)return `<h1>Verlauf</h1><p class="muted">Noch keine Daten. Lege unter „Kinder“ ein Kind mit einem Verhalten an.</p>`;
+  const k=kidById(view.aKid)||kids[0],g=goalById(k,view.aGoal)||k.goals[0];
+  const s=summary(k,g),notes=sortE(g.entries).filter(e=>e.note).slice(-6).reverse();
+  return `${HIST.length&&HIST.at(-1).kid?`<button class="btn ghost noprint" onclick="back()">‹ Zurück</button>`:""}<h1>Verlauf</h1>
+  <div class="two noprint"><select onchange="go({tab:'analyse',aKid:this.value})">${kids.map(x=>`<option value="${esc(x.id)}" ${x.id===k.id?"selected":""}>${x.icon?esc(x.icon)+" ":""}${esc(x.code)}</option>`).join("")}</select>
+  <select onchange="go({tab:'analyse',aKid:${ja(k.id)},aGoal:this.value})">${k.goals.map(x=>`<option value="${esc(x.id)}" ${x.id===g.id?"selected":""}>${esc(x.title)}</option>`).join("")}</select></div>
+  <div class="card" style="margin-top:12px"><div class="between"><div><b>${esc(g.title)}</b><div class="muted small">${esc(k.code)} · ${g.dir==="down"?"weniger davon":"mehr davon"}</div></div>${badge(trend(g))}</div>
+  ${chart(g,k)}</div>
+  ${docTiles(k,"analyse")}
+  <div class="card sum"><h2 style="margin-top:0">Was zeigt sich?</h2>${s.lines.map(l=>`<p>${l}</p>`).join("")}
+  ${s.text?`<p class="row noprint" style="margin-top:10px;flex-wrap:wrap"><button class="btn" onclick="copyEval()">Text für den Förderplan kopieren</button><button class="btn ghost" onclick="exportCSV(${ja(k.id)},${ja(g.id)})">Als Tabelle (CSV)</button></p><p class="muted small" style="margin:4px 0 0">Kopiert die Auswertung für die Evaluation im Förderplan. Vor dem Einfügen prüfen und ergänzen.</p>`:""}</div>
+  ${s.bs?.html?`<div class="card"><h2 style="margin-top:0">Nach Fach</h2>${s.bs.html}</div>`:""}
+  ${s.bt?.html?`<div class="card"><h2 style="margin-top:0">Nach Stunde</h2>${s.bt.html}</div>`:""}
+  ${notes.length?`<div class="card"><h2 style="margin-top:0">Letzte Kommentare</h2>${notes.map(n=>`<p><span class="muted small">${dDE(n.date)}${n.subj?" · "+esc(n.subj):""}${" · "+esc(dv(g,n.value))}</span><br>${esc(n.note)}</p>`).join("")}</div>`:""}
+  ${s.text?`<textarea id="evt" hidden>${esc(s.text)}</textarea>`:""}
+  ${entryEditV(k,g)}
+  <details class="card noprint" ${view.openList?"open":""}><summary><b>Alle Einschätzungen (${g.entries.length})</b></summary>
+  <table style="margin-top:8px"><tr><th>Datum</th><th>Fach</th><th>Wert</th><th></th></tr>${sortE(g.entries).reverse().map(e=>`<tr><td>${dDE(e.date)} <span class="muted small">${esc(e.slot)}</span></td><td>${esc(e.subj)}</td><td>${esc(dv(g,e.value))}</td><td style="white-space:nowrap"><button class="btn ghost small" style="padding:2px 10px 2px 0" onclick="editEntry(${ja(e.id)})">bearbeiten</button><button class="btn ghost danger small" style="padding:2px 0" onclick="delEntry(${ja(k.id)},${ja(g.id)},${ja(e.id)})">löschen</button></td></tr>`+(e.note?`<tr><td colspan="4" class="muted small" style="padding-top:0">${esc(e.note)}</td></tr>`:"")).join("")}</table></details>
+  <p class="muted small">Die Auswertung zeigt Tendenzen, kein Urteil über das Kind. Besprecht sie im Team und mit Blick auf die Kommentare.</p>`;
+}
+let ee=null;
+function editEntry(id){const k=kidById(view.aKid)||db.kids.filter(x=>x.goals.length)[0],g=goalById(k,view.aGoal)||k.goals[0];
+  ee={...g.entries.find(e=>e.id===id)};view={tab:"analyse",aKid:k.id,aGoal:g.id,openList:true};render();const f=$("#eform");if(f)f.scrollIntoView({block:"center"})}
+function entryEditV(k,g){
+  if(!ee||!g.entries.some(e=>e.id===ee.id))return "";
+  return `<div class="card noprint" id="eform"><p style="margin:0"><b>Einschätzung bearbeiten</b></p>
+  <div class="two" style="margin-top:10px"><div><div class="sub">Datum</div><input type="date" value="${ee.date}" max="${today()}" onchange="ee.date=this.value||ee.date"></div>
+  <div><div class="sub">Wert</div><select onchange="ee.value=this.value===''?null:+this.value">${scaleOpts(g).map(o=>`<option value="${o.v}" ${ee.value===o.v?"selected":""}>${esc(o.l)}</option>`).join("")}<option value="" ${ee.value==null?"selected":""}>nicht beobachtet</option></select></div></div>
+  <div class="two" style="margin-top:8px"><div><div class="sub">Stunde</div><select onchange="ee.slot=this.value"><option value="">Ohne Stunde</option>${SLOTS_ALL().map(x=>`<option ${x===ee.slot?"selected":""}>${x}</option>`).join("")}</select></div>
+  <div><div class="sub">Fach</div><select onchange="ee.subj=this.value"><option value="">Ohne Fach</option>${db.subjects.map(x=>`<option ${x===ee.subj?"selected":""}>${esc(x)}</option>`).join("")}</select></div></div>
+  <div class="sub" style="margin-top:8px">Kommentar</div><textarea oninput="ee.note=this.value">${esc(ee.note)}</textarea>
+  <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" style="width:auto" ${ee.pin?"checked":""} onchange="ee.pin=this.checked"> Im Verlauf markieren</label>
+  <p class="row" style="margin-top:10px"><button class="btn pri" onclick="saveEntry(${ja(k.id)},${ja(g.id)})">Speichern</button><button class="btn ghost" onclick="ee=null;render()">Abbrechen</button></p></div>`;
+}
+function saveEntry(kid,gid){const g=goalById(kidById(kid),gid),e=g.entries.find(x=>x.id===ee.id);
+  Object.assign(e,{date:ee.date,value:ee.value,slot:ee.slot,subj:ee.subj,note:(ee.note||"").trim(),pin:!!ee.pin,edited:Date.now()});ee=null;save();toast("Gespeichert");render()}
+async function delEntry(kid,gid,id){if(!await ask("Einschätzung löschen?",{ok:"Löschen",danger:true}))return;const g=goalById(kidById(kid),gid);g.entries=g.entries.filter(e=>e.id!==id);tomb(kidById(kid),id);save();render()}
+function copyEval(){const t=$("#evt");t.hidden=false;t.select();setTimeout(()=>t.hidden=true);(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast("Kopiert")).catch(()=>{document.execCommand("copy");toast("Kopiert")})}
+
+/* ===== Profil ===== */
+/* ===== Datenmodell für Austausch: Änderungszeiten, Löschmarken, Zusammenführen =====
+   Jeder Eintrag hat eine feste id und eine Änderungszeit (ts/edited/upd). Gelöschte ids stehen in k.del.
+   Zusammengeführt wird pro Kind: Neues kommt dazu, bei gleicher id gewinnt die neuere Fassung.
+   Dieselbe Regel nutzt der Schulserver (server/pfad-server.mjs). */
+const tomb=(k,id)=>{(k.del??=[]).includes(id)||k.del.push(id);k.delTs=Date.now()};
+const ver=x=>x.edited||x.upd||x.ts||0;
+function kidVer(k){return Math.max(ver(k),...k.goals.map(ver),...k.goals.flatMap(g=>g.entries.map(ver)),...(k.diary||[]).map(ver),k.delTs||0)}
+function mergeList(a=[],b=[],del){const m=new Map(a.map(x=>[x.id,x]));for(const x of b){const y=m.get(x.id);if(!y||ver(x)>ver(y))m.set(x.id,x)}return [...m.values()].filter(x=>!del.has(x.id))}
+function mergeKid(k,kids=db.kids,classes=db.classes){const ex=kids.find(x=>x.id===k.id);
+  if(!ex){kids.push(k);if(k.cls&&!classes.includes(k.cls))classes.push(k.cls);return 1}
+  const del=new Set([...(ex.del||[]),...(k.del||[])]),before=JSON.stringify(ex);
+  if(ver(k)>ver(ex))Object.assign(ex,{code:k.code,cls:k.cls,upd:k.upd,...(k.icon?{icon:k.icon}:{})});
+  if(k.team)ex.team=k.team;if(k.pending)ex.pending=k.pending;
+  const eg=new Map(ex.goals.map(g=>[g.id,g]));
+  ex.goals=mergeList(ex.goals,k.goals,del).map(g=>{const a=eg.get(g.id)?.entries||[],b=(k.goals.find(x=>x.id===g.id)||{}).entries||[];return {...g,entries:mergeList(a,b,del)}});
+  ex.diary=mergeList(ex.diary,k.diary,del);ex.del=[...del];ex.delTs=Math.max(ex.delTs||0,k.delTs||0);if(ex.cls&&!classes.includes(ex.cls))classes.push(ex.cls);
+  return before!==JSON.stringify(ex)?1:0}
+// Was brächte ein fremder Stand für dieses Kind Neues? (für die Auswahl beim Import)
+function diffKid(k){const ex=kidById(k.id);
+  const cnt=x=>({goals:x.goals.length,entries:x.goals.reduce((s,g)=>s+g.entries.length,0),diary:(x.diary||[]).length});
+  if(!ex)return {neu:true,...cnt(k)};
+  const ids=new Map([...ex.goals,...ex.goals.flatMap(g=>g.entries),...(ex.diary||[])].map(x=>[x.id,ver(x)])),del=new Set(ex.del||[]);
+  let entries=0,diary=0,goals=0,changed=0;
+  for(const g of k.goals){if(del.has(g.id))continue;if(!ids.has(g.id))goals++;else if(ver(g)>ids.get(g.id))changed++;
+    for(const e of g.entries){if(del.has(e.id))continue;if(!ids.has(e.id))entries++;else if(ver(e)>ids.get(e.id))changed++}}
+  for(const e of k.diary||[]){if(del.has(e.id))continue;if(!ids.has(e.id))diary++;else if(ver(e)>ids.get(e.id))changed++}
+  const dels=(k.del||[]).filter(id=>ids.has(id)).length;
+  return {neu:false,goals,entries,diary,changed,dels,leer:!(goals+entries+diary+changed+dels)}}
+/* ===== Verschlüsselung (Sicherungen und geteilte Stände) ===== */
+const b64=u=>{let s="";new Uint8Array(u).forEach(c=>s+=String.fromCharCode(c));return btoa(s)},unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const enc=x=>new TextEncoder().encode(typeof x==="string"?x:JSON.stringify(x)),dec=b=>new TextDecoder().decode(b);
+const rnd=n=>crypto.getRandomValues(new Uint8Array(n));
+async function pwKey(pw,salt){const base=await crypto.subtle.importKey("raw",enc(pw),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:310000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function gcm(key,data){const iv=rnd(12);return {iv:b64(iv),ct:b64(await crypto.subtle.encrypt({name:"AES-GCM",iv},key,data))}}
+const ungcm=(key,o)=>crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(o.iv)},key,unb64(o.ct));
+async function idb(){return new Promise((ok,no)=>{const r=indexedDB.open("verlaufsbogen",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>ok(r.result);r.onerror=no})}
+async function idbGet(k){const d=await idb();return new Promise(ok=>{const r=d.transaction("h").objectStore("h").get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}
+async function idbSet(k,v){const d=await idb();return new Promise(ok=>{const t=d.transaction("h","readwrite");v==null?t.objectStore("h").delete(k):t.objectStore("h").put(v,k);t.oncomplete=ok})}
+async function askNewPw(msg){const pw=await askText(msg,"Passwort (mind. 8 Zeichen)","password");if(!pw)return null;if(pw.length<8){toast("Mindestens 8 Zeichen");return null}
+  if(await askText("Passwort wiederholen","Passwort","password")!==pw){toast("Passwörter sind verschieden");return null}return pw}
+// Eigene Sicherung: Passwort einmal festlegen; der daraus abgeleitete Schlüssel bleibt nicht auslesbar auf dem Gerät
+async function backupKey(){let k=null;try{k=await idbGet("bkey")}catch(e){}if(k&&db.bsalt)return {key:k,salt:db.bsalt};
+  const pw=await askNewPw("Lege ein Passwort für deine Sicherungen fest. Du brauchst es, um eine Sicherung auf einem anderen Gerät zu laden.");if(!pw)return null;
+  const salt=b64(rnd(16));k=await pwKey(pw,unb64(salt));
+  if(await ask("Passwort auf diesem Gerät merken? Dann geht jede Sicherung mit einem Tipp.",{ok:"Merken",cancel:"Jedes Mal fragen"})){db.bsalt=salt;try{await idbSet("bkey",k)}catch(e){}save()}
+  return {key:k,salt}}
+async function forgetBackupPw(){await idbSet("bkey",null);delete db.bsalt;save();render();toast("Sicherungs-Passwort vergessen")}
+async function sealFile(art,payload,keyInfo){const body=await gcm(keyInfo.key,enc(payload));
+  return JSON.stringify({pfad:3,art,von:db.me||"",erstellt:new Date().toISOString(),anzahl:payload.kids.length,salt:keyInfo.salt,...body})}
+async function openFile(o,name){
+  if(o.pfad===3||(o.verlaufsbogen==="sicherung"&&o.salt)){for(;;){const pw=await askText((o.art==="teilen"?`Passwort für den geteilten Stand${o.von?` von ${o.von}`:""}`:"Passwort der Sicherung")+(name?` (${name})`:""),"Passwort","password");if(!pw)return null;
+    try{const k=await pwKey(pw,unb64(o.salt));if(o.pfad===3)return JSON.parse(dec(await ungcm(k,o)));
+      const raw=new Uint8Array(await ungcm(k,o.wrapped));return JSON.parse(dec(await ungcm(await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]),o)))}catch(e){toast("Passwort falsch")}}}
+  if(o.kids){if(!await ask(`${name||"Diese Datei"} ist nicht verschlüsselt (altes Format). Lade sie nur, wenn sie sicher von dir stammt.`,{ok:"Trotzdem laden"}))return null;return o} // alte, unverschlüsselte Sicherung
+  throw new Error("format")}
+async function giveFile(name,txt,type="application/json"){const file=new File([txt],name,{type});
+  if(matchMedia("(pointer:coarse)").matches&&navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file]});return true}catch(e){if(e.name==="AbortError")return false}}
+  download(name,txt,type);return true}
+/* ===== Schulserver (vorbereitet, Schnittstelle siehe server/README.md) =====
+   Die App arbeitet immer lokal. Ist ein Server eingetragen und erreichbar (Schul-WLAN), gleicht sie ab:
+   eigene Änderungen an freigegebenen Kindern hoch, Änderungen der Kolleg:innen herunter. Offline bleibt alles
+   im Zwischenspeicher auf dem Gerät und geht beim nächsten Kontakt raus. Freigabe pro Kind per Einladung (Kürzel). */
+const SV=()=>db.srv;
+const srvOn=()=>!!db.srv?.token;
+let SRVBUSY=false,SRVT=null,SRVREACH=null;
+async function api(path,body,timeout=4000){const s=SV(),c=new AbortController(),t=setTimeout(()=>c.abort(),timeout);
+  try{const r=await fetch(s.url.replace(/\/$/,"")+path,{method:body?"POST":"GET",headers:{"Content-Type":"application/json",...(s.token?{Authorization:"Bearer "+s.token}:{})},body:body?JSON.stringify(body):undefined,signal:c.signal});
+    const j=await r.json().catch(()=>({}));if(r.status===401&&s.token){s.token="";save();render();toast("Anmeldung am Schulserver abgelaufen. Bitte neu anmelden.")}if(!r.ok)throw Object.assign(new Error(j.fehler||r.status),{status:r.status});return j}
+  finally{clearTimeout(t)}}
+const mixedBlocked=u=>location.protocol==="https:"&&/^http:/i.test(u);
+async function srvConnect(){const url=$("#srvUrl").value.trim().replace(/\/$/,""),me=$("#srvMe").value.trim(),pw=$("#srvPw").value;
+  if(!/^https?:\/\//.test(url))return toast("Adresse mit http:// oder https:// eingeben");if(!me||!pw)return toast("Kürzel und Passwort eingeben");
+  if(mixedBlocked(url))return toast("Diese App läuft über https. Der Server braucht dann auch https, oder die App wird direkt vom Schulserver geöffnet.");
+  db.srv={url,token:"",rev:0,pushed:{},invites:[],people:[],last:0};
+  try{const r=await api("/api/login",{kuerzel:me,passwort:pw});Object.assign(db.srv,{token:r.token,me:r.kuerzel,name:r.name||""});db.me=r.kuerzel;save();toast("Mit dem Schulserver verbunden");await srvSync(true)}
+  catch(e){toast(e.name==="AbortError"||e.message==="Failed to fetch"?"Server nicht erreichbar":"Anmeldung fehlgeschlagen");db.srv={url,token:""};save()}render()}
+async function srvLogout(){if(!await ask("Vom Schulserver abmelden? Die Daten bleiben auf diesem Gerät.",{ok:"Abmelden"}))return;const u=db.srv?.url;db.srv={url:u,token:""};save();render()}
+const toPush=()=>db.kids.filter(k=>k.srv&&kidVer(k)>(SV().pushed[k.id]||0));
+async function srvSync(loud){if(!srvOn()||SRVBUSY)return;SRVBUSY=true;
+  try{const push=toPush().map(k=>structuredClone(k)),sent=Object.fromEntries(push.map(k=>[k.id,kidVer(k)]));
+    const r=await api("/api/sync",{since:SV().rev||0,push},8000);SRVREACH=true;
+    Object.assign(SV().pushed,sent);let ch=0;
+    for(const k of (r.kids||[]).filter(okKid)){const ex=kidById(k.id),dirty=ex&&kidVer(ex)>(SV().pushed[k.id]||0);ch+=mergeKid({...k,srv:true});const nk=kidById(k.id);nk.srv=true;if(!dirty)SV().pushed[k.id]=kidVer(nk)}
+    let gone=0;for(const id of r.removed||[]){const k=kidById(id);if(k?.srv){db.kids=db.kids.filter(x=>x.id!==id);delete SV().pushed[id];gone++}}
+    Object.assign(SV(),{rev:r.rev,invites:(r.invites||[]).filter(i=>okId(i?.id)),people:r.people||[],last:Date.now()});save();
+    const typing=document.activeElement?.matches?.("input,textarea,select");if(loud||!typing)render();
+    if(ch&&!loud)toast(`${ch} Kind${ch===1?"":"er"} mit neuen Einträgen von Kolleg:innen`);if(gone)toast(`${gone} Freigabe${gone===1?"":"n"} beendet, Kind von diesem Gerät entfernt`);
+    if(loud)toast("Abgleich fertig")}
+  catch(e){SRVREACH=false;if(loud)toast(e.status?`Server meldet: ${e.message}`:"Schulserver nicht erreichbar. Deine Änderungen bleiben auf dem Gerät und werden später übertragen.");if(loud)render()}
+  finally{SRVBUSY=false}}
+window.autoSoon=()=>{if(!srvOn()||SRVBUSY)return;clearTimeout(SRVT);SRVT=setTimeout(()=>srvSync(),5000)};
+setInterval(()=>srvSync(),60000);addEventListener("online",()=>srvSync());document.addEventListener("visibilitychange",()=>{if(!document.hidden)srvSync()});setTimeout(()=>srvSync(),1200);
+async function srvShare(kid){const k=kidById(kid);if(!await ask(`${k.code} auf dem Schulserver freigeben? Danach kannst du Kolleg:innen per Kürzel einladen.`,{ok:"Freigeben"}))return;
+  k.srv=true;k.team=[SV().me];k.upd=Date.now();save();await srvSync(true)}
+async function srvInvite(kid){const k=kidById(kid),who=(await askText(`Kolleg:in zu ${k.code} einladen. Kürzel eingeben:`,"z. B. MU")||"").trim();if(!who)return;
+  try{await api(`/api/faelle/${encodeURIComponent(kid)}/einladen`,{kuerzel:who});toast(`Einladung an ${who} verschickt`);await srvSync()}catch(e){toast(e.status?`Nicht möglich: ${e.message}`:"Schulserver nicht erreichbar")}render()}
+async function srvRemove(kid,who){const k=kidById(kid);if(!await ask(`${who} aus ${k.code} entfernen? ${who} sieht das Kind danach nicht mehr.`,{ok:"Entfernen",danger:true}))return;
+  try{await api(`/api/faelle/${encodeURIComponent(kid)}/entfernen`,{kuerzel:who});await srvSync()}catch(e){toast(e.status?`Nicht möglich: ${e.message}`:"Schulserver nicht erreichbar")}render()}
+async function srvAnswer(id,yes){try{await api(`/api/einladungen/${encodeURIComponent(id)}/${yes?"annehmen":"ablehnen"}`,{});await srvSync(true)}catch(e){toast(e.status?`Nicht möglich: ${e.message}`:"Schulserver nicht erreichbar")}}
+function invitesV(){if(!srvOn()||!SV().invites?.length)return "";
+  return SV().invites.map(i=>`<div class="card row" style="border:2px solid var(--acc)"><div class="grow small"><b>${esc(i.von)}</b> lädt dich zu <b>${esc(i.code)}</b>${i.cls?` (${esc(i.cls)})`:""} ein.</div><button class="btn ghost" onclick="srvAnswer(${ja(i.id)},false)">Ablehnen</button><button class="btn pri" onclick="srvAnswer(${ja(i.id)},true)">Annehmen</button></div>`).join("")}
+function srvStatus(){if(!srvOn())return "";const n=toPush().length,t=SV().last?new Date(SV().last).toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}):"";
+  return SRVREACH===false?`Schulserver nicht erreichbar${n?`, ${n} Kind${n===1?"":"er"} warten auf Übertragung`:""}. Alles ist auf dem Gerät gespeichert.`:`Verbunden${t?`, zuletzt abgeglichen ${t} Uhr`:""}${n?`, ${n} Änderung${n===1?"":"en"} ausstehend`:""}.`}
+function srvKidCard(k){if(k.demo||!srvOn())return "";
+  if(!k.srv)return `<div class="card noprint row"><div class="grow small"><b>Schulserver</b><br><span class="muted">Nur auf diesem Gerät.</span></div><button class="btn" onclick="srvShare(${ja(k.id)})">Freigeben</button></div>`;
+  const pend=(k.pending||[]);
+  return `<div class="card noprint"><b>Freigegeben für</b><div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${(k.team||[]).map(t=>`<span class="mem">${esc(t)}${t===SV().me?" <span class='small'>(du)</span>":`<button aria-label="${esc(t)} entfernen" onclick="srvRemove(${ja(k.id)},${ja(t)})">✕</button>`}</span>`).join("")}${pend.map(t=>`<span class="mem" style="opacity:.6">${esc(t)} <span class="small">eingeladen</span></span>`).join("")}</div>
+  <p style="margin:10px 0 0"><button class="btn" onclick="srvInvite(${ja(k.id)})">+ Kolleg:in einladen</button></p><p class="muted small" style="margin:6px 0 0">${srvStatus()}</p></div>`}
+function srvCard(){const s=db.srv||{};
+  if(srvOn())return `<div class="card"><h2 style="margin-top:0">Schulserver</h2><p class="small">Angemeldet als <b>${esc(s.me)}</b> bei ${esc(s.url)}.</p><p class="muted small">${srvStatus()}</p>
+    <p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="srvSync(true)">Jetzt abgleichen</button><button class="btn ghost" onclick="srvLogout()">Abmelden</button></p>
+    <p class="muted small">Abgeglichen werden nur Kinder, die du beim Kind freigegeben hast. Alles andere bleibt nur auf diesem Gerät.</p></div>`;
+  return `<details class="card"><summary style="font-weight:800;font-size:1.1rem">Schulserver <span class="muted small" style="font-weight:400">(in Vorbereitung)</span></summary>
+    <p class="muted small">Sobald ein Pfad-Server im Schulnetz läuft, trägst du hier Adresse, Kürzel und Passwort ein. Dann gleicht die App im Schul-WLAN automatisch ab.</p>
+    <label>Adresse</label><input id="srvUrl" placeholder="z. B. https://pfad.schule.local" value="${esc(s.url||"")}">
+    <div class="two"><div><label>Kürzel</label><input id="srvMe" value="${esc(db.me||"")}"></div><div><label>Passwort</label><input id="srvPw" type="password"></div></div>
+    <p><button class="btn" onclick="srvConnect()">Verbinden</button></p></details>`}
+let RDAY=0;const WDN=["","Mo","Di","Mi","Do","Fr"];
+function setR(i,j,v){db.raster[i][j]=v;save();render()}
+function setRD(i,wd,j,v){const r=db.raster[i];r[3]??={};const d=r[3][wd]??=["",""];d[j]=v===r[j+1]?"":v;if(!d[0]&&!d[1])delete r[3][wd];if(!Object.keys(r[3]).length)r.length=3;save();render()}
+function clrRD(i,wd){const r=db.raster[i];if(r[3]){delete r[3][wd];if(!Object.keys(r[3]).length)r.length=3}save();render()}
+const hasRD=wd=>db.raster.some(r=>r[3]?.[wd]);
+function rasterV(){const wd=RDAY;
+  return `<div class="card"><h2 style="margin-top:0">Stundenraster</h2><div class="sub">Damit beim Bewerten die laufende Stunde vorausgewählt ist.</div>
+  <div class="pick days5" style="margin-top:10px"><button class="${wd?"":"on"}" onclick="RDAY=0;render()">Alle Tage</button>${WDN.slice(1).map((n,d)=>`<button class="${wd===d+1?"on":""}" onclick="RDAY=${d+1};render()">${n}${hasRD(d+1)?" •":""}</button>`).join("")}</div>
+  <div class="sub" style="margin-top:8px">${wd?`Abweichende Zeiten am ${["","Montag","Dienstag","Mittwoch","Donnerstag","Freitag"][wd]}. Was du nicht änderst, gilt wie an allen Tagen.`:"Gilt für jeden Schultag. Weicht ein Tag ab, wähle ihn oben aus."}</div>
+  <div class="rast${wd?" r4":""}"><span></span><span class="sub">Beginn</span><span class="sub">Ende</span>${wd?"<span></span>":""}${db.raster.map((r,i)=>{if(!wd)return `<b>${esc(r[0])}</b><input type="time" value="${r[1]}" onchange="setR(${i},1,this.value)"><input type="time" value="${r[2]}" onchange="setR(${i},2,this.value)">`;
+    const [a,b]=rTime(r,wd),dv=r[3]?.[wd];return `<b>${esc(r[0])}</b><input type="time" class="${dv?.[0]?"dev":""}" value="${a}" onchange="setRD(${i},${wd},0,this.value)"><input type="time" class="${dv?.[1]?"dev":""}" value="${b}" onchange="setRD(${i},${wd},1,this.value)">${dv?`<button class="x" aria-label="Zurücksetzen" onclick="clrRD(${i},${wd})">✕</button>`:"<span></span>"}`}).join("")}</div>
+  ${wd?"":`<p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn ghost" onclick="addR()">+ Stunde</button>${db.raster.length>1?`<button class="btn ghost" onclick="db.raster.pop();save();render()">Letzte entfernen</button>`:""}<button class="btn ghost" onclick="db.raster=RASTER.map(r=>r.slice());save();render()">HBG-Raster</button></p>`}
+  <p class="muted small">Jetzt vorausgewählt: <b>${currentSlot()||"keine Stunde"}</b> (in Pausen bleibt die Stunde davor ausgewählt). Für Beobachtungen in der Pause gibt es beim Bewerten „Kleine Pause“, „Große Pause“ und „Mittagspause“.</p></div>`}
+function gameV(){const g=G(),T=GOALTYPES[g.type],max=g.type==="days"?5:10;
+  return `<div class="card"><h2 style="margin-top:0">Wochenziel</h2>
+  <label class="swr"><span class="grow">Wochenziel und Feedback anzeigen<span class="sub">Ring auf „Heute“ und kurzer Haken nach dem Speichern</span></span><input type="checkbox" class="sw" ${g.on?"checked":""} onchange="G().on=this.checked;save();render()"></label>
+  ${g.on?`<div class="sub" style="margin:14px 0 6px;font-weight:700">Was ist dein Ziel?</div>
+  <div class="gopts">${Object.entries(GOALTYPES).map(([key,x])=>`<button class="${g.type===key?"on":""}" onclick="G().type='${key}';G().n=GOALTYPES['${key}'].def;save();render()"><b>${x.t}</b><span>${x.d(g.type===key?g.n:x.def)}</span></button>`).join("")}</div>
+  ${g.type==="good"?"":`<div class="row stepr"><span class="grow">${g.type==="days"?"Schultage pro Woche":"Einschätzungen pro Kind und Woche"}</span><button aria-label="weniger" ${g.n<=1?"disabled":""} onclick="G().n=Math.max(1,G().n-1);save();render()">−</button><b>${g.n}</b><button aria-label="mehr" ${g.n>=max?"disabled":""} onclick="G().n=Math.min(${max},G().n+1);save();render()">+</button></div>`}
+  <label class="swr"><span class="grow">Ton beim Speichern</span><input type="checkbox" class="sw" ${g.sound?"checked":""} onchange="G().sound=this.checked;save();if(this.checked)fb('big')"></label>
+  <p class="muted small" style="margin-bottom:0">Nur ein Ziel pro Woche, keine Punkte, keine Abzeichen. Wochen ganz ohne Einträge (Ferien, Krankheit) unterbrechen die Reihe nicht.</p>`
+  :`<p class="muted small" style="margin-bottom:0">Ausgeschaltet: Nach dem Speichern erscheint nur eine kurze Bestätigung.</p>`}</div>`}
+function addR(){const l=db.raster.at(-1),n=(parseInt(l[0])||db.raster.length)+1;db.raster.push([n+".",l[2],l[2]]);save();render()}
+function profilV(){
+  const n=db.kids.reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0),0);
+  return `<h1>Einstellungen</h1>
+  <div class="card row"><div class="grow"><b>Anleitung</b><br><span class="small muted">Pfad zeigt dir in 8 Schritten die wichtigsten Stellen der App.</span></div><button class="btn" onclick="openHelp()">Starten</button></div>
+  <div class="card"><b>Erscheinungsbild</b><div class="pick theme" style="margin-top:10px">${[["system","Wie Gerät"],["light","Hell"],["dark","Dunkel"]].map(([k,t])=>`<button class="${(db.theme||"system")===k?"on":""}" onclick="db.theme='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div><div class="sub" style="margin-top:6px">„Wie Gerät“ folgt der Einstellung von iPad oder iPhone.</div>
+  <div class="sub" style="margin:14px 0 6px;font-weight:700">Schriftgröße</div><div class="pick theme">${[["m","Normal"],["l","Groß"],["xl","Sehr groß"]].map(([k,t])=>`<button class="${(db.fs||"m")===k?"on":""}" onclick="db.fs='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div></div>
+  <div class="card"><label style="margin-top:0">Dein Kürzel</label><div class="sub">Wird bei jeder Einschätzung gespeichert. Hilfreich, wenn ihr Daten im Team zusammenführt.</div>
+  ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`${mtip("me")}<div class="row" style="gap:8px"><input id="meIn" class="grow${mk("me")}" value="${esc(db.me)}" placeholder="z. B. MU" onkeydown="if(event.key==='Enter')this.blur()" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">${view.mark==="me"?`<button class="btn pri" onclick="const v=$('#meIn').value.trim();if(!v)return toast('Bitte dein Kürzel eintragen.');db.me=v;save();render()">Weiter</button>`:""}</div>`}
+  <label>Alle Fächer deiner Schule</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
+  <input value="${esc(db.subjects.join(", "))}" onchange="db.subjects=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')">
+  <label>Deine Klassen</label><div class="sub">Mit Komma getrennt.</div>
+  <input value="${esc(db.classes.join(", "))}" onchange="db.classes=this.value.split(',').map(s=>s.trim()).filter(Boolean);save();toast('Gespeichert')"></div>
+  ${rasterV()}
+  ${gameV()}
+  ${yearV()}
+  ${lockV()}
+  <div class="card"><h2 style="margin-top:0">Daten</h2><p class="muted">${db.kids.length} Kinder · ${n} Einschätzungen auf diesem Gerät</p>
+  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Dateien laden</button><button class="btn" onclick="$('#chk').click()">Sicherung prüfen</button></p>
+  <input type="file" id="imp" accept=".json,application/json" multiple hidden onchange="importJSON(this)"><input type="file" id="chk" accept=".json,application/json" hidden onchange="checkFile(this)">
+  <p class="muted small">${db.lastBackup?`Letzte Sicherung: ${dDEy(iso(new Date(db.lastBackup)))}. `:""}Sicherung: alle deine Kinder, nur für dich, spätestens alle 5 Tage. Teilen: nur ausgewählte Kinder, für eine Kollegin oder einen Kollegen. Laden: Du kannst mehrere Sicherungen und geteilte Stände auf einmal auswählen. Pfad führt sie zusammen, du wählst pro Kind, was du ergänzt. Prüfen: zeigt, was in einer Sicherung steckt, ohne etwas zu übernehmen.</p>
+  ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}
+  ${mtip("demo")}<p class="row" style="flex-wrap:wrap">${db.kids.some(k=>k.demo)&&!view.mark?`<button class="btn" onclick="delDemo()">Beispielfall entfernen</button>`:`<button class="btn${mk("demo")}" onclick="demo()">Fiktiven Beispielfall laden</button>`}</p>
+  <p><button class="btn ghost danger" onclick="wipe()">Alle Daten auf diesem Gerät löschen</button></p></div>
+  ${srvCard()}
+  <div class="card"><h2 style="margin-top:0">Datenschutz</h2>
+  <p>Die Daten liegen in diesem Browser auf diesem Gerät. Sie verlassen es nur als verschlüsselte Datei, wenn du sicherst oder teilst${srvOn()?", oder für freigegebene Kinder an euren Schulserver":""}.</p>
+  <p>Lege Kinder nur mit Kürzel an. Schreibe in Kommentare keine Namen.</p>
+  <p>Sicherungen und geteilte Stände sind mit Passwort verschlüsselt. Speichere sie trotzdem nur auf dienstlichem Speicher.</p><p>Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Nutze deshalb nur dienstliche Geräte mit Code-Sperre.</p>
+  <p>Vor dem Einsatz mit echten Fällen: Absprache mit Schulleitung und Datenschutzbeauftragten.</p></div>
+  <p class="muted small" style="text-align:center">Pfad ${PFAD_VERSION} · Stand ${PFAD_STAND} · schulintern</p>`;
+}
+function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+/* ===== Sicherung, Teilen, Import mit Auswahl ===== */
+const realKid=k=>!k.demo;
+async function exportJSON(){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
+  const ki=await backupKey();if(!ki)return;
+  if(!db.backupTip&&!await backupTip())return;
+  const {srv,bsalt,lock,yearUndo,...rest}=db,payload={...rest,kids:db.kids.filter(realKid)};
+  if(!await giveFile(backupName(),await sealFile("sicherung",payload,ki)))return;
+  db.lastBackup=Date.now();db.backupTip=1;save();render();toast(isIOS?"Sicherung erstellt. Sie liegt in „Dateien“ → „Auf meinem "+(/iPad/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Mac/.test(navigator.userAgent)?"iPad":"iPhone")+"“.":"Sicherung erstellt.")}
+// Dateiname mit Datum: jede Sicherung ist eine eigene Datei
+const backupName=()=>`pfad-sicherung-${(db.me||"ohne").replace(/[^\w-]/g,"")}-${today()}.json`;
+// Vor der ersten Sicherung: wohin die Datei gehört
+async function backupTip(){const touch=matchMedia("(pointer:coarse)").matches,dev=/iPad/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Mac/.test(navigator.userAgent)?"iPad":"iPhone";
+  const ok=html=>dlg(html+`<div class="duo"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Verstanden</button></div>`,(el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"));el.querySelector('[data-a="1"]').focus()}).then(v=>v===true);
+  const steps=isIOS?[`Gleich öffnet sich das Teilen-Fenster. Tippe dort auf <b>„In Dateien sichern“</b>.`,`Wähle <b>„Auf meinem ${dev}“</b>. Lege beim ersten Mal einen Ordner <b>„Pfad“</b> an und öffne ihn.`,`Tippe auf <b>„Sichern“</b>. Bei späteren Sicherungen wählst du wieder diesen Ordner.`]
+    :touch?[`Gleich öffnet sich das Teilen-Fenster. Wähle dort <b>„Dateien“</b> bzw. <b>„In Dateien speichern“</b>.`,`Speichere die Datei auf dem Gerät, am besten in einem Ordner <b>„Pfad“</b>.`]
+    :[`Die Datei landet im Ordner <b>„Downloads“</b>.`,`Verschiebe sie in einen eigenen Ordner <b>„Pfad“</b> auf deinem Dienstgerät.`];
+  return ok(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Wohin mit der Sicherung?</p>
+  <p class="small" style="margin:0 0 8px">Die Sicherung ist eine Datei. Sie muss in den Dateien auf deinem Dienstgerät liegen, sonst hilft sie im Notfall nicht.</p>
+  <ol class="small" style="padding-left:20px;margin:0 0 8px">${steps.map(x=>`<li style="margin:6px 0">${x}</li>`).join("")}</ol>
+  <p class="small muted" style="margin:0 0 14px">Spätere Sicherungen legst du in denselben Ordner. Mit anderen teilst du Daten nur über deine Dienstmail oder eine andere datenschutzkonforme Plattform der Schule. Lade die Sicherung nicht in eine private Cloud hoch.</p>`)}
+// Stand einzelner Kinder für Kolleg:innen
+async function shareKids(pre){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
+  const ks=db.kids.filter(realKid).sort((a,b)=>a.code.localeCompare(b.code));if(!ks.length)return toast("Noch keine Kinder angelegt");
+  const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Welche Kinder möchtest du teilen?</p><p class="small muted" style="margin:0 0 10px">Geteilt wird alles zu diesen Kindern: Verhalten, Einschätzungen, Tagebuch.</p>
+    <div style="max-height:46vh;overflow:auto">${ks.map(k=>`<label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" value="${esc(k.id)}" ${pre===k.id||(!pre&&ks.length===1)?"checked":""}> ${esc(k.code)} <span class="muted small" style="font-weight:400">${esc(k.cls||"")}</span></label>`).join("")}</div>
+    <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Weiter</button></div>`,
+    (el,done)=>{el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done([...el.querySelectorAll("input:checked")].map(i=>i.value))});
+  if(!sel||!sel.length)return;
+  const pw=await askNewPw("Passwort für diesen Stand festlegen. Sag es der Kollegin oder dem Kollegen mündlich, nicht per Mail.");if(!pw)return;
+  const salt=b64(rnd(16)),kids=sel.map(kidById);
+  const name=`pfad-${kids.length===1?kids[0].code.replace(/[^\w\-]/g,"_"):kids.length+"-kinder"}-von-${(db.me||"ohne").replace(/[^\w\-]/g,"_")}-${today()}.json`;
+  if(await giveFile(name,await sealFile("teilen",{kids,classes:[...new Set(kids.map(k=>k.cls).filter(Boolean))]},{key:await pwKey(pw,unb64(salt)),salt})))toast(`Stand von ${kids.length} Kind${kids.length===1?"":"ern"} erstellt`)}
+// Import: erst ansehen und auswählen, dann ergänzen
+let IMP=null;
+// Eine Datei öffnen (Passwort fragen). Gibt {o,d} zurück oder null.
+async function readPfad(f,many){let o,d;try{o=JSON.parse(await f.text())}catch(e){toast(`${f.name}: nicht lesbar`);return null}
+  if(!crypto.subtle&&(o.pfad||o.salt)){toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");return null}
+  try{d=await openFile(o,many?f.name:"")}catch(e){toast(`${f.name}: keine Pfad-Datei`);return null}if(!d)return null;if(!Array.isArray(d.kids)){toast(`${f.name}: keine Pfad-Datei`);return null}
+  const n=d.kids.length;d.kids=d.kids.filter(okKid);if(d.kids.length<n)toast(`${f.name}: ${n-d.kids.length} Kind${n-d.kids.length===1?"":"er"} beschädigt, nicht übernommen`);
+  return {o,d}}
+// Laden: eine oder mehrere Dateien; mehrere Stände werden erst untereinander zusammengeführt
+async function importJSON(inp){const fs=[...inp.files];inp.value="";if(!fs.length)return;
+  const got=[];for(const f of fs){const x=await readPfad(f,fs.length>1);if(x)got.push(x)}if(!got.length)return;
+  got.sort((a,b)=>(a.o.erstellt||"").localeCompare(b.o.erstellt||""));
+  const kids=[],cls=[];for(const {d} of got)for(const k of d.kids.filter(realKid))mergeKid(structuredClone(k),kids,cls);
+  const newest=got.filter(x=>(x.o.art||"sicherung")==="sicherung").at(-1),one=got.length===1?got[0]:null;
+  IMP={art:one?one.o.art||"sicherung":"mehrere",files:got.length,von:[...new Set(got.map(x=>x.o.von||x.d.me||"").filter(Boolean))].join(", "),erstellt:one?one.o.erstellt||"":"",
+    d:newest?newest.d:{},kids,sel:new Set(kids.filter(k=>{const x=diffKid(k);return x.neu||!x.leer}).map(k=>k.id)),settings:!!newest&&!db.kids.length};
+  go({tab:"profil",imp:true})}
+// Prüfen: nur ansehen, nichts übernehmen
+async function checkFile(inp){const f=inp.files[0];inp.value="";if(!f)return;const x=await readPfad(f);if(!x)return;const {o,d}=x;
+  const ks=d.kids.filter(realKid).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true})),ne=k=>k.goals.reduce((s,g)=>s+g.entries.length,0);
+  const last=ks.flatMap(k=>[...k.goals.flatMap(g=>g.entries),...(k.diary||[])].map(e=>e.date)).sort().pop();
+  await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 6px">✓ Die Datei lässt sich öffnen</p>
+  <p class="small" style="margin:0 0 8px">${o.art==="teilen"?"Geteilter Stand":"Sicherung"}${o.von||d.me?` von ${esc(o.von||d.me)}`:""}${o.erstellt?`, erstellt am ${dDEy(o.erstellt.slice(0,10))}`:""}. ${ks.length} Kind${ks.length===1?"":"er"}${last?`, letzter Eintrag am ${dDEy(last)}`:""}.</p>
+  <div style="max-height:42vh;overflow:auto"><table class="small"><tr><th>Kürzel</th><th>Verhalten</th><th>Einschätz.</th><th>Tagebuch</th></tr>${ks.map(k=>`<tr><td>${esc(k.code)}${kidById(k.id)?"":' <span class="tag">nicht auf dem Gerät</span>'}</td><td>${k.goals.length}</td><td>${ne(k)}</td><td>${(k.diary||[]).length}</td></tr>`).join("")}</table></div>
+  <p class="small muted" style="margin:10px 0 14px">Es wurde nichts übernommen. Zum Übernehmen nutze „Dateien laden“.</p>
+  <button class="btn pri block" data-a="1">Schließen</button>`,(el,done)=>{el.querySelector("[data-a]").onclick=()=>done(true);el.querySelector("[data-a]").focus()})}
+function importV(){if(!IMP){view={tab:"profil"};return profilV()}
+  const rows=IMP.kids.map(k=>{const x=diffKid(k),on=IMP.sel.has(k.id);
+    const what=x.neu?`neu · ${x.goals} Verhalten · ${x.entries} Einschätzung${x.entries===1?"":"en"} · ${x.diary} Tagebuch`
+      :x.leer?"nichts Neues":[x.goals&&`${x.goals} Verhalten`,x.entries&&`+${x.entries} Einschätzung${x.entries===1?"":"en"}`,x.diary&&`+${x.diary} Tagebuch`,x.changed&&`${x.changed} geändert`,x.dels&&`${x.dels} gelöscht`].filter(Boolean).join(" · ");
+    return `<label class="card row" style="margin:8px 0;align-items:flex-start;${x.leer?"opacity:.6":""}"><input type="checkbox" style="width:auto;margin-top:4px" ${on?"checked":""} ${x.leer?"disabled":""} onchange="this.checked?IMP.sel.add(${ja(k.id)}):IMP.sel.delete(${ja(k.id)});render()">
+      <span class="grow"><b>${esc(k.code)}</b> <span class="muted small">${esc(k.cls||"")}</span><br><span class="small ${x.neu?"":"muted"}" style="${x.neu?"color:var(--up);font-weight:700":""}">${x.neu?"":"vorhanden: "}${what}</span></span></label>`}).join("");
+  return `<button class="btn ghost" onclick="IMP=null;go({tab:'profil'})">‹ Abbrechen</button>
+  <h1>${IMP.art==="mehrere"?"Stände zusammenführen":IMP.art==="teilen"?"Geteilten Stand übernehmen":"Sicherung laden"}</h1>
+  <p class="muted">${[IMP.files>1&&`${IMP.files} Dateien`,IMP.von&&`von ${esc(IMP.von)}`,IMP.erstellt&&`erstellt ${dDEy(IMP.erstellt.slice(0,10))}`,`${IMP.kids.length} Kind${IMP.kids.length===1?"":"er"}`].filter(Boolean).join(" · ")}</p>
+  ${IMP.files>1?`<p class="small">Die Dateien sind schon untereinander zusammengeführt: Jeder Eintrag kommt nur einmal vor, bei zwei Fassungen gilt die neuere.</p>`:""}
+  <p class="small">Wähle, welche Kinder du übernimmst. Bei vorhandenen Kindern wird <b>ergänzt</b>: Neues kommt dazu, deine eigenen Einträge bleiben erhalten. Bei gleichen Einträgen gilt die neuere Fassung.</p>
+  ${IMP.kids.length>1?`<p class="row"><button class="btn ghost small" onclick="IMP.kids.forEach(k=>diffKid(k).leer||IMP.sel.add(k.id));render()">Alle auswählen</button><button class="btn ghost small" onclick="IMP.sel.clear();render()">Keine</button></p>`:""}
+  ${rows}
+  ${IMP.d.subjects?`<label class="row" style="margin:12px 0;font-weight:600"><input type="checkbox" style="width:auto" ${IMP.settings?"checked":""} onchange="IMP.settings=this.checked"> Auch Einstellungen übernehmen (Fächer, Stundenraster, Wochenziel${IMP.files>1?", aus der neuesten Sicherung":""})</label>`:""}
+  <p><button class="btn pri block" ${IMP.sel.size||IMP.settings?"":"disabled"} onclick="applyImport()">${IMP.sel.size?`${IMP.sel.size} Kind${IMP.sel.size===1?"":"er"} übernehmen`:"Übernehmen"}</button></p>`}
+function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=mergeKid(structuredClone(k))}
+  if(IMP.settings){const d=IMP.d;for(const f of ["subjects","raster","game"])if(d[f]){if(okSetting[f](d[f]))db[f]=d[f];else toast("Einstellungen aus der Datei teilweise ungültig, nicht übernommen")}if(!db.me&&d.me)db.me=d.me;(d.classes||[]).forEach(c=>db.classes.includes(c)||db.classes.push(c))}
+  const m=IMP.sel.size;IMP=null;save();toast(m?`${m} Kind${m===1?"":"er"} übernommen${n<m?` (${m-n} ohne Änderung)`:""}`:"Einstellungen übernommen");go({tab:"klassen"})}
+function exportCSV(kid,gid){const k=kidById(kid),g=goalById(k,gid);
+  const rows=[["Kürzel","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value==null?"nicht beobachtet":dv(g,e.value),e.note,e.rater]));
+  download(`verlauf-${k.code}-${today()}.csv`,"﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/^[=+\-@\t\r]/,"'$&").replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
+async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,classes:[],kids:[]};save();go({tab:"heute"})}
+async function delDemo(){if(!await ask("Den fiktiven Beispielfall entfernen? Deine eigenen Kinder bleiben.",{ok:"Entfernen"}))return;db.kids=db.kids.filter(k=>!k.demo);save();render();toast("Beispielfall entfernt")}
+/* ===== Schuljahreswechsel ===== */
+const syNow=()=>{const d=new Date(),y=d.getFullYear()-(d.getMonth()<7?1:0);return `${y}/${String(y+1).slice(2)}`};
+// 7B → 8B; Jahrgang 10 und Klassen ohne Zahl bleiben
+const upCls=c=>{const m=/^(\d{1,2})(.*)$/.exec(c||"");if(!m)return null;const n=+m[1];return n>=10||n<1?null:(n+1)+m[2]};
+const byNum=(a,b)=>a.localeCompare(b,"de",{numeric:true});
+function yearV(){const u=db.yearUndo;
+  return `<div class="card"><h2 style="margin-top:0">Schuljahreswechsel</h2><div class="sub">Setzt alle Klassen eine Stufe hoch: 7B wird 8B, 7B-01 wird 8B-01. Einträge bleiben, wie sie sind. Jahrgang 10 bleibt.</div>
+  <p class="row" style="flex-wrap:wrap;margin:10px 0 0"><button class="btn" onclick="yearUp()">Klassen hochsetzen</button>${u?`<button class="btn ghost" onclick="yearBack()">Wechsel vom ${dDEy(iso(new Date(u.ts)))} rückgängig machen</button>`:""}</p></div>`}
+async function yearUp(){const map={};db.classes.forEach(c=>{const u=upCls(c);if(u)map[c]=u});db.kids.forEach(k=>{const u=upCls(k.cls);if(u)map[k.cls]=u});
+  if(!Object.keys(map).length)return toast("Keine Klasse mit Jahrgang gefunden, z. B. 7B.");
+  const n=c=>db.kids.filter(k=>!k.demo&&k.cls===c).length,stay=[...new Set([...db.classes,...db.kids.map(k=>k.cls).filter(Boolean)])].filter(c=>!map[c]).sort(byNum);
+  const ok=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Schuljahreswechsel</p>
+  <p class="small" style="margin:0 0 8px">Alle Klassen gehen eine Stufe hoch. Kürzel, die mit der Klasse beginnen, ändern sich mit.</p>
+  <ul class="small" style="padding-left:20px;margin:0 0 8px;max-height:34vh;overflow:auto">${Object.keys(map).sort(byNum).map(c=>`<li>${esc(c)} → <b>${esc(map[c])}</b> <span class="muted">(${n(c)} Kind${n(c)===1?"":"er"})</span></li>`).join("")}</ul>
+  ${stay.length?`<p class="small muted" style="margin:0 0 8px">Bleiben: ${stay.map(esc).join(", ")}. Für Kinder, die die Schule verlassen, nutze beim Kind „Förderung abschließen“.</p>`:""}
+  <p class="small muted" style="margin:0 0 14px">Du kannst den Wechsel danach in den Einstellungen rückgängig machen.</p>
+  <div class="duo"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Hochsetzen</button></div>`,(el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))});
+  if(ok!==true)return;
+  const now=Date.now(),up=db.kids.filter(k=>map[k.cls]),taken=new Set(db.kids.filter(k=>!map[k.cls]).map(k=>k.code.toLowerCase()));
+  db.yearUndo={ts:now,sy:db.yearSY||"",classes:db.classes.slice(),kids:up.map(k=>({id:k.id,cls:k.cls,code:k.code}))};
+  for(const k of up){const nc=map[k.cls],pre=k.cls.toLowerCase()+"-";let code=k.code;
+    if(code.toLowerCase().startsWith(pre))code=nc+"-"+code.slice(pre.length);
+    if(taken.has(code.toLowerCase())){let i=1;do{code=`${nc}-${String(i++).padStart(2,"0")}`}while(taken.has(code.toLowerCase()))}
+    taken.add(code.toLowerCase());Object.assign(k,{cls:nc,code,upd:now})}
+  db.classes=[...new Set(db.classes.map(c=>map[c]||c))].sort(byNum);db.yearSY=syNow();view.filter="alle";save();render();
+  undoToast(`${up.filter(k=>!k.demo).length} Kinder hochgesetzt`,()=>yearBack(true))}
+async function yearBack(quick){const u=db.yearUndo;if(!u)return;
+  if(!quick&&!await ask(`Schuljahreswechsel vom ${dDEy(iso(new Date(u.ts)))} rückgängig machen? Klassen und Kürzel bekommen den alten Stand.`,{ok:"Rückgängig machen"}))return;
+  const now=Date.now(),back=new Set(u.kids.map(x=>x.id));let clash=0;
+  for(const x of u.kids){const k=kidById(x.id);if(!k)continue;
+    if(db.kids.some(o=>!back.has(o.id)&&o.code.toLowerCase()===x.code.toLowerCase())){clash++;k.cls=x.cls}else Object.assign(k,{cls:x.cls,code:x.code});k.upd=now}
+  db.classes=[...new Set([...u.classes,...db.kids.map(k=>k.cls).filter(Boolean)])].sort(byNum);db.yearSY=u.sy||syNow();delete db.yearUndo;view.filter="alle";save();render();
+  toast(clash?`Zurückgesetzt. ${clash} Kürzel waren inzwischen vergeben und bleiben neu.`:"Schuljahreswechsel zurückgenommen")}
+
+/* ===== App-Sperre mit Verschlüsselung (optional, Standard aus) =====
+   Aus dem Code (4 bis 6 Ziffern) wird per PBKDF2 (600 000 Runden) ein AES-Schlüssel. Im Browserspeicher liegen die Daten dann
+   nur verschlüsselt; der Schlüssel bleibt nur im Arbeitsspeicher, solange Pfad entsperrt ist. Ein Ziffern-Code ist durchprobierbar,
+   wenn jemand den Speicher kopiert: Schutz vor dem Blick und dem einfachen Auslesen, kein Hochsicherheitstresor. Code vergessen = Daten weg. */
+let LOCKED=false,LOCKIN="",LOCKFAIL=0,LOCKWAIT=0,HIDDEN_AT=0;
+// Fehlversuche und Wartezeit bleiben auch nach Neuladen erhalten
+const FAILKEY=KEY+"-sperre";try{({n:LOCKFAIL=0,bis:LOCKWAIT=0}=JSON.parse(localStorage.getItem(FAILKEY)||"{}"))}catch(e){}
+const saveFail=()=>{try{LOCKFAIL?localStorage.setItem(FAILKEY,JSON.stringify({n:LOCKFAIL,bis:LOCKWAIT})):localStorage.removeItem(FAILKEY)}catch(e){}};
+async function codeKey(code,salt){const base=await crypto.subtle.importKey("raw",enc(code),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:unb64(salt),iterations:600000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+// Prüft einen Code am gespeicherten Umschlag; gibt {key,data} zurück oder null
+async function tryCode(c){const raw=ENCWAIT||JSON.parse(localStorage.getItem(KEY)||"null");if(!raw?.pfadEnc)return null;
+  try{const key=await codeKey(c,raw.salt);return {key,data:JSON.parse(dec(await ungcm(key,raw)))}}catch(e){return null}}
+function askCode(msg,sub){return dlg(`<p style="font-weight:700;margin:0 0 6px">${esc(msg)}</p>${sub?`<p class="small muted" style="margin:0 0 10px">${sub}</p>`:""}<input id="dlgIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="4 bis 6 Ziffern">
+  <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">OK</button></div>`,
+  (el,done)=>{const i=el.querySelector("#dlgIn");i.focus();i.onkeydown=e=>{if(e.key==="Enter")done(i.value)};el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done(i.value)})}
+function lockV(){const L=db.lock;
+  return `<div class="card"><h2 style="margin-top:0">App-Sperre und Verschlüsselung</h2>
+  <label class="swr"><span class="grow">Pfad mit Code sperren und verschlüsseln<span class="sub">Zusätzlich zur Gerätesperre. Standard: aus.</span></span><input type="checkbox" class="sw" ${L?"checked":""} onchange="this.checked?setLock():offLock()"></label>
+  ${L?`<div class="sub" style="margin:10px 0 6px;font-weight:700">Sperren, wenn Pfad im Hintergrund war</div><div class="pick theme">${[[0,"Sofort"],[1,"Nach 1 Min."],[5,"Nach 5 Min."]].map(([m,t])=>`<button class="${L.after===m?"on":""}" onclick="db.lock.after=${m};save();render()">${t}</button>`).join("")}</div>
+  <p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn" onclick="setLock(true)">Code ändern</button><button class="btn" onclick="lockNow()">Jetzt sperren</button></p>`:""}
+  <p class="muted small" style="margin-bottom:0">Ist die Sperre an, liegen die Daten auf diesem Gerät nur verschlüsselt im Speicher. Ein Ziffern-Code schützt vor einem Blick und vor einfachem Auslesen, mit viel Aufwand ließe er sich durchprobieren. Der Gerätecode bleibt deshalb Pflicht. Wer den Code vergisst, kommt nicht mehr an die Daten und muss die letzte Sicherung laden.</p></div>`}
+async function setLock(change){if(!crypto.subtle){toast("In dieser Ansicht nicht möglich. Bitte im Browser öffnen.");return render()}
+  if(change){const c=await askCode("Aktuellen Code eingeben");if(c==null)return;if(!await tryCode(c))return toast("Code falsch")}
+  const a=await askCode(change?"Neuen Code festlegen":"Code für Pfad festlegen","4 bis 6 Ziffern, nicht dein Gerätecode. Du gibst ihn bei jedem Start ein. Vergessen heißt: Die Daten auf diesem Gerät sind weg. Speichere vorher eine Sicherung.");
+  if(a==null)return render();if(!/^\d{4,6}$/.test(a)){render();return toast("Bitte 4 bis 6 Ziffern.")}
+  if(await askCode("Code wiederholen")!==a){render();return toast("Die Codes stimmen nicht überein.")}
+  const salt=b64(rnd(16));LKEY=await codeKey(a,salt);db.lock={salt,len:a.length,after:db.lock?.after??1};save();await SAVEQ;render();toast(change?"Code geändert":"Pfad ist jetzt gesperrt und verschlüsselt")}
+async function offLock(){const c=await askCode("Zum Ausschalten Code eingeben","Danach liegen die Daten wieder unverschlüsselt im Speicher dieses Geräts.");
+  if(c!=null&&await tryCode(c)){delete db.lock;LKEY=null;save();render();toast("App-Sperre ist aus")}else{render();if(c)toast("Code falsch")}}
+function lockNow(){if(!db.lock)return;LOCKED=true;LOCKIN="";document.body.classList.add("locked");document.activeElement?.blur?.();renderLock()}
+function renderLock(msg,busy){let el=$("#lock");if(!LOCKED){el?.remove();return}
+  if(!el){el=document.createElement("div");el.id="lock";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Pfad ist gesperrt");document.body.appendChild(el)}
+  const wait=Math.ceil((LOCKWAIT-Date.now())/1000),len=db.lock.len||4;
+  el.innerHTML=`<div class="box"><div style="font-size:2.4rem" aria-hidden="true">🔒</div><h1 style="margin:6px 0 4px">Pfad ist gesperrt</h1>
+  <p class="muted" aria-live="polite">${wait>0?`Zu viele Versuche. Warte ${wait} Sekunden.`:busy?"Wird entsperrt …":esc(msg||"Gib deinen Code ein.")}</p>
+  <div class="pins${msg?" bad":""}" aria-hidden="true">${[...Array(len)].map((_,i)=>`<i class="${i<LOCKIN.length?"on":""}"></i>`).join("")}</div>
+  <div class="keys">${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="lockPress('${n}')">${n}</button>`).join("")}<button class="nb" onclick="lockForgot()">Vergessen?</button><button onclick="lockPress('0')">0</button><button class="nb" aria-label="Ziffer löschen" onclick="LOCKIN=LOCKIN.slice(0,-1);renderLock()">⌫</button></div></div>`;
+  if(wait>0)setTimeout(()=>LOCKED&&renderLock(),1000)}
+let LOCKBUSY=false;
+async function lockPress(d){if(LOCKWAIT>Date.now()||LOCKBUSY)return;const len=db.lock.len||4;if(LOCKIN.length>=len)return;LOCKIN+=d;renderLock();if(LOCKIN.length<len)return;
+  LOCKBUSY=true;renderLock("",true);const r=await tryCode(LOCKIN);LOCKBUSY=false;LOCKIN="";
+  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT){ENCWAIT=null;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();return}
+  LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**Math.min(LOCKFAIL-5,10);saveFail();try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
+async function lockForgot(){if(!await ask("Code vergessen? Ohne Code lassen sich die Daten nicht entschlüsseln. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden.",{ok:"Alles löschen",danger:true}))return;
+  const keep=ENCWAIT?{}:db;ENCWAIT=null;LKEY=null;
+  db={v:2,me:keep.me||"",subjects:keep.subjects||SUBJECTS.slice(),raster:keep.raster,game:keep.game,theme:keep.theme,fs:keep.fs,bsalt:keep.bsalt,yearSY:keep.yearSY,classes:[],kids:[]};migrate();
+  localStorage.removeItem(KEY);save();LOCKED=false;document.body.classList.remove("locked");renderLock();applyTheme();go({tab:"profil"});toast("Alles gelöscht. Lade jetzt deine letzte Sicherung.")}
+document.addEventListener("visibilitychange",()=>{if(!db?.lock)return;if(document.hidden){HIDDEN_AT=Date.now();if(!db.lock.after)lockNow()}
+  else if(!LOCKED&&HIDDEN_AT&&Date.now()-HIDDEN_AT>=db.lock.after*6e4)lockNow()});
+document.addEventListener("keydown",e=>{if(!LOCKED||e.target.closest?.(".cele"))return;if(/^\d$/.test(e.key))lockPress(e.key);else if(e.key==="Backspace"){LOCKIN=LOCKIN.slice(0,-1);renderLock()}});
+
+function demo(quiet){
+  if(db.kids.some(k=>k.demo))return quiet?null:toast("Beispielfall ist schon da");
+  if(!db.classes.includes("7B"))db.classes.push("7B");
+  const t=today(),start=addDays(t,-14);
+  const g1={id:uid(),title:"Stört den Unterricht",how:"Ruft rein, verlässt ohne Erlaubnis den Platz, lenkt andere ab.",fp:"Fiktiv: Ich melde mich, bevor ich etwas sage.",dir:"down",a0:"nie",a10:"ständig",target:3,start,entries:[]};
+  const g2={id:uid(),title:"Beginnt Aufgaben selbstständig",how:"Hat nach 3 Minuten das Material da und fängt an.",fp:"Fiktiv: Ich fange Aufgaben ohne Erinnerung an.",dir:"up",a0:"gar nicht",a10:"durchgehend",target:7,start,entries:[]};
+  const subj=["Mathe","Deutsch","Englisch","Mathe","GL"],slot=["1. Std.","3. Std.","5. Std.","2. Std.","4. Std."];
+  const v1=[7,8,6,9,7,8,7,5,6,4,null,4,3,5,3,2,3,4],v2=[3,2,4,3,3,2,4,5,5,6,null,6,7,5,7,8,7,6];
+  let d=addDays(t,-27),i=0;
+  while(i<v1.length){const wd=new Date(d+"T12:00").getDay();if(wd&&wd<6){const s=subj[i%5],sl=slot[i%5],ts=new Date(d+"T10:00").getTime()+i;
+    const adj=s==="Deutsch"&&v1[i]!=null?1:0;
+    g1.entries.push({id:uid(),date:d,slot:sl,subj:s,value:v1[i]==null?null:Math.min(10,v1[i]+adj),note:i===7?"Neuer Sitzplatz vorne am Pult.":i===10?"Kind war bei Förderstunde.":"",rater:"MU",ts,gen:true});
+    g2.entries.push({id:uid(),date:d,slot:sl,subj:s,value:v2[i]==null?null:Math.max(0,v2[i]-adj),note:i===13?"Mit Wochenplan deutlich schneller gestartet.":"",rater:"MU",ts,gen:true});i++}d=addDays(d,1)}
+  const diary=[[-25,"Beobachtung","Mathe","Kommt nach der Pause oft unruhig in die Stunde. Erste 10 Minuten am schwierigsten."],[-20,"Gespräch","","Kurzes Gespräch nach der Stunde: wünscht sich einen Platz weiter vorne."],[-14,"Absprache","","Mit Klassenleitung: Sitzplatz vorne, Wochenplan mit Startsignal. Ab heute Förderung."],[-9,"Elternkontakt","","Telefonat mit der Mutter: zu Hause läuft es ähnlich, Unterstützung bei Wochenplan zugesagt."],[-4,"Erfolg","Mathe","Hat heute als Erste:r angefangen und das stolz gezeigt."],[-2,"Vorfall","Deutsch","Streit in der Gruppenarbeit, Auszeit nötig. Danach wieder gut eingestiegen."]]
+    .map(([o,cat,subj,text],i)=>({id:uid(),date:addDays(t,o),cat,subj,text,rater:"MU",ts:new Date(addDays(t,o)+"T15:00").getTime()+i,gen:true}));
+  db.kids.push({id:uid(),code:"DEMO-7B",icon:"🦉",cls:"7B",demo:true,goals:[g1,g2],diary});save();if(quiet)return;toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
+
+load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();
+</script>
+</body>
+</html>
