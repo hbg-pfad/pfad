@@ -15,3 +15,6 @@ Prototyp. Einsatz mit echten Fällen erst nach Freigabe durch Schulleitung und D
 Neue Versionen erscheinen zuerst unter https://hbg-pfad.github.io/pfad/beta/ („Pfad Beta“, gelbes BETA-Schild).
 Die Beta speichert getrennt von der Hauptversion (eigener Speicherschlüssel, eigener Offline-Zwischenspeicher).
 Die Hauptversion unter /pfad/ wird erst nach ausdrücklicher Freigabe aktualisiert.
+
+## Entwicklung
+Quelldatei: `quelle/pfad.html`. Bauwege in `werkzeuge/`, Regeln in `CLAUDE.md`, Stand in `docs/uebergabe.md`.
