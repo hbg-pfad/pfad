@@ -22,7 +22,7 @@
 
 ## Offene Punkte
 
-1. **Sicherheitsprüfung, offene Befunde 5, 7 und 8 sowie Server-Punkte S1 bis S6.** Details nur im privaten Prüfbericht (Claude Doc „Pfad – Sicherheitsprüfung“, https://claude.ai/artifact/YY9e6RyosL8Ca9FpRMiQCW). Nicht im öffentlichen Repo ausführen. Befund 5 betrifft das GitHub-Konto (Zwei-Faktor-Anmeldung), Befund 7 betrifft Webfonts in `einrichten.html`.
+1. **Sicherheitsprüfung (Bericht aktualisiert 26.10.2026 auf Stand bb27134), offene Befunde 4, 5, 7, 8 und 9 sowie Server-Punkte S1 bis S6.** Details nur im privaten Prüfbericht (Claude Doc „Pfad – Sicherheitsprüfung“, https://claude.ai/artifact/YY9e6RyosL8Ca9FpRMiQCW). Nicht im öffentlichen Repo ausführen. Befund 4: soll die App-Sperre Pflicht werden? Befund 5 betrifft die GitHub-Konten inkl. Organisation hbg-pfad (Zwei-Faktor-Anmeldung), Befund 7 betrifft Webfonts in `einrichten.html`.
 2. **Druck auf dem iPad prüfen.** Bericht und Gesprächsblatt als PDF über das Teilen-Fenster auf einem echten iPad testen.
 3. **Schulserver Phase 2.** Gemeinsame Datenbank im Schulnetz, Freigabe pro Fall per Einladung über Kürzel. Vorher Server-Punkte aus der Prüfung erledigen und mit Schul-IT und DSB klären. Wiederherstellung der App-Sperre über die Dienstmail erst mit Server.
 4. **ThinkCentre als möglicher Schulserver.** Klärung mit dem IT-Kollegen läuft über das Projekt „Digitale Förderplanung“.
