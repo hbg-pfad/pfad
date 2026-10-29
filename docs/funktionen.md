@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.6 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.7 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -64,7 +64,7 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 - Gespeichert wird automatisch nach jeder Eingabe, auf dem Gerät.
 - **Achtung iOS:** Die App auf dem Home-Bildschirm hat einen eigenen Speicher, getrennt vom Safari-Tab. Was im Safari-Tab eingetragen wurde, erscheint nicht in der Home-Bildschirm-App. Wird das Symbol gelöscht, löscht iOS auch die Daten. Vor dem Löschen oder Neu-Hinzufügen (z. B. für ein neues Symbol) deshalb immer eine Sicherung speichern und danach wieder laden.
 - Als Datei geöffnet (z. B. in der Vorschau der Dateien-App), zeigt die App eine Warnung: Dort kann das Gerät die Daten jederzeit löschen.
-- Auf „Heute“ steht ab dem ersten eigenen Kind eine Zeile „Letzte Sicherung am … Nächste in x Tagen fällig.“ mit Knopf „Sichern“ (ab 1.1.6). Nach 5 Tagen ohne Sicherung wird daraus ab 5 eigenen Einträgen ein deutlicher Hinweis.
+- Auf „Heute“ steht nach der Einrichtung (auch nur mit dem Beispielfall, ab 1.1.7) eine Zeile „Letzte Sicherung am … Nächste in x Tagen fällig.“ mit Knopf „Sichern“ (ab 1.1.6). Nach 5 Tagen ohne Sicherung wird daraus ab 5 eigenen Einträgen ein deutlicher Hinweis.
 - Updates: Eine neue Version auf GitHub Pages wird beim nächsten Start mit Internet geladen. Die Daten bleiben dabei erhalten.
 
 ## Sicherungen und Kürzel
