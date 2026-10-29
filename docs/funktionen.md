@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.7 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.8 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -133,6 +133,7 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 
 ## Erscheinungsbild
 - iPad quer: breitere Darstellung.
+- Home-Bildschirm-App (ab 1.1.8): oben ein Streifen in Hintergrundfarbe, der Inhalt beginnt etwas tiefer. So bleiben Datum und Überschrift scharf, obwohl iOS den oberen Rand verwischt.
 - Einstellungen → „Erscheinungsbild“: „Wie Gerät“ (Standard), „Hell“ oder „Dunkel“.
 - Markierungen (Einrichtung, Anleitung) in Senfgelb, passend zur Palette.
 - Schriftgröße: Normal, Groß, Sehr groß. Knöpfe ohne Text haben Beschriftungen für VoiceOver.
