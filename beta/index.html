@@ -293,7 +293,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.1.3 Beta",PFAD_STAND="26.10.2026";
+const PFAD_VERSION="1.1.4 Beta",PFAD_STAND="29.10.2026";
 const KEY="pfad-beta";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -1271,10 +1271,13 @@ function srvKidCard(k){if(k.demo||!srvOn())return "";
   const pend=(k.pending||[]);
   return `<div class="card noprint"><b>Freigegeben für</b><div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${(k.team||[]).map(t=>`<span class="mem">${esc(t)}${t===SV().me?" <span class='small'>(du)</span>":`<button aria-label="${esc(t)} entfernen" onclick="srvRemove(${ja(k.id)},${ja(t)})">✕</button>`}</span>`).join("")}${pend.map(t=>`<span class="mem" style="opacity:.6">${esc(t)} <span class="small">eingeladen</span></span>`).join("")}</div>
   <p style="margin:10px 0 0"><button class="btn" onclick="srvInvite(${ja(k.id)})">+ Kolleg:in einladen</button></p><p class="muted small" style="margin:6px 0 0">${srvStatus()}</p></div>`}
+/* Anmeldefeld für den Schulserver vorerst ausgeblendet (Server geparkt, siehe docs/uebergabe.md). Wieder zeigen: true. */
+const SRV_ANZEIGEN=false;
 function srvCard(){const s=db.srv||{};
   if(srvOn())return `<div class="card"><h2 style="margin-top:0">Schulserver</h2><p class="small">Angemeldet als <b>${esc(s.me)}</b> bei ${esc(s.url)}.</p><p class="muted small">${srvStatus()}</p>
     <p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="srvSync(true)">Jetzt abgleichen</button><button class="btn ghost" onclick="srvLogout()">Abmelden</button></p>
     <p class="muted small">Abgeglichen werden nur Kinder, die du beim Kind freigegeben hast. Alles andere bleibt nur auf diesem Gerät.</p></div>`;
+  if(!SRV_ANZEIGEN)return "";
   return `<details class="card"><summary style="font-weight:800;font-size:1.1rem">Schulserver <span class="muted small" style="font-weight:400">(in Vorbereitung)</span></summary>
     <p class="muted small">Sobald ein Pfad-Server im Schulnetz läuft, trägst du hier Adresse, Kürzel und Passwort ein. Dann gleicht die App im Schul-WLAN automatisch ab.</p>
     <label>Adresse</label><input id="srvUrl" placeholder="z. B. https://pfad.schule.local" value="${esc(s.url||"")}">
