@@ -28,7 +28,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.45 system-u
 main{max-width:640px;margin:0 auto;padding:16px 16px 96px}
 /* Home-Bildschirm-App: iOS verwischt den oberen Rand der Ansicht. Ein ruhiger Streifen in Hintergrundfarbe deckt diese Zone ab,
    der Inhalt beginnt darunter, damit Datum und Überschrift scharf bleiben. */
-@media (display-mode:standalone){body::before{content:"";position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 38px);background:var(--bg);z-index:4;pointer-events:none}main{padding-top:calc(env(safe-area-inset-top,0px) + 50px)}.rate .inner{padding-top:calc(env(safe-area-inset-top,0px) + 46px)}}
+@media (display-mode:standalone){body::before{content:"";position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 30px);background:var(--bg);z-index:4;pointer-events:none}main{padding-top:calc(env(safe-area-inset-top,0px) + 38px)}.rate .inner{padding-top:calc(env(safe-area-inset-top,0px) + 34px)}}
 @media (min-width:900px) and (orientation:landscape){main{max-width:860px;padding-left:24px;padding-right:24px}body .rate .inner{max-width:760px}}
 h1{font-size:1.7rem;margin:6px 0 12px;letter-spacing:-.01em}
 h2{font-size:1.1rem;margin:18px 0 8px}
@@ -295,7 +295,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.1.8",PFAD_STAND="29.10.2026";
+const PFAD_VERSION="1.1.9",PFAD_STAND="29.10.2026";
 const KEY="verlaufsbogen-v2";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026

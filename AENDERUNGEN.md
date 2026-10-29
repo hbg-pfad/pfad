@@ -4,6 +4,7 @@ Neueste oben. „Mails/Anleitungen“ = ja, wenn sich Adresse, Einrichtung, Sich
 
 | Datum | Version | Was | Beta/Haupt | Mails/Anleitungen |
 |---|---|---|---|---|
+| 29.10.2026 | 1.1.9 | Home-Bildschirm-App: Abstand oben etwas kleiner | Beta | nein |
 | 29.10.2026 | 1.1.8 | Home-Bildschirm-App: Inhalt beginnt unterhalb der Zone, die iOS oben verwischt (Datum und BETA-Hinweis waren unscharf) | Beta | nein |
 | 29.10.2026 | 1.1.7 | Sicherungs-Zeile auf „Heute“ erscheint auch, wenn nur der Beispielfall da ist | Beta | nein |
 | 29.10.2026 | 1.1.6 | „Heute“: Zeile mit letzter und nächster fälliger Sicherung plus Knopf „Sichern“. Einrichtung: App-Sperre als 4. Schritt, empfohlen und überspringbar | Beta | ja (Einrichtung hat 4 Schritte, App-Sperre empfohlen) |
