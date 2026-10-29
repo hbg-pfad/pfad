@@ -11,6 +11,8 @@ def rep(old, new):
     assert old in s, old
     s = s.replace(old, new, 1)
 rep('const KEY="verlaufsbogen-v2";', 'const KEY="pfad-beta";')
+# Eigene IndexedDB für gemerkte Schlüssel (Sicherungs- und Team-Passwort), sonst überschreibt die Beta die der Hauptversion
+rep('indexedDB.open("verlaufsbogen",1)', 'indexedDB.open("pfad-beta",1)')
 rep('<title>Pfad</title>', '<title>Pfad Beta</title>')
 rep('content="Pfad">', 'content="Pfad Beta">')
 s = re.sub(r'const PFAD_VERSION="([^"]+)"', r'const PFAD_VERSION="\1 Beta"', s, count=1)
