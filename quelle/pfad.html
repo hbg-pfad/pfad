@@ -292,7 +292,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.1.4",PFAD_STAND="29.10.2026";
+const PFAD_VERSION="1.1.5",PFAD_STAND="29.10.2026";
 const KEY="verlaufsbogen-v2";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -459,9 +459,11 @@ const HI=(()=>{const p={
  help:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.3 2.4c-.6.3-.9.7-.9 1.4v.4M12 16.8v.2"/>',
  pin:'<path d="M12 21s-6-5.4-6-10a6 6 0 0 1 12 0c0 4.6-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/>',
  server:'<rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/><path d="M8 7.5h.01M8 16.5h.01"/>',
- me:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.9-4 3.8-6 7.5-6s6.6 2 7.5 6"/>'};
+ me:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.9-4 3.8-6 7.5-6s6.6 2 7.5 6"/>',
+ save:'<path d="M12 4v10M8 10l4 4 4-4"/><path d="M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/>',
+ swap:'<path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/>'};
  const m={"Verhalten":"target","Tagebuch":"book","Wen bewertest du?":"users","Was zeigt sich?":"bulb","Nach Fach":"subj","Nach Stunde":"clock","Letzte Kommentare":"chat","Notizen im Zeitraum":"pin",
-  "Stundenraster":"clock","Wochenziel":"flag","Schuljahreswechsel":"year","App-Sperre und Verschlüsselung":"lock","Daten":"data","Datenschutz":"shield","Erscheinungsbild":"look","Anleitung":"help","Schulserver":"server","Dein Kürzel":"me","Das hat gut geklappt":"flag","Das nehmen wir uns vor":"target"};
+  "Stundenraster":"clock","Wochenziel":"flag","Schuljahreswechsel":"year","App-Sperre und Verschlüsselung":"lock","Daten":"data","Datenschutz":"shield","Erscheinungsbild":"look","Anleitung":"help","Schulserver":"server","Dein Kürzel":"me","Sichern":"save","Austausch im Team":"swap","Das hat gut geklappt":"flag","Das nehmen wir uns vor":"target"};
  const o={};for(const[k,v]of Object.entries(m))o[k]=`<span class="hic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${p[v]}</svg></span>`;return o})();
 function decorateHeads(){
   document.querySelectorAll("#app h2, #app .card>b:first-child, #app .card .grow>b:first-child, #app .card>label:first-child, #app summary>b").forEach(h=>{if(h.querySelector(".hic"))return;const t=h.textContent.trim(),ic=HI[t];if(ic)h.insertAdjacentHTML("afterbegin",ic)})}
@@ -658,7 +660,7 @@ const HELP=[
  {t:"Nach der Stunde bewerten",p:"Auf „Heute“ tippst du beim Kind auf „Bewerten“.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
  {t:"Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
  {t:"Verlauf ansehen",p:"Unter „Verlauf“ siehst du jedes Verhalten als Kurve mit Ziel und Förderbeginn.",l:["Die App sagt in Worten, ob es eher besser, stabil oder eher schwieriger wird.","Der Text für die Evaluation im Förderplan lässt sich kopieren.","Gesprächsblatt für Kind und Eltern und Bericht für die Förderakte gibt es als PDF."]},
- {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Spätestens alle 5 Tage: Einstellungen → „Sicherung speichern“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt. Mit „Sicherung prüfen“ siehst du, ob sie sich öffnen lässt.","Mit Kolleg:innen: „Kinder teilen“ und nur die Kinder auswählen, um die es geht.","Über „Dateien laden“ führst du Sicherungen und geteilte Stände zusammen, auch mehrere auf einmal. Neues kommt dazu, deine Einträge bleiben."]},
+ {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Spätestens alle 5 Tage: Einstellungen → „Sicherung speichern“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder weitergeben“, nur die Kinder auswählen, um die es geht, und die Datei per AirDrop oder Dienstmail schicken.","Mit dem Team-Passwort tippt niemand ein Passwort ein. Beim Einlesen kommt Neues dazu, deine Einträge bleiben."]},
  {t:"Sicher arbeiten",p:"Ein paar Regeln, damit die Daten geschützt bleiben.",l:["Nur auf dem Dienstgerät mit Gerätecode und automatischer Sperre.","Auf iPad und iPhone: In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Mit iOS 27 liegt „Teilen“ im Seitenmenü links neben der Adresse.","Das Symbol nicht löschen, ohne vorher zu sichern. Sonst sind die Daten weg."]}];
 // Geführte Anleitung: zeigt die echten Bildschirme mit dem fiktiven Beispielfall und markiert die Stelle
 const demoKid=()=>db.kids.find(k=>k.demo);
@@ -736,7 +738,7 @@ function kidV(){
     h+=`<div class="card"><div class="between"><div class="grow"><b>${esc(g.title)}</b><div class="muted small">${g.dir==="down"?"weniger davon":"mehr davon"} · ${n} Einschätzung${n===1?"":"en"}</div></div>${spark(g)}</div>
     <div class="between" style="margin-top:8px">${badge(t)}<span><button class="btn ghost" onclick="go({tab:'analyse',aKid:${ja(k.id)},aGoal:${ja(g.id)}})">Verlauf</button><button class="btn ghost" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},goal:${ja(g.id)}})">Bearbeiten</button></span></div></div>`}
   h+=`<p><button class="btn block" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},goal:''})">+ Verhalten</button></p>`+diaryV(k)+`
-  <div class="card noprint row"><div class="grow small"><b>Mit Kolleg:in teilen</b><br><span class="muted">Verschlüsselte Datei nur mit diesem Kind.</span></div><button class="btn" onclick="shareKids(${ja(k.id)})">Teilen</button></div>
+  <div class="card noprint row"><div class="grow small"><b>An Kolleg:in weitergeben</b><br><span class="muted">${db.shared?.[k.id]?`Zuletzt weitergegeben am ${dDEy(iso(new Date(db.shared[k.id])))}.`:"Verschlüsselte Datei nur mit diesem Kind."}</span></div><button class="btn" onclick="shareKids(${ja(k.id)})">Weitergeben</button></div>
   ${srvKidCard(k)}
   ${k.closed||k.demo?"":`<div class="card noprint row"><div class="grow small"><b>Förderung abschließen</b><br><span class="muted">Zum Beispiel am Schuljahresende oder bei Schulwechsel.</span></div><button class="btn" onclick="closeKid(${ja(k.id)})">Abschließen</button></div>`}
   <p class="noprint" style="margin-top:24px"><button class="btn ghost danger" onclick="delKid(${ja(k.id)})">Kind und alle Einschätzungen löschen</button></p>`;
@@ -1209,11 +1211,22 @@ async function backupKey(){let k=null;try{k=await idbGet("bkey")}catch(e){}if(k&
   if(await ask("Passwort auf diesem Gerät merken? Dann geht jede Sicherung mit einem Tipp.",{ok:"Merken",cancel:"Jedes Mal fragen"})){db.bsalt=salt;try{await idbSet("bkey",k)}catch(e){}save()}
   return {key:k,salt}}
 async function forgetBackupPw(){await idbSet("bkey",null);delete db.bsalt;save();render();toast("Sicherungs-Passwort vergessen")}
+// Team-Passwort: einmal im Team vereinbart, als nicht auslesbarer Schlüssel auf dem Gerät gemerkt.
+// Fester Salt, damit alle im Team aus demselben Passwort denselben Schlüssel ableiten. Ältere Pfad-Versionen fragen einfach nach dem Passwort.
+const TEAM_SALT=b64(enc("pfad-team-1"));
+async function teamKey(){try{return await idbGet("tkey")||null}catch(e){return null}}
+async function keepTeamKey(k){try{await idbSet("tkey",k)}catch(e){toast("Team-Passwort ließ sich nicht merken");return false}db.team={at:today()};save();render();return true}
+async function setTeamPw(){const pw=await askNewPw("Trag das Team-Passwort ein, das ihr im Team vereinbart habt.");if(!pw)return null;
+  const k=await pwKey(pw,unb64(TEAM_SALT));if(!await keepTeamKey(k))return null;toast("Team-Passwort gespeichert");return k}
+async function forgetTeamPw(){if(!await ask("Team-Passwort auf diesem Gerät vergessen? Zum Weitergeben und Einlesen trägst du es dann neu ein.",{ok:"Vergessen"}))return;
+  await idbSet("tkey",null);delete db.team;save();render();toast("Team-Passwort vergessen")}
 async function sealFile(art,payload,keyInfo){const body=await gcm(keyInfo.key,enc(payload));
-  return JSON.stringify({pfad:3,art,von:db.me||"",erstellt:new Date().toISOString(),anzahl:payload.kids.length,salt:keyInfo.salt,...body})}
+  return JSON.stringify({pfad:3,art,von:db.me||"",erstellt:new Date().toISOString(),anzahl:payload.kids.length,salt:keyInfo.salt,...(keyInfo.team?{team:1}:{}),...body})}
 async function openFile(o,name){
-  if(o.pfad===3||(o.verlaufsbogen==="sicherung"&&o.salt)){for(;;){const pw=await askText((o.art==="teilen"?`Passwort für den geteilten Stand${o.von?` von ${o.von}`:""}`:"Passwort der Sicherung")+(name?` (${name})`:""),"Passwort","password");if(!pw)return null;
-    try{const k=await pwKey(pw,unb64(o.salt));if(o.pfad===3)return JSON.parse(dec(await ungcm(k,o)));
+  const team=o.pfad===3&&o.team&&o.salt===TEAM_SALT;
+  if(team){const k=await teamKey();if(k)try{return JSON.parse(dec(await ungcm(k,o)))}catch(e){toast("Dein Team-Passwort passt nicht zu dieser Datei")}}
+  if(o.pfad===3||(o.verlaufsbogen==="sicherung"&&o.salt)){for(;;){const pw=await askText((team?`Team-Passwort für den geteilten Stand${o.von?` von ${o.von}`:""}`:o.art==="teilen"?`Passwort für den geteilten Stand${o.von?` von ${o.von}`:""}`:"Passwort der Sicherung")+(name?` (${name})`:""),"Passwort","password");if(!pw)return null;
+    try{const k=await pwKey(pw,unb64(o.salt));if(o.pfad===3){const d=JSON.parse(dec(await ungcm(k,o)));if(team&&await ask("Das Team-Passwort auf diesem Gerät merken? Dann musst du es beim Einlesen und Weitergeben nicht mehr eintippen.",{ok:"Merken",cancel:"Nicht merken"}))await keepTeamKey(k);return d}
       const raw=new Uint8Array(await ungcm(k,o.wrapped));return JSON.parse(dec(await ungcm(await crypto.subtle.importKey("raw",raw,"AES-GCM",false,["decrypt"]),o)))}catch(e){toast("Passwort falsch")}}}
   if(o.kids){if(!await ask(`${name||"Diese Datei"} ist nicht verschlüsselt (altes Format). Lade sie nur, wenn sie sicher von dir stammt.`,{ok:"Trotzdem laden"}))return null;return o} // alte, unverschlüsselte Sicherung
   throw new Error("format")}
@@ -1309,6 +1322,7 @@ function profilV(){
   const n=db.kids.reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0),0);
   return `<h1>Einstellungen</h1>
   <div class="card row"><div class="grow"><b>Anleitung</b><br><span class="small muted">Pfad zeigt dir in 8 Schritten die wichtigsten Stellen der App.</span></div><button class="btn" onclick="openHelp()">Starten</button></div>
+  ${austauschV()}
   <div class="card"><b>Erscheinungsbild</b><div class="pick theme" style="margin-top:10px">${[["system","Wie Gerät"],["light","Hell"],["dark","Dunkel"]].map(([k,t])=>`<button class="${(db.theme||"system")===k?"on":""}" onclick="db.theme='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div><div class="sub" style="margin-top:6px">„Wie Gerät“ folgt der Einstellung von iPad oder iPhone.</div>
   <div class="sub" style="margin:14px 0 6px;font-weight:700">Schriftgröße</div><div class="pick theme">${[["m","Normal"],["l","Groß"],["xl","Sehr groß"]].map(([k,t])=>`<button class="${(db.fs||"m")===k?"on":""}" onclick="db.fs='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div></div>
   <div class="card"><label style="margin-top:0">Dein Kürzel</label><div class="sub">Wird bei jeder Einschätzung gespeichert. Hilfreich, wenn ihr Daten im Team zusammenführt.</div>
@@ -1322,10 +1336,7 @@ function profilV(){
   ${yearV()}
   ${lockV()}
   <div class="card"><h2 style="margin-top:0">Daten</h2><p class="muted">${db.kids.length} Kinder · ${n} Einschätzungen auf diesem Gerät</p>
-  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="shareKids()">Kinder teilen</button><button class="btn" onclick="$('#imp').click()">Dateien laden</button><button class="btn" onclick="$('#chk').click()">Sicherung prüfen</button></p>
   <input type="file" id="imp" accept=".json,application/json" multiple hidden onchange="importJSON(this)"><input type="file" id="chk" accept=".json,application/json" hidden onchange="checkFile(this)">
-  <p class="muted small">${db.lastBackup?`Letzte Sicherung: ${dDEy(iso(new Date(db.lastBackup)))}. `:""}Sicherung: alle deine Kinder, nur für dich, spätestens alle 5 Tage. Teilen: nur ausgewählte Kinder, für eine Kollegin oder einen Kollegen. Laden: Du kannst mehrere Sicherungen und geteilte Stände auf einmal auswählen. Pfad führt sie zusammen, du wählst pro Kind, was du ergänzt. Prüfen: zeigt, was in einer Sicherung steckt, ohne etwas zu übernehmen.</p>
-  ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}
   ${mtip("demo")}<p class="row" style="flex-wrap:wrap">${db.kids.some(k=>k.demo)&&!view.mark?`<button class="btn" onclick="delDemo()">Beispielfall entfernen</button>`:`<button class="btn${mk("demo")}" onclick="demo()">Fiktiven Beispielfall laden</button>`}</p>
   <p><button class="btn ghost danger" onclick="wipe()">Alle Daten auf diesem Gerät löschen</button></p></div>
   ${srvCard()}
@@ -1336,13 +1347,24 @@ function profilV(){
   <p>Vor dem Einsatz mit echten Fällen: Absprache mit Schulleitung und Datenschutzbeauftragten.</p></div>
   <p class="muted small" style="text-align:center">Pfad ${PFAD_VERSION} · Stand ${PFAD_STAND} · schulintern</p>`;
 }
+// Sichern (nur für dich) und Austausch im Team, oben in den Einstellungen
+function austauschV(){const last=db.lastBackup;
+  return `<div class="card"><h2 style="margin-top:0">Sichern</h2><p class="small muted" style="margin-top:0">Alle deine Kinder in einer Datei, nur für dich. Spätestens alle 5 Tage, Pfad erinnert dich daran.</p>
+  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="$('#imp').click()">Sicherung laden</button><button class="btn" onclick="$('#chk').click()">Sicherung prüfen</button></p>
+  <p class="small muted">${last?`Letzte Sicherung: ${dDEy(iso(new Date(last)))}. `:"Noch keine Sicherung. "}Neues Gerät, App-Symbol gelöscht oder Code der App-Sperre vergessen? Dann lädst du hier deine letzte Sicherung. „Prüfen“ zeigt, was in einer Sicherung steckt, ohne etwas zu übernehmen.</p>
+  ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}</div>
+  <div class="card"><h2 style="margin-top:0">Austausch im Team</h2><p class="small muted" style="margin-top:0">Du gibst nur die Kinder weiter, an denen ihr gemeinsam arbeitet. Beim Einlesen kommt Neues dazu, deine eigenen Einträge bleiben.</p>
+  <p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="shareKids()">Kinder weitergeben</button><button class="btn" onclick="$('#imp').click()">Geteilte Datei einlesen</button></p>
+  <ol class="small" style="padding-left:20px;margin:8px 0 12px"><li style="margin:4px 0">„Kinder weitergeben“ und die Kinder auswählen.</li><li style="margin:4px 0">Die Datei per AirDrop oder Dienstmail an die Kollegin oder den Kollegen schicken.</li><li style="margin:4px 0">Dort die Datei in „Dateien“ sichern und in Pfad „Geteilte Datei einlesen“ tippen.</li></ol>
+  <div class="row" style="flex-wrap:wrap;gap:8px">${db.team?`<span class="grow small">✓ Team-Passwort ist auf diesem Gerät eingetragen.</span><button class="btn ghost small" onclick="setTeamPw()">Ändern</button><button class="btn ghost small" onclick="forgetTeamPw()">Vergessen</button>`
+    :`<span class="grow small">Noch kein Team-Passwort eingetragen. Ihr vereinbart es im Team, nie per Mail.</span><button class="btn small" onclick="setTeamPw()">Eintragen</button>`}</div></div>`}
 function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
 /* ===== Sicherung, Teilen, Import mit Auswahl ===== */
 const realKid=k=>!k.demo;
 async function exportJSON(){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
   const ki=await backupKey();if(!ki)return;
   if(!db.backupTip&&!await backupTip())return;
-  const {srv,bsalt,lock,yearUndo,...rest}=db,payload={...rest,kids:db.kids.filter(realKid)};
+  const {srv,bsalt,lock,yearUndo,team,...rest}=db,payload={...rest,kids:db.kids.filter(realKid)};
   if(!await giveFile(backupName(),await sealFile("sicherung",payload,ki)))return;
   db.lastBackup=Date.now();db.backupTip=1;save();render();toast(isIOS?"Sicherung erstellt. Sie liegt in „Dateien“ → „Auf meinem "+(/iPad/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&/Mac/.test(navigator.userAgent)?"iPad":"iPhone")+"“.":"Sicherung erstellt.")}
 // Dateiname mit Datum: jede Sicherung ist eine eigene Datei
@@ -1359,16 +1381,35 @@ async function backupTip(){const touch=matchMedia("(pointer:coarse)").matches,de
   <p class="small muted" style="margin:0 0 14px">Spätere Sicherungen legst du in denselben Ordner. Mit anderen teilst du Daten nur über deine Dienstmail oder eine andere datenschutzkonforme Plattform der Schule. Lade die Sicherung nicht in eine private Cloud hoch.</p>`)}
 // Stand einzelner Kinder für Kolleg:innen
 async function shareKids(pre){if(!crypto.subtle)return toast("Verschlüsselung in dieser Ansicht nicht möglich. Bitte im Browser öffnen.");
-  const ks=db.kids.filter(realKid).sort((a,b)=>a.code.localeCompare(b.code));if(!ks.length)return toast("Noch keine Kinder angelegt");
-  const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Welche Kinder möchtest du teilen?</p><p class="small muted" style="margin:0 0 10px">Geteilt wird alles zu diesen Kindern: Verhalten, Einschätzungen, Tagebuch.</p>
-    <div style="max-height:46vh;overflow:auto">${ks.map(k=>`<label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" value="${esc(k.id)}" ${pre===k.id||(!pre&&ks.length===1)?"checked":""}> ${esc(k.code)} <span class="muted small" style="font-weight:400">${esc(k.cls||"")}</span></label>`).join("")}</div>
+  const ks=db.kids.filter(realKid).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true}));if(!ks.length)return toast("Noch keine Kinder angelegt");
+  let tk=await teamKey();if(!tk&&db.team){delete db.team;save()}
+  const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Welche Kinder gibst du weiter?</p><p class="small muted" style="margin:0 0 10px">Weitergegeben wird alles zu diesen Kindern: Verhalten, Einschätzungen, Tagebuch.</p>
+    <div style="max-height:38vh;overflow:auto">${ks.map(k=>`<label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" value="${esc(k.id)}" ${pre===k.id||(!pre&&ks.length===1)?"checked":""}> ${esc(k.icon||"")} ${esc(k.code)} <span class="muted small" style="font-weight:400">${esc(k.cls||"")}</span></label>`).join("")}</div>
+    <p style="font-weight:700;margin:14px 0 4px">Verschlüsseln mit</p>
+    <label class="row" style="margin:6px 0"><input type="radio" name="pwart" value="team" style="width:auto" checked> <span>Team-Passwort <span class="muted small">${tk?"(eingetragen)":"(trägst du gleich ein)"}</span></span></label>
+    <label class="row" style="margin:6px 0"><input type="radio" name="pwart" value="own" style="width:auto"> <span>Eigenes Passwort nur für diese Datei <span class="muted small">(sagst du persönlich)</span></span></label>
     <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Weiter</button></div>`,
-    (el,done)=>{el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done([...el.querySelectorAll("input:checked")].map(i=>i.value))});
-  if(!sel||!sel.length)return;
-  const pw=await askNewPw("Passwort für diesen Stand festlegen. Sag es der Kollegin oder dem Kollegen mündlich, nicht per Mail.");if(!pw)return;
-  const salt=b64(rnd(16)),kids=sel.map(kidById);
+    (el,done)=>{el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done({ids:[...el.querySelectorAll("input[type=checkbox]:checked")].map(i=>i.value),art:el.querySelector("input[name=pwart]:checked").value})});
+  if(!sel)return;if(!sel.ids.length)return toast("Kein Kind ausgewählt");
+  let ki;
+  if(sel.art==="team"){tk=tk||await setTeamPw();if(!tk)return;ki={key:tk,salt:TEAM_SALT,team:1}}
+  else{const pw=await askNewPw("Passwort nur für diese Datei festlegen. Sag es der Kollegin oder dem Kollegen persönlich, nicht in derselben Mail.");if(!pw)return;const salt=b64(rnd(16));ki={key:await pwKey(pw,unb64(salt)),salt}}
+  if(!db.shareTip&&!await shareTip())return;
+  const kids=sel.ids.map(kidById).filter(Boolean);
   const name=`pfad-${kids.length===1?kids[0].code.replace(/[^\w\-]/g,"_"):kids.length+"-kinder"}-von-${(db.me||"ohne").replace(/[^\w\-]/g,"_")}-${today()}.json`;
-  if(await giveFile(name,await sealFile("teilen",{kids,classes:[...new Set(kids.map(k=>k.cls).filter(Boolean))]},{key:await pwKey(pw,unb64(salt)),salt})))toast(`Stand von ${kids.length} Kind${kids.length===1?"":"ern"} erstellt`)}
+  if(!await giveFile(name,await sealFile("teilen",{kids,classes:[...new Set(kids.map(k=>k.cls).filter(Boolean))]},ki)))return;
+  const now=Date.now();db.shared??={};kids.forEach(k=>db.shared[k.id]=now);db.shareTip=1;save();render();
+  toast(`Datei mit ${kids.length} Kind${kids.length===1?"":"ern"} erstellt. In Pfad der Kollegin oder des Kollegen: „Geteilte Datei einlesen“.`)}
+// Vor dem ersten Weitergeben: wie die Datei ankommt
+async function shareTip(){const touch=matchMedia("(pointer:coarse)").matches;
+  const steps=[touch?`Gleich öffnet sich das Teilen-Fenster. Sitzt ihr zusammen, tippst du auf <b>AirDrop</b> und wählst das Dienstgerät der Kollegin oder des Kollegen. Sonst wählst du <b>Mail</b> und schickst die Datei über deine Dienstmail.`
+      :`Die Datei landet im Ordner <b>„Downloads“</b>. Hänge sie an eine Mail über deine Dienstmail.`,
+    `Die Kollegin oder der Kollege sichert die Datei in <b>„Dateien“</b>. Was per AirDrop kommt, liegt dort schon unter „Downloads“.`,
+    `Dann in Pfad: Einstellungen → <b>„Geteilte Datei einlesen“</b> und die Datei auswählen.`];
+  return dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">So kommt die Datei an</p>
+  <ol class="small" style="padding-left:20px;margin:0 0 8px">${steps.map(x=>`<li style="margin:6px 0">${x}</li>`).join("")}</ol>
+  <p class="small muted" style="margin:0 0 14px">Die Datei ist verschlüsselt. Schick sie trotzdem nicht über Messenger und lade sie nicht in eine private Cloud.</p>
+  <div class="duo"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Verstanden</button></div>`,(el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"));el.querySelector('[data-a="1"]').focus()}).then(v=>v===true)}
 // Import: erst ansehen und auswählen, dann ergänzen
 let IMP=null;
 // Eine Datei öffnen (Passwort fragen). Gibt {o,d} zurück oder null.
@@ -1393,7 +1434,7 @@ async function checkFile(inp){const f=inp.files[0];inp.value="";if(!f)return;con
   await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 6px">✓ Die Datei lässt sich öffnen</p>
   <p class="small" style="margin:0 0 8px">${o.art==="teilen"?"Geteilter Stand":"Sicherung"}${o.von||d.me?` von ${esc(o.von||d.me)}`:""}${o.erstellt?`, erstellt am ${dDEy(o.erstellt.slice(0,10))}`:""}. ${ks.length} Kind${ks.length===1?"":"er"}${last?`, letzter Eintrag am ${dDEy(last)}`:""}.</p>
   <div style="max-height:42vh;overflow:auto"><table class="small"><tr><th>Kürzel</th><th>Verhalten</th><th>Einschätz.</th><th>Tagebuch</th></tr>${ks.map(k=>`<tr><td>${esc(k.code)}${kidById(k.id)?"":' <span class="tag">nicht auf dem Gerät</span>'}</td><td>${k.goals.length}</td><td>${ne(k)}</td><td>${(k.diary||[]).length}</td></tr>`).join("")}</table></div>
-  <p class="small muted" style="margin:10px 0 14px">Es wurde nichts übernommen. Zum Übernehmen nutze „Dateien laden“.</p>
+  <p class="small muted" style="margin:10px 0 14px">Es wurde nichts übernommen. Zum Übernehmen nutze „Sicherung laden“.</p>
   <button class="btn pri block" data-a="1">Schließen</button>`,(el,done)=>{el.querySelector("[data-a]").onclick=()=>done(true);el.querySelector("[data-a]").focus()})}
 function importV(){if(!IMP){view={tab:"profil"};return profilV()}
   const rows=IMP.kids.map(k=>{const x=diffKid(k),on=IMP.sel.has(k.id);
@@ -1416,7 +1457,7 @@ function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=
 function exportCSV(kid,gid){const k=kidById(kid),g=goalById(k,gid);
   const rows=[["Kürzel","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value==null?"nicht beobachtet":dv(g,e.value),e.note,e.rater]));
   download(`verlauf-${k.code}-${today()}.csv`,"﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/^[=+\-@\t\r]/,"'$&").replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
-async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,classes:[],kids:[]};save();go({tab:"heute"})}
+async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,team:db.team,shareTip:db.shareTip,classes:[],kids:[]};save();go({tab:"heute"})}
 async function delDemo(){if(!await ask("Den fiktiven Beispielfall entfernen? Deine eigenen Kinder bleiben.",{ok:"Entfernen"}))return;db.kids=db.kids.filter(k=>!k.demo);save();render();toast("Beispielfall entfernt")}
 /* ===== Schuljahreswechsel ===== */
 const syNow=()=>{const d=new Date(),y=d.getFullYear()-(d.getMonth()<7?1:0);return `${y}/${String(y+1).slice(2)}`};

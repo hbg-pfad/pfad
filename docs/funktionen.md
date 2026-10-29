@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.3, Stand 26.10.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.5 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -14,7 +14,7 @@ Gestaltung bewusst eigenständig (Entwurf B „warm und freundlich“, 23.10.202
 - **Bewerten:** alle Verhalten eines Kindes nacheinander. Tag (Heute, Gestern, früher bis 7 Tage), Stunde und Fach als Knöpfe mit einem Tipp. Die laufende Stunde ist nach Uhrzeit vorausgewählt, in Pausen die Stunde davor. Für Beobachtungen in der Pause: „Kleine Pause“, „Große Pause“, „Mittagspause“ (alte Einträge „Pause“ zählen als Große Pause). Ab dem zweiten Verhalten nur noch eine Zeile „Heute · 3. Std. · Mathe – ändern“. Zahlenleiste je nach Skala, Kommentar mit Schalter „Im Verlauf markieren“ (wichtige Kommentare erscheinen dann wie Tagebucheinträge als Markierung im Graphen, Art „Notiz“; nachträglich unter „Alle Einschätzungen“ änderbar), „Heute nicht gesehen“.
 - **Tagebuch (pro Kind):** freie Notizen ohne Skala mit Art (Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall, Erfolg), Datum und Fach. Schnell erreichbar über „Notiz“ auf der Seite Heute. In der Analyse erscheinen die Einträge als nummerierte, farbige Markierungen im Verlaufsgraphen, darunter mit Text.
 - **Analyse:** Verlauf mit Zielwert und Förderbeginn, Zusammenfassung in Worten, Vergleich nach Fach und Stunde, letzte Kommentare, Text für die Evaluation im Förderplan (kopieren, drucken, CSV).
-- **Einstellungen:** Kürzel, Fächer (Reihenfolge = Knöpfe), Klassen, Stundenraster (abweichende Zeiten für jeden Wochentag einzeln möglich), Wochenziel, Sicherung speichern, Kinder teilen, Datei laden (mit Auswahl pro Kind), Schulserver (vorbereitet), Beispielfall, Datenschutz.
+- **Einstellungen:** ganz oben „Sichern“ (Sicherung speichern, laden, prüfen) und „Austausch im Team“ (Kinder weitergeben, geteilte Datei einlesen, Team-Passwort), dann Kürzel, Fächer (Reihenfolge = Knöpfe), Klassen, Stundenraster (abweichende Zeiten für jeden Wochentag einzeln möglich), Wochenziel, Beispielfall, Datenschutz. Der Bereich Schulserver ist ausgeblendet, solange der Server geparkt ist (ab 1.1.4).
 
 ## Gesprächsblatt für Kind und Eltern
 - Aufruf: beim Kind „Gesprächsblatt“ oder im Verlauf unten.
@@ -68,7 +68,7 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 - Updates: Eine neue Version auf GitHub Pages wird beim nächsten Start mit Internet geladen. Die Daten bleiben dabei erhalten.
 
 ## Sicherungen und Kürzel
-- Speichern: Einstellungen → „Sicherung speichern“. Beim ersten Mal legst du ein Sicherungs-Passwort fest (mind. 8 Zeichen) und kannst es auf dem Gerät merken lassen. Dann geht jede weitere Sicherung mit einem Tipp. „Passwort vergessen“ löscht es nur auf diesem Gerät.
+- Speichern: Einstellungen → Sichern → „Sicherung speichern“. Beim ersten Mal legst du ein Sicherungs-Passwort fest (mind. 8 Zeichen) und kannst es auf dem Gerät merken lassen. Dann geht jede weitere Sicherung mit einem Tipp. „Passwort vergessen“ löscht es nur auf diesem Gerät.
 - Vor der ersten Sicherung erklärt die App, wohin die Datei gehört: iPad/iPhone „In Dateien sichern“ → „Auf meinem iPad“ → Ordner „Pfad“ → „Sichern“. Spätere Sicherungen kommen in denselben Ordner, jede als eigene Datei mit Datum.
 - Die Datei (`pfad-sicherung-NB-2026-10-23.json`) ist verschlüsselt und enthält alle eigenen Kinder und Einstellungen. Ablage nur lokal auf dem Dienstgerät (z. B. „Dateien“ → „Auf meinem iPad“), nicht in einer Cloud.
 - Das Passwort ist nicht wiederherstellbar. Ohne Passwort lässt sich die Sicherung nicht öffnen.
@@ -78,18 +78,24 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 - Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Deshalb nur dienstliche Geräte mit Code-Sperre nutzen.
 
 ## Laden und selektiv ergänzen
-- Einstellungen → „Dateien laden“ → Passwort. Mehrere Dateien auf einmal gehen auch (z. B. mehrere eigene Sicherungen oder Stände von Kolleg:innen): Pfad fragt pro Datei nach dem Passwort, führt die Stände untereinander zusammen (jeder Eintrag nur einmal, die neuere Fassung gilt) und zeigt dann die Auswahl. Einstellungen kommen dabei aus der neuesten Sicherung.
+- Einstellungen → „Sicherung laden“ oder „Geteilte Datei einlesen“ (beide Knöpfe öffnen denselben Weg) → Passwort, bei Dateien mit Team-Passwort ohne Abfrage. Mehrere Dateien auf einmal gehen auch (z. B. mehrere eigene Sicherungen oder Stände von Kolleg:innen): Pfad fragt pro Datei nach dem Passwort, führt die Stände untereinander zusammen (jeder Eintrag nur einmal, die neuere Fassung gilt) und zeigt dann die Auswahl. Einstellungen kommen dabei aus der neuesten Sicherung.
 - „Sicherung prüfen“ öffnet eine Datei nur zur Ansicht (Kinder, Einträge, letzter Eintrag) und übernimmt nichts.
 -  Danach zeigt die App jedes Kind aus der Datei mit dem, was neu wäre: „neu · 2 Verhalten · 14 Einschätzungen“, „vorhanden: +3 Einschätzungen · +1 Tagebuch“ oder „nichts Neues“.
 - Du wählst die Kinder aus, die übernommen werden. Nicht ausgewählte Kinder bleiben unverändert.
 - Übernehmen heißt **ergänzen**, nie ersetzen: Neue Einträge kommen dazu, eigene bleiben. Bei demselben Eintrag gilt die neuere Fassung, Löschungen werden mit übernommen.
 - Bei einer eigenen Sicherung lassen sich zusätzlich die Einstellungen übernehmen (Fächer, Stundenraster, Wochenziel). Auf einem leeren Gerät ist das vorausgewählt.
 
-## Mit Kolleg:innen teilen (ohne Server)
-- Einstellungen → „Kinder teilen“ oder beim Kind „Mit Kolleg:in teilen“. Du wählst die Kinder aus, nur diese kommen in die Datei. So bekommt niemand alle Fälle, sondern nur die, an denen er:sie mitarbeitet.
-- Für jede geteilte Datei legst du ein eigenes Passwort fest. Das Passwort sagst du der Kollegin oder dem Kollegen persönlich, nicht in derselben Mail oder Nachricht wie die Datei.
-- Die Kollegin oder der Kollege lädt die Datei über „Datei laden“ und ergänzt damit den eigenen Stand (siehe oben). Danach kann sie:er selbst teilen, so entsteht ein Austausch in beide Richtungen.
+## Mit Kolleg:innen austauschen (ohne Server, ab 1.1.5)
+- Einstellungen → „Austausch im Team“ → „Kinder weitergeben“ oder beim Kind „Weitergeben“. Du wählst die Kinder aus, nur diese kommen in die Datei. So bekommt niemand alle Fälle, sondern nur die, an denen er:sie mitarbeitet.
+- **Team-Passwort (Standard):** Das Team vereinbart ein gemeinsames Passwort, persönlich und nicht per Mail. Jede:r trägt es einmal ein („Eintragen“), Pfad merkt es sich als nicht auslesbaren Schlüssel auf dem Gerät. Danach geht Weitergeben ohne Passwort-Tippen, und Dateien mit Team-Passwort lassen sich ohne Abfrage einlesen. Wer das Team-Passwort noch nicht eingetragen hat, wird beim Einlesen danach gefragt und kann es dann merken lassen.
+- **Eigenes Passwort:** Für heikle Fälle lässt sich weiter ein Passwort nur für diese Datei festlegen. Das sagst du der Kollegin oder dem Kollegen persönlich.
+- Grenze des Team-Passworts: Wer zum Team gehört, kann jede Datei mit Team-Passwort öffnen. Verlässt jemand das Team, vereinbart ihr ein neues und tragt es neu ein („Ändern“).
+- Ältere Pfad-Versionen können Dateien mit Team-Passwort öffnen, sie fragen dann einfach nach dem Passwort.
+- Vor dem ersten Weitergeben erklärt Pfad den Weg: iPad/iPhone per AirDrop ans Dienstgerät, wenn ihr zusammensitzt, sonst per Dienstmail. Nicht über Messenger, nicht in eine private Cloud.
+- Die Kollegin oder der Kollege sichert die Datei in „Dateien“ (AirDrop legt sie unter „Downloads“ ab) und tippt in Pfad auf „Geteilte Datei einlesen“. Dann ergänzt die Datei den eigenen Stand (siehe oben). So entsteht ein Austausch in beide Richtungen.
+- Beim Kind steht „Zuletzt weitergegeben am …“ (nur auf dem eigenen Gerät).
 - Jeder Eintrag trägt das Kürzel der Lehrkraft, die ihn gemacht hat.
+- Passwort vergessen: Das Team-Passwort fragst du im Team nach. Ein vergessenes Sicherungs-Passwort lässt sich nicht wiederherstellen: „Vergessen“, neues festlegen und sofort neu sichern. Code der App-Sperre vergessen: alles auf dem Gerät löschen und die letzte Sicherung laden.
 
 ## Schulserver (vorbereitet, noch nicht in Betrieb)
 Ziel: eine gemeinsame Datenbank auf einem internen Schulserver, erreichbar im Schul-WLAN. Die App ist dafür fertig vorbereitet, der Server muss aber noch von IT bzw. Schulträger eingerichtet und freigegeben werden. Ein lauffähiger Referenz-Server liegt unter `server/` (Anleitung in `server/README.md`).
