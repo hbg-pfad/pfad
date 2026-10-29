@@ -26,6 +26,9 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{max-width:640px;margin:0 auto;padding:16px 16px 96px}
+/* Home-Bildschirm-App: iOS verwischt den oberen Rand der Ansicht. Ein ruhiger Streifen in Hintergrundfarbe deckt diese Zone ab,
+   der Inhalt beginnt darunter, damit Datum und Überschrift scharf bleiben. */
+@media (display-mode:standalone){body::before{content:"";position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 38px);background:var(--bg);z-index:4;pointer-events:none}main{padding-top:calc(env(safe-area-inset-top,0px) + 50px)}.rate .inner{padding-top:calc(env(safe-area-inset-top,0px) + 46px)}}
 @media (min-width:900px) and (orientation:landscape){main{max-width:860px;padding-left:24px;padding-right:24px}body .rate .inner{max-width:760px}}
 h1{font-size:1.7rem;margin:6px 0 12px;letter-spacing:-.01em}
 h2{font-size:1.1rem;margin:18px 0 8px}
@@ -282,7 +285,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 :root nav button svg{width:54px;height:30px;padding:3px 15px;border-radius:15px;transition:background .15s}
 :root nav button.on svg{background:var(--accs)}
 @supports (padding:max(0px)){:root nav{padding-bottom:max(6px,env(safe-area-inset-bottom))}}
-.betab{position:fixed;top:calc(env(safe-area-inset-top) + 6px);right:10px;z-index:50;background:var(--sig,#e3a008);color:#2b2420;font:700 .7rem/1 system-ui,sans-serif;letter-spacing:.06em;padding:5px 8px;border-radius:8px;pointer-events:none}@media print{.betab{display:none}}
+.betab{position:fixed;top:calc(env(safe-area-inset-top) + 6px);right:10px;z-index:50;background:var(--sig,#e3a008);color:#2b2420;font:700 .7rem/1 system-ui,sans-serif;letter-spacing:.06em;padding:5px 8px;border-radius:8px;pointer-events:none}@media (display-mode:standalone){.betab{top:calc(env(safe-area-inset-top) + 48px)}}@media print{.betab{display:none}}
 </style>
 <style id="pg"></style>
 </head>
@@ -293,7 +296,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.1.7 Beta",PFAD_STAND="29.10.2026";
+const PFAD_VERSION="1.1.8 Beta",PFAD_STAND="29.10.2026";
 const KEY="pfad-beta";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
