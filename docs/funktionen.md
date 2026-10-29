@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.5 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.6 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -64,7 +64,7 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 - Gespeichert wird automatisch nach jeder Eingabe, auf dem Gerät.
 - **Achtung iOS:** Die App auf dem Home-Bildschirm hat einen eigenen Speicher, getrennt vom Safari-Tab. Was im Safari-Tab eingetragen wurde, erscheint nicht in der Home-Bildschirm-App. Wird das Symbol gelöscht, löscht iOS auch die Daten. Vor dem Löschen oder Neu-Hinzufügen (z. B. für ein neues Symbol) deshalb immer eine Sicherung speichern und danach wieder laden.
 - Als Datei geöffnet (z. B. in der Vorschau der Dateien-App), zeigt die App eine Warnung: Dort kann das Gerät die Daten jederzeit löschen.
-- Die App erinnert auf „Heute“ nach 5 Tagen ohne Sicherung daran (ab 5 eigenen Einträgen).
+- Auf „Heute“ steht ab dem ersten eigenen Kind eine Zeile „Letzte Sicherung am … Nächste in x Tagen fällig.“ mit Knopf „Sichern“ (ab 1.1.6). Nach 5 Tagen ohne Sicherung wird daraus ab 5 eigenen Einträgen ein deutlicher Hinweis.
 - Updates: Eine neue Version auf GitHub Pages wird beim nächsten Start mit Internet geladen. Die Daten bleiben dabei erhalten.
 
 ## Sicherungen und Kürzel
@@ -123,7 +123,7 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 - „Förderung startet am“: der Tag, ab dem eine neue Maßnahme gilt. Davor wird nur beobachtet. Im Verlauf erscheint eine Linie, der Trend vergleicht die 5 Werte davor mit den 5 danach.
 
 ## Einrichtung
-- Kürzel (mit „Weiter“), Beispielfall, erste Sicherung. Danach Konfetti und „Geschafft, Pfad ist eingerichtet!“ mit Knopf „Anleitung starten“.
+- Kürzel (mit „Weiter“), Beispielfall, erste Sicherung, App-Sperre (ab 1.1.6, empfohlen, mit „Ohne Sperre weiter“ überspringbar). Danach Konfetti und „Geschafft, Pfad ist eingerichtet!“ mit Knopf „Anleitung starten“.
 - Der Beispielfall lässt sich in den Einstellungen mit „Beispielfall entfernen“ löschen.
 
 ## Anleitung in der App
@@ -151,7 +151,7 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 - Beim Kind → „Förderung abschließen“: Das Kind verschwindet von „Heute“, Pfad öffnet den Bericht und erinnert nach 4 Wochen auf „Heute“ ans Löschen. „Wieder aufnehmen“ macht es rückgängig.
 - Bericht für die Förderakte (beim Kind oder im Verlauf): Kopf mit Kürzel, Zeitraum, wer eingeschätzt hat; pro Verhalten Graph, Auswertung, Nach Fach; dazu das Tagebuch. A4 hoch, über „PDF erstellen“. Pfad baut die PDF selbst, weil iOS in der Home-Bildschirm-App kein Druckfenster öffnet. Auf iPhone und iPad öffnet sich das Teilen-Fenster mit „Drucken“ und „In Dateien sichern“, am Rechner lädt die Datei herunter. Das Gesprächsblatt geht genauso („PDF / Drucken“, A4 quer). Den Namen trägst du nur auf dem Ausdruck von Hand ein.
 
-## App-Sperre mit Verschlüsselung (optional, Standard aus)
+## App-Sperre mit Verschlüsselung (optional, Standard aus, in der Einrichtung empfohlen)
 - Einstellungen → „App-Sperre und Verschlüsselung“: Code mit 4 bis 6 Ziffern (entschieden 24.10.2026), Sperre sofort, nach 1 oder nach 5 Minuten im Hintergrund, beim Start immer.
 - Ist sie an, liegen die Daten im Browserspeicher nur verschlüsselt (AES-GCM, Schlüssel per PBKDF2 mit 600 000 Runden aus dem Code). Ohne Code sind sie nicht lesbar.
 - Grenze: Ein Ziffern-Code lässt sich mit viel Aufwand durchprobieren, wenn jemand den Speicher kopiert. Der Gerätecode bleibt Pflicht.
