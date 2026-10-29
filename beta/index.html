@@ -293,7 +293,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.1.6 Beta",PFAD_STAND="29.10.2026";
+const PFAD_VERSION="1.1.7 Beta",PFAD_STAND="29.10.2026";
 const KEY="pfad-beta";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -626,7 +626,7 @@ function backupHint(){const n=ownCount(),last=db.lastBackup||0,days=(Date.now()-
   if(n<5||days<5)return backupRow(last);
   return `<div class="card row"><div class="grow small"><b>Sicherung fällig.</b> ${last?`Letzte vor ${Math.floor(days)} Tagen.`:"Noch keine Sicherung."} Ohne Sicherung sind die Daten weg, wenn das Gerät verloren geht, das App-Symbol gelöscht oder der Browserspeicher geleert wird.</div><button class="btn pri" onclick="exportJSON()">Sichern</button></div>`}
 // Ruhige Zeile auf „Heute“: wann zuletzt gesichert, wann die nächste Sicherung fällig ist (alle 5 Tage)
-function backupRow(last){if(!db.kids.some(realKid))return "";
+function backupRow(last){if(!db.kids.length||setupOpen().length)return "";
   const ago=last?Math.round((new Date(today()+"T12:00")-new Date(iso(new Date(last))+"T12:00"))/864e5):null,left=ago==null?0:5-ago;
   const when=ago==null?"Noch keine Sicherung.":`Letzte Sicherung ${ago===0?"heute.":ago===1?"gestern.":`am ${dDE(iso(new Date(last)))}`}`;
   const next=ago==null?"":left<=0?" Nächste ist fällig.":left===1?" Nächste morgen fällig.":` Nächste in ${left} Tagen fällig.`;
