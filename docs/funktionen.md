@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.8 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.9 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
