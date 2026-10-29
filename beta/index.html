@@ -293,7 +293,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.1.5 Beta",PFAD_STAND="29.10.2026";
+const PFAD_VERSION="1.1.6 Beta",PFAD_STAND="29.10.2026";
 const KEY="pfad-beta";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -520,7 +520,7 @@ function confetti(n=22){const cols=["var(--acc)","var(--up)","var(--new)","var(-
 // Abschluss der Einrichtung feiern, dann zur Anleitung
 function setupDoneV(){confetti(40);fb("big");
   dlg(`<div style="text-align:center"><svg width="72" height="72" viewBox="0 0 72 72" class="setok"><circle class="c" cx="36" cy="36" r="30" fill="none" stroke="var(--up)" stroke-width="6"/><path d="M23 37l9 9 17-19" fill="none" stroke="var(--up)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  <h2 style="margin:8px 0 4px">Geschafft, Pfad ist eingerichtet!</h2><p class="muted" style="margin:0 0 14px">Kürzel, Beispielfall und erste Sicherung sind erledigt. Jetzt zeigt dir die Anleitung in 8 Schritten, wo du was findest.</p></div>
+  <h2 style="margin:8px 0 4px">Geschafft, Pfad ist eingerichtet!</h2><p class="muted" style="margin:0 0 14px">Die Einrichtung ist erledigt. Jetzt zeigt dir die Anleitung in 8 Schritten, wo du was findest.</p></div>
   <div class="duo"><button class="btn" data-a="0">Später</button><button class="btn pri" data-a="1">Anleitung starten</button></div>`,
   (el,done)=>{el.querySelector(".box").classList.add("pop");el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))}).then(v=>v===true?openHelp():go({tab:"heute"}))}
 // Ende der Anleitung genauso feiern wie die Einrichtung
@@ -602,11 +602,12 @@ function installV(){
   <p><button class="btn ghost small" onclick="sessionStorage.setItem('browse',1);render()">Nur ansehen, ohne Einrichtung</button></p>
   ${ptr}`}
 
-/* ===== Einrichtung nach dem ersten Start: drei Schritte, rot markiert ===== */
+/* ===== Einrichtung nach dem ersten Start: vier Schritte, markiert. Die App-Sperre ist empfohlen, aber überspringbar ===== */
 const SETUP=[
  {k:"me",t:"Dein Kürzel eintragen",done:()=>!!db.me,tip:"Trag hier dein Lehrkraft-Kürzel ein."},
  {k:"demo",t:"Fiktiven Beispielfall laden",done:()=>db.kids.length>0,tip:"Tippe auf „Fiktiven Beispielfall laden“."},
- {k:"backup",t:"Erste Sicherung speichern",done:()=>!!db.lastBackup,tip:"Tippe auf „Sicherung speichern“ und lege ein Passwort fest."}];
+ {k:"backup",t:"Erste Sicherung speichern",done:()=>!!db.lastBackup,tip:"Tippe auf „Sicherung speichern“ und lege ein Passwort fest."},
+ {k:"lock",t:"App-Sperre einschalten (empfohlen)",done:()=>!!db.lock||!!db.lockSkip,tip:"Schalte die App-Sperre ein. Empfohlen, vor allem wenn du dein iPad auch mal aus der Hand gibst. Kein Muss: „Ohne Sperre weiter“ überspringt den Schritt."}];
 const setupOpen=()=>isWeb&&!db.setupDone&&!(DEV&&!standalone)?SETUP.filter(s=>!s.done()):[];
 function setupCard(){const open=setupOpen();if(!open.length)return "";const nx=open[0];
   return `<div class="card" style="border:2px solid var(--line)"><b>Einrichtung: noch ${open.length} von ${SETUP.length} Schritten</b>
@@ -622,8 +623,14 @@ const mk=k=>markFor(k)?` mark`:"";
 const mtip=k=>{const t=markFor(k);return t?`<div class="marktip">${t}</div>`:""};
 const ownCount=()=>db.kids.filter(k=>!k.demo).reduce((s,k)=>s+k.goals.reduce((t,g)=>t+g.entries.length,0)+(k.diary||[]).length,0);
 function backupHint(){const n=ownCount(),last=db.lastBackup||0,days=(Date.now()-last)/864e5;
-  if(n<5||days<5)return "";
+  if(n<5||days<5)return backupRow(last);
   return `<div class="card row"><div class="grow small"><b>Sicherung fällig.</b> ${last?`Letzte vor ${Math.floor(days)} Tagen.`:"Noch keine Sicherung."} Ohne Sicherung sind die Daten weg, wenn das Gerät verloren geht, das App-Symbol gelöscht oder der Browserspeicher geleert wird.</div><button class="btn pri" onclick="exportJSON()">Sichern</button></div>`}
+// Ruhige Zeile auf „Heute“: wann zuletzt gesichert, wann die nächste Sicherung fällig ist (alle 5 Tage)
+function backupRow(last){if(!db.kids.some(realKid))return "";
+  const ago=last?Math.round((new Date(today()+"T12:00")-new Date(iso(new Date(last))+"T12:00"))/864e5):null,left=ago==null?0:5-ago;
+  const when=ago==null?"Noch keine Sicherung.":`Letzte Sicherung ${ago===0?"heute.":ago===1?"gestern.":`am ${dDE(iso(new Date(last)))}`}`;
+  const next=ago==null?"":left<=0?" Nächste ist fällig.":left===1?" Nächste morgen fällig.":` Nächste in ${left} Tagen fällig.`;
+  return `<div class="card row bkrow"><div class="grow small">${when}${next}</div><button class="btn${left<=0?" pri":""}" onclick="exportJSON()">Sichern</button></div>`}
 function heuteV(){
   const t=today(),wk=addDays(t,-6);
   const all=db.kids.flatMap(k=>k.goals.flatMap(g=>g.entries));
@@ -1512,9 +1519,10 @@ function askCode(msg,sub){return dlg(`<p style="font-weight:700;margin:0 0 6px">
   (el,done)=>{const i=el.querySelector("#dlgIn");i.focus();i.onkeydown=e=>{if(e.key==="Enter")done(i.value)};el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done(i.value)})}
 function lockV(){const L=db.lock;
   return `<div class="card"><h2 style="margin-top:0">App-Sperre und Verschlüsselung</h2>
-  <label class="swr"><span class="grow">Pfad mit Code sperren und verschlüsseln<span class="sub">Zusätzlich zur Gerätesperre. Standard: aus.</span></span><input type="checkbox" class="sw" ${L?"checked":""} onchange="this.checked?setLock():offLock()"></label>
+  ${mtip("lock")}<label class="swr${mk("lock")}"><span class="grow">Pfad mit Code sperren und verschlüsseln<span class="sub">Zusätzlich zur Gerätesperre. Empfohlen, vor allem wenn du dein Gerät aus der Hand gibst.</span></span><input type="checkbox" class="sw" ${L?"checked":""} onchange="this.checked?setLock():offLock()"></label>
   ${L?`<div class="sub" style="margin:10px 0 6px;font-weight:700">Sperren, wenn Pfad im Hintergrund war</div><div class="pick theme">${[[0,"Sofort"],[1,"Nach 1 Min."],[5,"Nach 5 Min."]].map(([m,t])=>`<button class="${L.after===m?"on":""}" onclick="db.lock.after=${m};save();render()">${t}</button>`).join("")}</div>
   <p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn" onclick="setLock(true)">Code ändern</button><button class="btn" onclick="lockNow()">Jetzt sperren</button></p>`:""}
+  ${markFor("lock")?`<p><button class="btn" onclick="db.lockSkip=1;save();render()">Ohne Sperre weiter</button></p>`:""}
   <p class="muted small" style="margin-bottom:0">Ist die Sperre an, liegen die Daten auf diesem Gerät nur verschlüsselt im Speicher. Ein Ziffern-Code schützt vor einem Blick und vor einfachem Auslesen, mit viel Aufwand ließe er sich durchprobieren. Der Gerätecode bleibt deshalb Pflicht. Wer den Code vergisst, kommt nicht mehr an die Daten und muss die letzte Sicherung laden.</p></div>`}
 async function setLock(change){if(!crypto.subtle){toast("In dieser Ansicht nicht möglich. Bitte im Browser öffnen.");return render()}
   if(change){const c=await askCode("Aktuellen Code eingeben");if(c==null)return;if(!await tryCode(c))return toast("Code falsch")}
