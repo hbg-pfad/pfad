@@ -16,8 +16,8 @@
 
 ## Stand
 
-- Hauptversion 1.1.3 (26.10.2026), enthält Sicherheitspaket A (CSP, Prüfhelfer `ja()`, `okKid`, `okSetting`).
-- Beta 1.2.0 (01.11.2026): Offline zuerst, Knopf „Neu laden“ bei neuer Fassung. Davor Beta 1.1.6 (29.10.2026): Schulserver-Bereich ausgeblendet (1.1.4), Austausch im Team mit Team-Passwort (1.1.5), Sicherungs-Zeile auf „Heute“ und App-Sperre als empfohlener Einrichtungsschritt (1.1.6), Sicherungs-Zeile auch mit Beispielfall (1.1.7), Abstand oben gegen die iOS-Unschärfe (1.1.8, in 1.1.9 etwas verkleinert, auf dem iPhone prüfen). Wartet auf Prüfung auf iPad und Handy.
+- Hauptversion 1.2.0 (01.11.2026, von Nick freigegeben): entspricht Beta 1.2.0. Davor 1.1.3 (26.10.2026) mit Sicherheitspaket A (CSP, Prüfhelfer `ja()`, `okKid`, `okSetting`).
+- Beta 1.2.0 (01.11.2026): Offline zuerst, Knopf „Neu laden“ bei neuer Fassung. Davor Beta 1.1.6 (29.10.2026): Schulserver-Bereich ausgeblendet (1.1.4), Austausch im Team mit Team-Passwort (1.1.5), Sicherungs-Zeile auf „Heute“ und App-Sperre als empfohlener Einrichtungsschritt (1.1.6), Sicherungs-Zeile auch mit Beispielfall (1.1.7), Abstand oben gegen die iOS-Unschärfe (1.1.8, in 1.1.9 etwas verkleinert, auf dem iPhone prüfen). Seit 01.11.2026 in der Hauptversion.
 - Adresse seit 26.10.2026: https://hbg-pfad.github.io/pfad/ (GitHub-Organisation `hbg-pfad`). Alte Adresse unter n-bru.github.io hatte nur Testdaten, keine Brücke nötig.
 - Einsatz mit echten Fällen erst nach Freigabe durch Schulleitung und DSB. Bis dahin nur der fiktive Beispielfall.
 - Studientag des Sonderpädagogik-Teams am 16.11.2026: Pfad wird dort vorgestellt und auf Dienstgeräten eingerichtet.

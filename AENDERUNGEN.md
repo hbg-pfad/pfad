@@ -4,6 +4,7 @@ Neueste oben. „Mails/Anleitungen“ = ja, wenn sich Adresse, Einrichtung, Sich
 
 | Datum | Version | Was | Beta/Haupt | Mails/Anleitungen |
 |---|---|---|---|---|
+| 01.11.2026 | 1.2.0 | Hauptversion freigegeben (Nick): Stand von Beta 1.2.0 inkl. 1.1.4 bis 1.1.9 (Server-Bereich aus, Austausch im Team mit Team-Passwort, Sicherungs-Zeile, App-Sperre in der Einrichtung, Abstand oben, offline zuerst) | Haupt | ja (Einrichtung mit App-Sperre, Austausch im Team, Knopf „Neu laden“) |
 | 01.11.2026 | 1.2.0 | Offline zuerst: Pfad startet immer aus dem Gerät, der Server wird nur noch auf eine neue Fassung geprüft. Neue Fassung zeigt Knopf „Neu laden“ statt sich still zu tauschen. Offline-Datei kommt jetzt aus `quelle/sw.js`. Neues Werkzeug `werkzeuge/paket-bauen.py` (ZIP zum Hochladen auf eigenen Webspace statt GitHub). `einrichten.html` lädt keine Google-Schrift mehr | Beta (einrichten.html: Haupt) | nein (erst bei Umzug der Adresse: ja) |
 | 29.10.2026 | 1.1.9 | Home-Bildschirm-App: Abstand oben etwas kleiner | Beta | nein |
 | 29.10.2026 | 1.1.8 | Home-Bildschirm-App: Inhalt beginnt unterhalb der Zone, die iOS oben verwischt (Datum und BETA-Hinweis waren unscharf) | Beta | nein |
