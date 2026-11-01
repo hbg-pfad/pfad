@@ -25,7 +25,7 @@ for f in ["icon-180.png", "icon-192.png", "icon-512.png"]:
 m = (repo / "manifest.webmanifest").read_text().replace('"name":"Pfad","short_name":"Pfad"', '"name":"Pfad Beta","short_name":"Pfad Beta"')
 assert "Pfad Beta" in m
 (out / "manifest.webmanifest").write_text(m)
-sw = (repo / "sw.js").read_text()
+sw = (repo / "quelle" / "sw.js").read_text()
 sw = re.sub(r'const C="[^"]+"', f'const C="{cache}"', sw, count=1)
 sw = sw.replace('!k.startsWith("pfad-beta")', 'k.startsWith("pfad-beta")')
 assert 'startsWith("pfad-beta")' in sw

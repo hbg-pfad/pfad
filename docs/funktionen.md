@@ -59,7 +59,8 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 - Empfehlung: Diktierfunktion der iPhone-Tastatur. Auf neueren iPhones läuft Deutsch auf dem Gerät (Einstellungen → Allgemein → Tastatur → Diktierfunktion). Vorher mit der:dem Datenschutzbeauftragten klären.
 
 ## Installation auf iPad und Handy (wichtig für sicheres Speichern)
-- Die App wird über eine feste Internetadresse geöffnet (GitHub Pages, Ordner `web/`: `index.html`, `manifest.webmanifest`, `sw.js`, Symbole). Auf dem Server liegt nur der App-Code, keine Förderdaten.
+- Die App wird über eine feste Internetadresse geöffnet (derzeit GitHub Pages, Hauptordner: `index.html`, `manifest.webmanifest`, `sw.js`, Symbole). Auf dem Server liegt nur der App-Code, keine Förderdaten.
+- Offline zuerst (ab Beta 1.2.0): Pfad startet aus dem Zwischenspeicher des Geräts. Der Browser prüft nur `sw.js` auf eine neue Fassung. Ist eine da, erscheint unten „Neue Version von Pfad geladen. Tippe hier zum Aktualisieren.“
 - In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Dann startet sie wie eine App, läuft offline, und Safari löscht die Daten nicht nach Wochen ohne Nutzung. Die App fordert außerdem dauerhaften Speicher an.
 - Gespeichert wird automatisch nach jeder Eingabe, auf dem Gerät.
 - **Achtung iOS:** Die App auf dem Home-Bildschirm hat einen eigenen Speicher, getrennt vom Safari-Tab. Was im Safari-Tab eingetragen wurde, erscheint nicht in der Home-Bildschirm-App. Wird das Symbol gelöscht, löscht iOS auch die Daten. Vor dem Löschen oder Neu-Hinzufügen (z. B. für ein neues Symbol) deshalb immer eine Sicherung speichern und danach wieder laden.

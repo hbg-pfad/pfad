@@ -1,4 +1,4 @@
-# Übergabe Pfad (Stand 29.10.2026)
+# Übergabe Pfad (Stand 01.11.2026)
 
 ## Wo was liegt
 
@@ -7,7 +7,8 @@
 | Quelldatei der App | `quelle/pfad.html` |
 | Hauptversion (live) | `index.html`, `sw.js`, `manifest.webmanifest`, Symbole im Hauptordner |
 | Beta (live) | `beta/` (wird gebaut, nicht von Hand ändern) |
-| Bauwege | `werkzeuge/beta-bauen.py`, `werkzeuge/hauptversion-freigeben.py` |
+| Offline-Datei (Quelle) | `quelle/sw.js` (Beta und Hauptversion werden daraus gebaut) |
+| Bauwege | `werkzeuge/beta-bauen.py`, `werkzeuge/hauptversion-freigeben.py`, `werkzeuge/paket-bauen.py` (ZIP für eigenen Webspace) |
 | Bildanleitung zur Einrichtung | `einrichten.html` (nur nach Rückfrage ändern) |
 | Schulserver (vorbereitet, geparkt) | `server/pfad-server.mjs`, `server/README.md` |
 | Funktionsbeschreibung | `docs/funktionen.md` |
@@ -16,7 +17,7 @@
 ## Stand
 
 - Hauptversion 1.1.3 (26.10.2026), enthält Sicherheitspaket A (CSP, Prüfhelfer `ja()`, `okKid`, `okSetting`).
-- Beta 1.1.6 (29.10.2026): Schulserver-Bereich ausgeblendet (1.1.4), Austausch im Team mit Team-Passwort (1.1.5), Sicherungs-Zeile auf „Heute“ und App-Sperre als empfohlener Einrichtungsschritt (1.1.6), Sicherungs-Zeile auch mit Beispielfall (1.1.7), Abstand oben gegen die iOS-Unschärfe (1.1.8, in 1.1.9 etwas verkleinert, auf dem iPhone prüfen). Wartet auf Prüfung auf iPad und Handy.
+- Beta 1.2.0 (01.11.2026): Offline zuerst, Knopf „Neu laden“ bei neuer Fassung. Davor Beta 1.1.6 (29.10.2026): Schulserver-Bereich ausgeblendet (1.1.4), Austausch im Team mit Team-Passwort (1.1.5), Sicherungs-Zeile auf „Heute“ und App-Sperre als empfohlener Einrichtungsschritt (1.1.6), Sicherungs-Zeile auch mit Beispielfall (1.1.7), Abstand oben gegen die iOS-Unschärfe (1.1.8, in 1.1.9 etwas verkleinert, auf dem iPhone prüfen). Wartet auf Prüfung auf iPad und Handy.
 - Adresse seit 26.10.2026: https://hbg-pfad.github.io/pfad/ (GitHub-Organisation `hbg-pfad`). Alte Adresse unter n-bru.github.io hatte nur Testdaten, keine Brücke nötig.
 - Einsatz mit echten Fällen erst nach Freigabe durch Schulleitung und DSB. Bis dahin nur der fiktive Beispielfall.
 - Studientag des Sonderpädagogik-Teams am 16.11.2026: Pfad wird dort vorgestellt und auf Dienstgeräten eingerichtet.
@@ -31,6 +32,7 @@
 6. **ThinkCentre (privates Altgerät).** Nur als Testgerät mit dem fiktiven Beispielfall sinnvoll, nicht für den Echtbetrieb. Falls aufgesetzt: SSD statt alter Festplatte.
 7. **iPadOS 27: Weg zum Home-Bildschirm bestätigen.** Echte Safari-Infos fehlen noch, dann ggf. Hinweis in der App und `einrichten.html` anpassen (nach Rückfrage).
 8. **Testskript ins Repo.** Bisher liefen Playwright-Prüfungen nur in der Arbeitsumgebung. Ein dauerhaftes Testskript mit Beispielfall unter `tests/` wäre sinnvoll.
+9. **Auslieferung ohne GitHub (Prüfung 01.11.2026).** Schülerdaten berühren GitHub nicht, GitHub sieht beim Laden nur Daten der Lehrkraft (IP). Empfehlung: Pfad auf eigener Subdomain beim Schulträger oder auf der Schul-Website ausliefern (statisch, Paket aus `werkzeuge/paket-bauen.py`). Eigene Subdomain, weil andere Skripte auf derselben Adresse den Speicher lesen könnten. Adresse vor dem ersten echten Fall festlegen, weil die Daten an der Adresse hängen. Anfragen an Website-Kollegen, Medienberatung und Datenschutzstelle liegen als Claude Docs vor. Dienst-iPads: laut Nick keine iCloud-Sicherung der Daten. Rein lokale HTML-Datei ist auf iOS nicht tragfähig.
 
 ## Was außerhalb dieses Repos liegt
 
