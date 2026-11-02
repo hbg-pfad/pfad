@@ -4,6 +4,7 @@ Neueste oben. „Mails/Anleitungen“ = ja, wenn sich Adresse, Einrichtung, Sich
 
 | Datum | Version | Was | Beta/Haupt | Mails/Anleitungen |
 |---|---|---|---|---|
+| 02.11.2026 | 1.2.3 | Hauptversion freigegeben (Nick): Stand Beta 1.2.3 | Haupt | nein |
 | 02.11.2026 | 1.2.3 | iPad/iPhone: Seite federt am Ende nicht mehr nach, damit die Menüleiste unten nicht mit nach oben gezogen wird | Beta | nein |
 | 02.11.2026 | 1.2.2 | Hauptversion freigegeben (Nick): Stand Beta 1.2.2 | Haupt | nein |
 | 02.11.2026 | 1.2.2 | Einrichtungsanleitung in Safari: kein markierter „aktueller Schritt“ mehr (lief nicht mit), Pfeil auf dem iPad weiter links (über dem Teilen-Symbol), Text „vier kurze Schritte“ inkl. App-Sperre | Beta | nein |
