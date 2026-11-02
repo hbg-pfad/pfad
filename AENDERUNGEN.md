@@ -4,6 +4,7 @@ Neueste oben. „Mails/Anleitungen“ = ja, wenn sich Adresse, Einrichtung, Sich
 
 | Datum | Version | Was | Beta/Haupt | Mails/Anleitungen |
 |---|---|---|---|---|
+| 02.11.2026 | 1.2.2 | Einrichtungsanleitung in Safari: kein markierter „aktueller Schritt“ mehr (lief nicht mit), Pfeil auf dem iPad weiter links (über dem Teilen-Symbol), Text „vier kurze Schritte“ inkl. App-Sperre | Beta | nein |
 | 01.11.2026 | 1.2.1 | Fehler behoben: Seit 1.2.0 öffnete sich auf Geräten mit installiertem Pfad statt der Einrichtungsanleitung (`einrichten.html`) die App. Offline-Datei liefert jetzt nur noch die App-Dateien aus dem Speicher, alles andere aus dem Netz | Haupt + Beta | nein |
 | 01.11.2026 | 1.2.0 | Hauptversion freigegeben (Nick): Stand von Beta 1.2.0 inkl. 1.1.4 bis 1.1.9 (Server-Bereich aus, Austausch im Team mit Team-Passwort, Sicherungs-Zeile, App-Sperre in der Einrichtung, Abstand oben, offline zuerst) | Haupt | ja (Einrichtung mit App-Sperre, Austausch im Team, Knopf „Neu laden“) |
 | 01.11.2026 | 1.2.0 | Offline zuerst: Pfad startet immer aus dem Gerät, der Server wird nur noch auf eine neue Fassung geprüft. Neue Fassung zeigt Knopf „Neu laden“ statt sich still zu tauschen. Offline-Datei kommt jetzt aus `quelle/sw.js`. Neues Werkzeug `werkzeuge/paket-bauen.py` (ZIP zum Hochladen auf eigenen Webspace statt GitHub). `einrichten.html` lädt keine Google-Schrift mehr | Beta (einrichten.html: Haupt) | nein (erst bei Umzug der Adresse: ja) |

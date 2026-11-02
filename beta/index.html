@@ -245,7 +245,7 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 .pointer{position:fixed;z-index:20;display:flex;flex-direction:column;align-items:center;gap:0;color:var(--sigt);font-weight:800;font-size:.95rem;pointer-events:none;animation:bob 1.2s ease-in-out infinite;text-shadow:0 0 6px var(--bg)}
 .pointer svg{width:44px;height:44px;stroke:var(--sig);stroke-width:3.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .pointer.down{bottom:calc(4px + env(safe-area-inset-bottom,0px))}.pointer.up{top:calc(4px + env(safe-area-inset-top,0px));animation-name:bobup}
-.pointer.left{left:8px}.pointer.right{right:8px}
+.pointer.left{left:8px}.pointer.right{right:8px}.pointer.right.ipad{right:76px}
 @keyframes bob{50%{transform:translateY(7px)}}@keyframes bobup{50%{transform:translateY(-7px)}}
 @media (prefers-reduced-motion:reduce){.mark,.pointer{animation:none}}
 /* Schriftgröße */
@@ -297,7 +297,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.2.1 Beta",PFAD_STAND="01.11.2026";
+const PFAD_VERSION="1.2.2 Beta",PFAD_STAND="02.11.2026";
 const KEY="pfad-beta";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -595,18 +595,17 @@ function installV(){
      :[["„···“"+sym("more"),"unten rechts neben der Adresse. Bei älteren iOS-Versionen tippst du direkt unten in der Leiste auf das Teilen-Symbol."],["„Teilen“"+sym("share"),"im Menü"]];
     st.push(["„Zum Home-Bildschirm“"+sym("plus"),"Nicht zu sehen? Im Menü nach oben wischen oder „Mehr anzeigen“ tippen."],
             ["„Hinzufügen“","oben rechts. Den Schalter „Als Web-App öffnen“ lässt du an."]);
-    ptr=pointer(DEV==="ipad"?"up right":v27?"down left":"down right");
+    ptr=pointer(DEV==="ipad"?"up right ipad":v27?"down left":"down right");
   }
   st.push(["das neue Pfad-Symbol",`auf dem ${home}. Ab jetzt startest du Pfad nur noch dort. ${ios?"Safari":"Chrome"} kannst du schließen.`]);
-  const cur=0;
   return `<h1>Pfad einrichten</h1>
   <p>Lege Pfad einmal auf den ${home}. Dann startet Pfad wie eine App, läuft ohne Internet und deine Daten bleiben auf dem Gerät.</p>
   ${DEV==="iphone"?`<p class="row small" style="gap:6px;flex-wrap:wrap"><span class="muted">Dein iOS:</span><button class="chip ${v27?"on":""}" onclick="IOSV='27';render()">iOS 27</button><button class="chip ${v27?"":"on"}" onclick="IOSV='26';render()">iOS 26 oder älter</button></p>`:""}
   ${INSTALLED?`<div class="card" style="border:2px solid var(--up)"><b>Installiert.</b> Öffne Pfad jetzt über das neue Symbol auf dem Startbildschirm.</div>`:""}
-  <ol class="setup">${st.map(([tap,wo],i)=>`<li class="${i===cur?"now":""}"><span class="n">${i+1}</span><div><span class="do">Tippe auf ${tap}</span><span class="wo">${wo}</span></div></li>`).join("")}</ol>
+  <ol class="setup">${st.map(([tap,wo],i)=>`<li><span class="n">${i+1}</span><div><span class="do">Tippe auf ${tap}</span><span class="wo">${wo}</span></div></li>`).join("")}</ol>
   ${INSTALL_EVT?`<button class="btn pri block mark" style="width:100%;padding:16px;font-size:1.1rem" onclick="doInstall()">Pfad installieren</button>`:""}
   <div class="card" style="border-left:6px solid var(--new);margin-top:16px"><b>Wichtig</b><p class="small" style="margin:6px 0 0">${ios?"Trag hier im Safari-Tab nichts ein. Das Symbol hat einen eigenen Speicher. Was du im Tab einträgst, siehst du in der App nicht.":"Werden die Chrome-Daten gelöscht, sind auch die Pfad-Daten weg. Deshalb später regelmäßig sichern."}</p></div>
-  <p class="small muted">Danach führt dich Pfad durch drei kurze Schritte: Kürzel, Beispielfall, Sicherung.</p>
+  <p class="small muted">Danach führt dich Pfad durch vier kurze Schritte: Kürzel, Beispielfall, Sicherung, App-Sperre.</p>
   <p><button class="btn ghost small" onclick="sessionStorage.setItem('browse',1);render()">Nur ansehen, ohne Einrichtung</button></p>
   ${ptr}`}
 
