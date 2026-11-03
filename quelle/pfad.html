@@ -25,6 +25,8 @@
 --chart1:#8db8e3;--chart2:#eba068}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+/* iPad/iPhone: kein Nachfedern am Seitenende, sonst zieht iOS die Menüleiste unten mit (Nick, 03.11.2026) */
+html,body{overscroll-behavior-y:none}
 main{max-width:640px;margin:0 auto;padding:16px 16px 96px}
 /* Home-Bildschirm-App: iOS verwischt den oberen Rand der Ansicht. Ein ruhiger Streifen in Hintergrundfarbe deckt diese Zone ab,
    der Inhalt beginnt darunter, damit Datum und Überschrift scharf bleiben. */
@@ -296,7 +298,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.2.4",PFAD_STAND="02.11.2026";
+const PFAD_VERSION="1.2.5",PFAD_STAND="03.11.2026";
 const KEY="verlaufsbogen-v2";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026

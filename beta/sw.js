@@ -2,7 +2,7 @@
 // Der Browser prüft beim Start nur diese kleine Datei auf eine neue Fassung. Ändert sich der Cache-Name,
 // lädt er die App-Dateien einmal neu und die App zeigt „Neue Version – neu laden“.
 // Quelle: quelle/sw.js. Beta und Hauptversion werden daraus gebaut, nicht von Hand ändern.
-const C="pfad-beta-1.2.4",FILES=["./","index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png"];
+const C="pfad-beta-1.2.5",FILES=["./","index.html","manifest.webmanifest","icon-180.png","icon-192.png","icon-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:"reload"})))));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C&&k.startsWith("pfad-beta")).map(k=>caches.delete(k)))));self.clients.claim()});
 // Nur die App-Dateien kommen aus dem Speicher. Alles andere (z. B. einrichten.html) geht ans Netz.
