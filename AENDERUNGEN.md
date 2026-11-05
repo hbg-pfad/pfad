@@ -4,6 +4,7 @@ Neueste oben. „Mails/Anleitungen“ = ja, wenn sich Adresse, Einrichtung, Sich
 
 | Datum | Version | Was | Beta/Haupt | Mails/Anleitungen |
 |---|---|---|---|---|
+| 05.11.2026 | 1.2.6 | Home-Bildschirm-App: fester Streifen oben entfernt. Beim Scrollen verschwand der Inhalt dahinter und tauchte in der iOS-Unschärfe wieder auf. Abstand oben bleibt | Beta | nein |
 | 03.11.2026 | 1.2.5 | Nachfedern am Seitenende aus, damit die Menüleiste auf dem iPad nicht mitgezogen wird (Nick). Direkt als Hauptversion freigegeben | Haupt + Beta | nein |
 | 02.11.2026 | 1.2.4 | Nachfedern am Seitenende wieder an (Nick: gefällt). Abschaltung aus 1.2.3 zurückgenommen, das Menüleisten-Problem war nach einem Neustart weg. Hauptversion freigegeben (Nick) | Haupt + Beta | nein |
 | 02.11.2026 | 1.2.3 | iPad/iPhone: Seite federt am Ende nicht mehr nach, damit die Menüleiste unten nicht mit nach oben gezogen wird | Beta | nein |
