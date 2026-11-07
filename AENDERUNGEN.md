@@ -4,6 +4,7 @@ Neueste oben. „Mails/Anleitungen“ = ja, wenn sich Adresse, Einrichtung, Sich
 
 | Datum | Version | Was | Beta/Haupt | Mails/Anleitungen |
 |---|---|---|---|---|
+| 07.11.2026 | 1.2.8 | Bewerten: Ansicht springt beim Antippen einer Zahl, Stunde oder eines Fachs nicht mehr nach oben. Alles passt auf einen Bildschirm (Nick): Fach als Auswahlliste statt 24 Knöpfe, Abstände knapper, Kommentarfeld kleiner. Auf kleinen iPhones (z. B. SE) startet die Zeile Tag/Stunde/Fach zugeklappt („ändern“) | Beta | nein |
 | 07.11.2026 | 1.2.7 | „Mehrere nacheinander“: Ist keine Stunde hinterlegt (z. B. außerhalb der Stundenzeiten oder am Wochenende), gibt es eine Auswahlliste „Stunde“. Im Dialog gilt sie für alle Kinder, beim Bewerten erscheint sie unter der Zeile „ohne Stunde“ (Nick) | Beta | nein |
 | 05.11.2026 | 1.2.6 | Home-Bildschirm-App: fester Streifen oben entfernt. Beim Scrollen verschwand der Inhalt dahinter und tauchte in der iOS-Unschärfe wieder auf. Abstand oben bleibt | Beta | nein |
 | 03.11.2026 | 1.2.5 | Nachfedern am Seitenende aus, damit die Menüleiste auf dem iPad nicht mitgezogen wird (Nick). Direkt als Hauptversion freigegeben | Haupt + Beta | nein |
