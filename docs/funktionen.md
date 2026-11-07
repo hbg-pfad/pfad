@@ -140,7 +140,7 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 - Schriftgröße: Normal, Groß, Sehr groß. Knöpfe ohne Text haben Beschriftungen für VoiceOver.
 
 ## Bewerten: mehrere Kinder, Rückgängig, Erinnerung
-- „Heute“ → „Mehrere nacheinander“: Kinder auswählen, mit einem Tipp „Alle aus 8A“. Tag, Stunde und Fach bleiben für alle gleich, „Überspringen“ geht zum nächsten Kind.
+- „Heute“ → „Mehrere nacheinander“: Kinder auswählen, mit einem Tipp „Alle aus 8A“. Tag, Stunde und Fach bleiben für alle gleich, „Überspringen“ geht zum nächsten Kind. Ist keine Stunde hinterlegt, gibt es im Dialog eine Auswahlliste „Stunde“ (gilt für alle). Fehlt die Stunde weiter, steht die Auswahlliste beim Bewerten unter der Zeile „ohne Stunde“.
 - Nach dem Speichern erscheint einige Sekunden „Rückgängig“. Das nimmt alle Einschätzungen dieses Durchgangs zurück.
 - Wurde ein Kind 7 Tage nicht eingeschätzt, steht das auf „Heute“ bei dem Kind.
 

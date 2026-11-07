@@ -299,7 +299,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.2.6 Beta",PFAD_STAND="05.11.2026";
+const PFAD_VERSION="1.2.7 Beta",PFAD_STAND="07.11.2026";
 const KEY="pfad-beta";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -822,19 +822,22 @@ const hm=t=>{const[a,b]=t.split(":");return +a*60+ +b};
 const rTime=(r,wd)=>{const d=r[3]?.[wd];return [d?.[0]||r[1],d?.[1]||r[2]]};
 function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getMinutes();if(wd===0||wd===6)return "";
   let best="";for(const r of db.raster){const [a,b]=rTime(r,wd),st=hm(a),en=hm(b);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
-function startRate(kidId,queue=[]){const k=kidById(kidId);if(!k.goals.length)return;
-  const cs=currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
+function startRate(kidId,queue=[],slot=""){const k=kidById(kidId);if(!k.goals.length)return;
+  const cs=slot||currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
   rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:true,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
 // Mehrere Kinder nacheinander, z. B. alle aus 8A
 async function pickMulti(){const ks=db.kids.filter(k=>k.goals.length&&!k.closed).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true}));
-  const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))];
+  const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))],noSlot=!currentSlot();
   const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Wen bewertest du nacheinander?</p>
     ${cls.length?`<p class="row" style="flex-wrap:wrap;gap:6px;margin:0 0 8px">${cls.map(c=>`<button class="btn small" data-c="${esc(c)}">Alle aus ${esc(c)}</button>`).join("")}</p>`:""}
     <div style="max-height:46vh;overflow:auto">${ks.map(k=>`<label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" value="${esc(k.id)}" data-k="${esc(k.cls||"")}"> ${kidIcon(k)} ${esc(k.code)}</label>`).join("")}</div>
+    ${noSlot?`<label for="mslot" style="margin-top:10px">Stunde <span class="sub">(gilt für alle)</span></label>${slotSelect("mslot","")}`:""}
     <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Los geht's</button></div>`,
     (el,done)=>{el.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>el.querySelectorAll("input").forEach(i=>i.checked=i.dataset.k===b.dataset.c));
-      el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done([...el.querySelectorAll("input:checked")].map(i=>i.value))});
-  if(!sel?.length)return;startRate(sel[0],sel.slice(1))}
+      el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done({ids:[...el.querySelectorAll("input:checked")].map(i=>i.value),slot:el.querySelector("#mslot")?.value||""})});
+  if(!sel?.ids.length)return;startRate(sel.ids[0],sel.ids.slice(1),sel.slot)}
+// Auswahlliste für die Stunde, falls keine hinterlegt ist
+const slotSelect=(id,v,on="")=>`<select id="${id}" ${on}><option value="">Stunde wählen …</option>${SLOTS_ALL().map(x=>`<option value="${esc(x)}" ${x===v?"selected":""}>${esc(x)}</option>`).join("")}</select>`;
 function renderRate(){
   const o=$("#overlay");if(!rs){o.innerHTML="";return}
   const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur,t=today();
@@ -848,7 +851,7 @@ function renderRate(){
    <div class="pick slots">${db.raster.map(slotName).map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x.replace(" Std.",""))}</button>`).join("")}</div>
    <div class="pick pauses">${PAUSES.map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x)}</button>`).join("")}</div>
    <div class="pick subjs">${db.subjects.map(x=>`<button class="${x===rs.subj?"on":""}" onclick="rs.subj=rs.subj===this.textContent?'':this.textContent;renderRate()">${esc(x)}</button>`).join("")}</div></div>`
-  :`<button class="ctxline" onclick="rs.ctxOpen=true;renderRate()">${dayLbl(rs.date)} · ${rs.slot||"ohne Stunde"} · ${esc(rs.subj||"ohne Fach")} <span>ändern</span></button>`}
+  :`<button class="ctxline" onclick="rs.ctxOpen=true;renderRate()">${dayLbl(rs.date)} · ${rs.slot||"ohne Stunde"} · ${esc(rs.subj||"ohne Fach")} <span>ändern</span></button>${!rs.slot&&rs.qn>1?`<div style="margin-top:8px">${slotSelect("qslot","",'aria-label="Stunde wählen" onchange="rs.slot=this.value;renderRate()"')}</div>`:""}`}
   ${rs.date!==t?`<p class="small" style="text-align:center;color:var(--new)">Eintrag für einen vergangenen Tag (${dDEy(rs.date)})</p>`:""}
   <div class="goalTitle">${esc(g.title)}</div>
   ${g.how?`<p class="muted small" style="text-align:center">${esc(g.how)}</p>`:""}
