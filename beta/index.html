@@ -223,6 +223,12 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 .tile svg{width:30px;height:30px;color:var(--acc);margin-bottom:6px}.tile b{font-size:1.02rem}.tile span{font-size:.85rem;color:var(--muted)}.pick.slots{grid-template-columns:repeat(7,1fr)}.pick.subjs{grid-template-columns:repeat(4,1fr)}
 .pick button,.pick select{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:11px;padding:8px 2px;font:inherit;font-weight:700;font-size:.82rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pick select{padding:8px 6px}
+/* Bewerten: alles auf einen Bildschirm (Nick, 07.11.2026). Fach als Auswahlliste statt Knopf-Raster, Abstände knapper */
+.pick button,.pick select{min-height:40px}.pick.subjs{grid-template-columns:1fr}.pick.subjs select{font-size:1rem}
+.rate .goalTitle{margin:14px 0 2px}.rate .big{height:52px;font-size:2.6rem;margin-top:4px}.rate .ruler{margin:6px 0 4px}
+.rate textarea{min-height:48px;height:56px}.rate label{margin-top:8px}.rate .foot{padding-top:10px}
+@media (max-width:600px){.rate .pinsub{display:none}.rate .ends{font-size:.82rem}}
+@media (max-height:760px),(max-width:600px){.rate .goalTitle{font-size:1.35rem;margin-top:8px}.rate .big{height:40px;font-size:2rem}.rate .step{margin:0 0 6px}.ctx{padding:8px;gap:6px}.rate .ruler.s5 button,.rate .ruler.sc button{height:54px}.rate .ruler.s2 button{height:56px}.rate textarea{height:44px;min-height:44px;padding:9px 12px}.rate label{margin-top:6px;margin-bottom:4px}.rate .foot{padding-top:8px}}
 .pick .on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 .ctxline{width:100%;border:none;background:var(--soft);border-radius:14px;padding:10px 12px;font:inherit;font-weight:700;color:var(--ink);text-align:left}
 .ctxline span{float:right;color:var(--acc)}
@@ -299,7 +305,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.2.7 Beta",PFAD_STAND="07.11.2026";
+const PFAD_VERSION="1.2.8 Beta",PFAD_STAND="07.11.2026";
 const KEY="pfad-beta";
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
@@ -824,7 +830,7 @@ function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getM
   let best="";for(const r of db.raster){const [a,b]=rTime(r,wd),st=hm(a),en=hm(b);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
 function startRate(kidId,queue=[],slot=""){const k=kidById(kidId);if(!k.goals.length)return;
   const cs=slot||currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
-  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:true,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
+  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:innerHeight>=720,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
 // Mehrere Kinder nacheinander, z. B. alle aus 8A
 async function pickMulti(){const ks=db.kids.filter(k=>k.goals.length&&!k.closed).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true}));
   const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))],noSlot=!currentSlot();
@@ -840,6 +846,8 @@ async function pickMulti(){const ks=db.kids.filter(k=>k.goals.length&&!k.closed)
 const slotSelect=(id,v,on="")=>`<select id="${id}" ${on}><option value="">Stunde wählen …</option>${SLOTS_ALL().map(x=>`<option value="${esc(x)}" ${x===v?"selected":""}>${esc(x)}</option>`).join("")}</select>`;
 function renderRate(){
   const o=$("#overlay");if(!rs){o.innerHTML="";return}
+  // Scrollstand halten, solange dasselbe Verhalten offen ist (sonst springt die Ansicht beim Antippen nach oben)
+  const rk=rs.kid+"|"+rs.i,old=o.querySelector(".rate"),top=old&&o.dataset.rk===rk?old.scrollTop:0;o.dataset.rk=rk;
   const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur,t=today();
   const days=[...Array(7)].map((_,i)=>addDays(t,-i));
   const dayLbl=d=>d===t?"Heute":d===addDays(t,-1)?"Gestern":new Date(d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"numeric"});
@@ -850,7 +858,7 @@ function renderRate(){
    <div class="pick days">${days.slice(0,2).map(d=>`<button class="${d===rs.date?"on":""}" onclick="rs.date='${d}';renderRate()">${dayLbl(d)}</button>`).join("")}<select class="${days.slice(2).includes(rs.date)?"on":""}" onchange="rs.date=this.value;renderRate()"><option value="">früher …</option>${days.slice(2).map(d=>`<option value="${d}" ${d===rs.date?"selected":""}>${dayLbl(d)}</option>`).join("")}</select></div>
    <div class="pick slots">${db.raster.map(slotName).map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x.replace(" Std.",""))}</button>`).join("")}</div>
    <div class="pick pauses">${PAUSES.map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x)}</button>`).join("")}</div>
-   <div class="pick subjs">${db.subjects.map(x=>`<button class="${x===rs.subj?"on":""}" onclick="rs.subj=rs.subj===this.textContent?'':this.textContent;renderRate()">${esc(x)}</button>`).join("")}</div></div>`
+   <div class="pick subjs"><select class="${rs.subj?"on":""}" aria-label="Fach" onchange="rs.subj=this.value;renderRate()"><option value="">Fach wählen …</option>${[...new Set([...db.subjects,...(rs.subj?[rs.subj]:[])])].map(x=>`<option value="${esc(x)}" ${x===rs.subj?"selected":""}>${esc(x)}</option>`).join("")}</select></div></div>`
   :`<button class="ctxline" onclick="rs.ctxOpen=true;renderRate()">${dayLbl(rs.date)} · ${rs.slot||"ohne Stunde"} · ${esc(rs.subj||"ohne Fach")} <span>ändern</span></button>${!rs.slot&&rs.qn>1?`<div style="margin-top:8px">${slotSelect("qslot","",'aria-label="Stunde wählen" onchange="rs.slot=this.value;renderRate()"')}</div>`:""}`}
   ${rs.date!==t?`<p class="small" style="text-align:center;color:var(--new)">Eintrag für einen vergangenen Tag (${dDEy(rs.date)})</p>`:""}
   <div class="goalTitle">${esc(g.title)}</div>
@@ -859,11 +867,12 @@ function renderRate(){
   <div class="ruler s${sc(g)==="c"&&scaleOpts(g).length>7?"10":sc(g)} ${c.na?"off":""}" style="${sc(g)==="c"?`grid-template-columns:repeat(${scaleOpts(g).length},1fr)`:""}" id="ruler" role="radiogroup" aria-label="Einschätzung: ${esc(g.title)}">${scaleOpts(g).map(o=>`<button data-v="${o.v}" role="radio" aria-label="${esc(o.l)}${sc(g)==="2"?"":` von ${rng(g)[1]}`}" aria-checked="${c.value===o.v}" class="${c.value===o.v?"sel":sc(g)!=="2"&&c.value!=null&&o.v<c.value?"lit":""}">${esc(o.l)}</button>`).join("")}</div>
   ${sc(g)==="2"?"":`<div class="ends"><span>${rng(g)[0]} = ${esc(g.a0)}</span><span>${esc(g.a10)} = ${rng(g)[1]}</span></div>`}
   <label>Kommentar <span class="sub">(optional)</span></label>
-  <textarea id="note" placeholder="Was war los? Was hat geholfen? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
-  <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" id="pin" style="width:auto" ${c.pin?"checked":""} onchange="rs.cur.pin=this.checked"> Im Verlauf markieren <span class="sub" style="font-weight:400">(erscheint als Markierung im Graphen)</span></label>
+  <textarea id="note" rows="2" placeholder="Was war los? Was hat geholfen? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
+  <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" id="pin" style="width:auto" ${c.pin?"checked":""} onchange="rs.cur.pin=this.checked"> Im Verlauf markieren <span class="sub pinsub" style="font-weight:400">(erscheint als Markierung im Graphen)</span></label>
   <div class="foot duo"><button class="btn ${c.na?"na-on":""}" onclick="rs.cur.na=!rs.cur.na;if(rs.cur.na)rs.cur.value=null;renderRate()">${c.na?"✓ Heute nicht gesehen":"Heute nicht gesehen"}</button>
   <button class="btn pri" ${c.value==null&&!c.na?"disabled":""} onclick="nextRate()">${rs.i<k.goals.length-1?"Weiter":"Speichern"}</button></div>
   </div></div>`;
+  if(top)o.querySelector(".rate").scrollTop=top;
   const ru=$("#ruler");let down=false;
   const pick=e=>{const el=document.elementFromPoint(e.clientX,e.clientY);if(!el||el.dataset.v==null)return;const v=+el.dataset.v;if(v!==rs.cur.value){rs.cur.value=v;markRuler();try{navigator.vibrate?.(5)}catch(e){}}};
   ru.onpointerdown=e=>{down=true;ru.setPointerCapture(e.pointerId);pick(e)};
