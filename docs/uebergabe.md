@@ -17,6 +17,7 @@
 
 ## Stand
 
+- Beta 1.3.5 (08.11.2026): Stundenplan beim Kind, aus dem Schulmanager kopieren und einfügen. Pfad liest die Tabelle lokal, speichert nur Fachkürzel und wählt beim Bewerten das Fach vor. Offen: auf dem iPad prüfen, ob Safari die Tabellenfassung mitkopiert (sonst Text mit markierten Zeilen).
 - Hauptversion 1.3.4 = Beta 1.3.4 (08.11.2026, von Nick ohne eigenen Beta-Test freigegeben): enthält alles aus Beta 1.2.6 bis 1.3.3. Bitte nach dem Update auf iPad und Handy prüfen (vor allem Kennung/Klassen, Bewerten, „Neu in Pfad“). Mails/Anleitungen müssen nachgezogen werden (Kennung, „Sicherungskopie ablegen“).
 - Beta 1.3.3 (08.11.2026): Technik aus SoMi übernommen (Löschen behält App-Sperre, Offline-Datei räumt nur eigene Speicher, Minuszeichen im PDF) und Rauchtest im Repo.
 - Beta 1.3.0 und 1.3.1 (08.11.2026, Feedback der Schulleitung): „Heute“ beginnt mit der Kinderliste, offene Kinder zuerst, ein Tipp auf die Karte startet das Bewerten. „Sicherungskopie ablegen“ statt „Sicherung speichern“ („Speicherort festlegen“ bewusst nicht, weil iOS sich keinen Ort merkt). Kinder haben eine einheitliche **Kennung** = Klasse + Platz in der Klassenliste im Schulmanager (z. B. 8A-07), „Kürzel“ meint nur noch die Lehrkraft. Wartet mit 1.2.6 bis 1.2.9 auf Nicks Test. Die Schulleitung will vorerst keinen DSB-Kontakt, Hosting soll über den all-inkl-Webspace laufen (eigener Thread).
@@ -37,6 +38,7 @@
 7. **iPadOS 27: Weg zum Home-Bildschirm bestätigen.** Echte Safari-Infos fehlen noch, dann ggf. Hinweis in der App und `einrichten.html` anpassen (nach Rückfrage).
 8. **Testskript ins Repo: erledigt (1.3.3).** `tests/rauchtest.js` prüft Einrichtung, Kind anlegen, Bewerten, Sicherung, App-Sperre und Löschen. Neue Funktionen dort ergänzen.
 9. **Auslieferung ohne GitHub (Prüfung 01.11.2026).** Schülerdaten berühren GitHub nicht, GitHub sieht beim Laden nur Daten der Lehrkraft (IP). Empfehlung: Pfad auf eigener Subdomain beim Schulträger oder auf der Schul-Website ausliefern (statisch, Paket aus `werkzeuge/paket-bauen.py`). Eigene Subdomain, weil andere Skripte auf derselben Adresse den Speicher lesen könnten. Adresse vor dem ersten echten Fall festlegen, weil die Daten an der Adresse hängen. Anfragen an Website-Kollegen, Medienberatung und Datenschutzstelle liegen als Claude Docs vor. Dienst-iPads: laut Nick keine iCloud-Sicherung der Daten. Rein lokale HTML-Datei ist auf iOS nicht tragfähig.
+10. **Stundenplan-Import (Beta 1.3.5) auf dem iPad testen.** Im Schulmanager eine normale Woche markieren, kopieren, beim Kind einsetzen. Prüfen: Kommen leere Tage richtig an (Tabellenfassung) oder erscheinen markierte Zeilen (nur Text)? Die 6. Stunde fehlt im HBG-Raster, dort wählt Pfad nichts vor. Kürzel wie PA, SZ, GE, S1 ordnet Nick selbst zu. Datenschutz-Beschreibung um „Stundenplan (nur Fachkürzel)“ ergänzen (Projekt „Digitale Förderplanung“).
 
 ## Was außerhalb dieses Repos liegt
 

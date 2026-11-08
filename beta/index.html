@@ -69,6 +69,7 @@ input,select,textarea{font:inherit;color:var(--ink);background:var(--card);borde
 input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:0}
 textarea{min-height:76px;resize:vertical}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.plan{min-width:300px}.plan th,.plan td{text-align:center;padding:2px;border:none}.plan tbody th{color:var(--muted);width:2.4em}.plan td button{width:100%;min-height:40px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700;font-size:.95rem;padding:4px 2px}.plan td button.free{color:var(--muted);font-weight:400;background:transparent}.plan tr.unsure td,.plan tr.unsure th{background:var(--news)}
 .toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .toggle button{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:13px;font-weight:600}
 .toggle button.on{border-color:var(--acc);background:var(--accs);color:var(--acc)}
@@ -305,7 +306,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.3.4 Beta",PFAD_STAND="08.11.2026";
+const PFAD_VERSION="1.3.5 Beta",PFAD_STAND="08.11.2026";
 const KEY="pfad-beta";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
 const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
@@ -354,8 +355,13 @@ const okStr=(s,n=4000)=>s==null||typeof s==="string"&&s.length<=n,okNum=v=>v==nu
 const okTime=t=>t===""||typeof t==="string"&&/^\d{2}:\d{2}$/.test(t);
 const okSetting={subjects:a=>Array.isArray(a)&&a.length<=60&&a.every(x=>typeof x==="string"&&x.length<=40),
   raster:a=>Array.isArray(a)&&a.length<=20&&a.every(r=>Array.isArray(r)&&typeof r[0]==="string"&&/^[\w .()\/äöüÄÖÜß-]{1,12}$/.test(r[0])&&okTime(r[1])&&okTime(r[2])&&(r[3]==null||typeof r[3]==="object"&&Object.values(r[3]).every(d=>Array.isArray(d)&&d.every(okTime)))),
-  game:g=>!!g&&typeof g==="object"&&(g.type==null||Object.hasOwn(GOALTYPES,g.type))&&(g.n==null||Number.isInteger(g.n)&&g.n>=1&&g.n<=99)};
+  game:g=>!!g&&typeof g==="object"&&(g.type==null||Object.hasOwn(GOALTYPES,g.type))&&(g.n==null||Number.isInteger(g.n)&&g.n>=1&&g.n<=99),
+  planMap:m=>!!m&&typeof m==="object"&&!Array.isArray(m)&&Object.keys(m).length<=100&&Object.entries(m).every(([a,b])=>okKz(a)&&typeof b==="string"&&b.length<=40)};
+// Stundenplan eines Kindes: {Wochentag 1–5: {Stunde 0–15: Fachkürzel}}, nur Kürzel, keine Lehrkräfte oder Räume
+const okKz=s=>typeof s==="string"&&/^[A-Za-z0-9ÄÖÜäöüß&+.\/-]{1,12}$/.test(s);
+const okPlan=p=>!!p&&typeof p==="object"&&!Array.isArray(p)&&Object.entries(p).every(([d,h])=>/^[1-5]$/.test(d)&&!!h&&typeof h==="object"&&!Array.isArray(h)&&Object.entries(h).every(([n,z])=>/^\d{1,2}$/.test(n)&&+n<=15&&okKz(z)));
 function okKid(k){try{if(!k||!okId(k.id)||typeof k.code!=="string"||k.code.length>40||!okStr(k.cls,20)||!okStr(k.icon,16)||!Array.isArray(k.goals))return false;
+  if(k.plan!=null&&!okPlan(k.plan))return false;
   if(k.diary!=null&&!Array.isArray(k.diary)||k.del!=null&&!(Array.isArray(k.del)&&k.del.every(okId)))return false;
   for(const t of [k.team,k.pending])if(t!=null&&!(Array.isArray(t)&&t.every(x=>okStr(x,40))))return false;
   for(const g of k.goals){if(!g||!okId(g.id)||!Array.isArray(g.entries)||!okStr(g.title,400))return false;
@@ -450,7 +456,7 @@ analyse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width
 profil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.9-4 3.8-6 7.5-6s6.6 2 7.5 6"/></svg>'};
 function renderNav(){$("#nav").innerHTML=[["heute","Heute"],["klassen","Kinder"],["analyse","Verlauf"],["profil","Einstellungen"]].map(([k,t])=>`<button class="${view.tab===k?"on":""}" ${view.tab===k?'aria-current="page"':""} onclick="navTo('${k}')">${ICON[k].replace("<svg ",'<svg aria-hidden="true" ')}${t}</button>`).join("")}
 // Verlauf der Ansichten: „Zurück“ führt dorthin, wo man herkam. Kommt eine Ansicht erneut, wird bis dorthin gekürzt.
-let HIST=[];const vkey=v=>JSON.stringify([v.tab,v.kid,!!v.talk,!!v.report,v.goal,v.aKid,v.aGoal,!!v.imp]);
+let HIST=[];const vkey=v=>JSON.stringify([v.tab,v.kid,!!v.talk,!!v.report,v.goal,v.aKid,v.aGoal,!!v.imp,!!v.plan]);
 function go(v){const i=HIST.findIndex(h=>vkey(h)===vkey(v));if(i>=0)HIST.length=i;else if(view&&view.tour==null&&vkey(view)!==vkey(v))HIST.push(view);view=v;render();window.scrollTo(0,0)}
 function back(fb){view=HIST.pop()||fb||{tab:view.tab};render();window.scrollTo(0,0)}
 function navTo(k){HIST=[];draft=null;go({tab:k})}
@@ -465,6 +471,7 @@ function render(){
   else if(view.talk)a.innerHTML=talkV();
   else if(view.goal!==undefined)a.innerHTML=goalEditV();
   else if(view.imp)a.innerHTML=importV();
+  else if(view.plan&&view.kid)a.innerHTML=planV();
   else if(view.kid)a.innerHTML=kidV();
   else a.innerHTML={heute:heuteV,klassen:klassenV,analyse:analyseV,profil:profilV}[view.tab]();
   if(view.mark)requestAnimationFrame(()=>$("#app .mark")?.scrollIntoView({block:"center",behavior:"smooth"}));
@@ -513,6 +520,7 @@ async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-s
 // Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
 // Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
 const NEU=[
+ ["1.3.5",["Neu: Stundenplan beim Kind. Kopiere den Plan aus dem Schulmanager und füge ihn in Pfad ein. Beim Bewerten ist dann das Fach zur Stunde schon ausgewählt.","Pfad übernimmt nur die Fächer, keine Lehrkräfte und keine Räume."]],
  ["1.3.2",["Klassen heißen jetzt wie im Schulmanager: 5.1 bis 10.9, dazu EF, Q1 und Q2."]],
  ["1.3.1",["Kinder haben jetzt eine einheitliche Kennung: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8.1-07. Beim Anlegen wählst du die Klasse und trägst die Nummer ein.","Passt eine ältere Kennung nicht dazu, zeigt Pfad beim Kind „Kennung anpassen“.","Jedes Kind hat jetzt ein Symbol."]],
  ["1.3.0",["Auf „Heute“ stehen deine Kinder jetzt ganz oben. Wer heute noch nicht bewertet ist, kommt zuerst. Tippe einfach auf das Kind, um zu bewerten.","Hinweise wie die Sicherung findest du jetzt unter der Kinderliste.","„Sicherung speichern“ heißt jetzt „Sicherungskopie ablegen“. Pfad speichert deine Einträge sowieso automatisch, die Kopie ist für den Notfall."]],
@@ -814,6 +822,7 @@ function kidV(){
     <div class="between" style="margin-top:8px">${badge(t)}<span><button class="btn ghost" onclick="go({tab:'analyse',aKid:${ja(k.id)},aGoal:${ja(g.id)}})">Verlauf</button><button class="btn ghost" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},goal:${ja(g.id)}})">Bearbeiten</button></span></div></div>`}
   h+=`<p><button class="btn block" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},goal:''})">+ Verhalten</button></p>`+diaryV(k)+`
   <div class="card noprint row"><div class="grow small"><b>An Kolleg:in weitergeben</b><br><span class="muted">${db.shared?.[k.id]?`Zuletzt weitergegeben am ${dDEy(iso(new Date(db.shared[k.id])))}.`:"Verschlüsselte Datei nur mit diesem Kind."}</span></div><button class="btn" onclick="shareKids(${ja(k.id)})">Weitergeben</button></div>
+  <div class="card noprint row"><div class="grow small"><b>Stundenplan</b><br><span class="muted">${k.plan&&Object.keys(k.plan).length?"Hinterlegt. Beim Bewerten ist das Fach zur Stunde schon ausgewählt.":"Aus dem Schulmanager einfügen. Dann ist beim Bewerten das Fach schon ausgewählt."}</span></div><button class="btn" onclick="openPlan(${ja(k.id)})">${k.plan&&Object.keys(k.plan).length?"Ansehen":"Einfügen"}</button></div>
   ${srvKidCard(k)}
   ${k.closed||k.demo?"":`<div class="card noprint row"><div class="grow small"><b>Förderung abschließen</b><br><span class="muted">Zum Beispiel am Schuljahresende oder bei Schulwechsel.</span></div><button class="btn" onclick="closeKid(${ja(k.id)})">Abschließen</button></div>`}
   <p class="noprint" style="margin-top:24px"><button class="btn ghost danger" onclick="delKid(${ja(k.id)})">Kind und alle Einschätzungen löschen</button></p>`;
@@ -882,7 +891,7 @@ function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getM
   let best="";for(const r of db.raster){const [a,b]=rTime(r,wd),st=hm(a),en=hm(b);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
 function startRate(kidId,queue=[],slot=""){const k=kidById(kidId);if(!k.goals.length)return;
   const cs=slot||currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
-  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:innerHeight>=720,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
+  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",subj0:same?lastCtx.subj:"",subjMan:false,cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:innerHeight>=720,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
 // Mehrere Kinder nacheinander, z. B. alle aus 8.1
 async function pickMulti(){const ks=db.kids.filter(k=>k.goals.length&&!k.closed).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true}));
   const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))],noSlot=!currentSlot();
@@ -901,6 +910,8 @@ function renderRate(){
   // Scrollstand halten, solange dasselbe Verhalten offen ist (sonst springt die Ansicht beim Antippen nach oben)
   const rk=rs.kid+"|"+rs.i,old=o.querySelector(".rate"),top=old&&o.dataset.rk===rk?old.scrollTop:0;o.dataset.rk=rk;
   const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur,t=today();
+  // Fach aus dem Stundenplan des Kindes, solange niemand selbst ein Fach gewählt hat
+  if(!rs.subjMan){const p=planSubj(k,rs.date,rs.slot);rs.subjPlan=!!p;rs.subj=p||rs.subj0||""}
   const days=[...Array(7)].map((_,i)=>addDays(t,-i));
   const dayLbl=d=>d===t?"Heute":d===addDays(t,-1)?"Gestern":new Date(d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"numeric"});
   o.innerHTML=`<div class="rate" role="dialog" aria-label="Bewerten"><div class="inner">
@@ -910,7 +921,7 @@ function renderRate(){
    <div class="pick days">${days.slice(0,2).map(d=>`<button class="${d===rs.date?"on":""}" onclick="rs.date='${d}';renderRate()">${dayLbl(d)}</button>`).join("")}<select class="${days.slice(2).includes(rs.date)?"on":""}" onchange="rs.date=this.value;renderRate()"><option value="">früher …</option>${days.slice(2).map(d=>`<option value="${d}" ${d===rs.date?"selected":""}>${dayLbl(d)}</option>`).join("")}</select></div>
    <div class="pick slots">${db.raster.map(slotName).map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x.replace(" Std.",""))}</button>`).join("")}</div>
    <div class="pick pauses">${PAUSES.map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x)}</button>`).join("")}</div>
-   <div class="pick subjs"><select class="${rs.subj?"on":""}" aria-label="Fach" onchange="rs.subj=this.value;renderRate()"><option value="">Fach wählen …</option>${[...new Set([...db.subjects,...(rs.subj?[rs.subj]:[])])].map(x=>`<option value="${esc(x)}" ${x===rs.subj?"selected":""}>${esc(x)}</option>`).join("")}</select></div></div>`
+   <div class="pick subjs"><select class="${rs.subj?"on":""}" aria-label="Fach" onchange="rs.subj=this.value;rs.subjMan=true;renderRate()"><option value="">Fach wählen …</option>${[...new Set([...db.subjects,...(rs.subj?[rs.subj]:[])])].map(x=>`<option value="${esc(x)}" ${x===rs.subj?"selected":""}>${esc(x)}</option>`).join("")}</select>${rs.subjPlan&&!rs.subjMan?`<span class="sub" style="display:block;margin:4px 0 0 4px">laut Stundenplan</span>`:""}</div></div>`
   :`<button class="ctxline" onclick="rs.ctxOpen=true;renderRate()">${dayLbl(rs.date)} · ${rs.slot||"ohne Stunde"} · ${esc(rs.subj||"ohne Fach")} <span>ändern</span></button>${!rs.slot&&rs.qn>1?`<div style="margin-top:8px">${slotSelect("qslot","",'aria-label="Stunde wählen" onchange="rs.slot=this.value;renderRate()"')}</div>`:""}`}
   ${rs.date!==t?`<p class="small" style="text-align:center;color:var(--new)">Eintrag für einen vergangenen Tag (${dDEy(rs.date)})</p>`:""}
   <div class="goalTitle">${esc(g.title)}</div>
@@ -947,6 +958,100 @@ function undoRate(saved){for(const x of saved){const k=kidById(x.kid),g=k&&goalB
   document.querySelectorAll(".cele").forEach(x=>x.remove());save();render();toast(`${saved.length} Einschätzung${saved.length===1?"":"en"} zurückgenommen`)}
 let lastCtx=null;
 async function closeRate(){if(rs.count&&!await ask("Bewerten beenden? Bereits gespeicherte Einschätzungen bleiben erhalten.",{ok:"Beenden"}))return;if(rs.count)return finishRate();rs=null;$("#overlay").innerHTML="";render()}
+
+/* ===== Stundenplan des Kindes (aus dem Schulmanager eingefügt, nur Fachkürzel) ===== */
+const WD=["Mo","Di","Mi","Do","Fr"];
+// Vorschläge für die Zuordnung Kürzel → Fach. Nur eindeutige, die Lehrkraft bestätigt jede Zuordnung.
+const PLAN_SUG={D:"Deutsch",M:"Mathe",E:"Englisch",F:"Franz.",S:"Spanisch",L:"Latein",T:"Türkisch",GL:"GL",NW:"NW",BI:"Bio",CH:"Chemie",PH:"Physik",WAW:"WAW",TC:"Technik",HW:"HW",IF:"Info",KU:"Kunst",MU:"Musik",SP:"Sport",DG:"D&G",ER:"Rel. ev.",KR:"Rel. kath.",PP:"PP",FUF:"FUF"};
+const planSug=z=>{const v=PLAN_SUG[z.toUpperCase()];return v&&db.subjects.includes(v)?v:""};
+const planHas=k=>!!k?.plan&&Object.keys(k.plan).length>0;
+function planSubj(k,date,slot){if(!planHas(k)||!slot)return "";const n=parseInt(slot,10);if(isNaN(n))return "";
+  const wd=new Date(date+"T12:00").getDay(),z=k.plan[wd]?.[n];return z?db.planMap?.[z]||"":""}
+// Erstes Wort einer Zelle = Fachkürzel („D L1 NAP / P 101“ → „D“)
+const firstTok=t=>{const m=String(t||"").trim().match(/^\S+/);return m?m[0]:""};
+const wdOf=t=>{const m=String(t||"").trim().match(/^(mo|di|mi|do|fr)/i);return m?WD.findIndex(x=>x.toLowerCase()===m[1].toLowerCase())+1:0};
+// Tabelle (Zeilen mit Zellen-Texten) → Plan. Kopfzeile mit Wochentagen, erste Spalte Stundennummer.
+function gridToPlan(grid){const h=grid.findIndex(r=>r.filter(c=>wdOf(c)).length>=3);if(h<0)return null;
+  const cols=grid[h].map(wdOf),plan={};let n=0;
+  for(const r of grid.slice(h+1)){const m=String(r[0]||"").trim().match(/^(\d{1,2})\b/);if(!m||+m[1]>15)continue;
+    r.forEach((c,i)=>{const wd=cols[i],z=firstTok(c);if(!wd||!i||!okKz(z))return;(plan[wd]??={})[+m[1]]=z;n++})}
+  return n?{plan,unsure:[]}:null}
+// Tabellenfassung aus der Zwischenablage (Safari kopiert sie mit). Wird nur gelesen, nie in die Seite eingefügt.
+function planFromHTML(html){let doc;try{doc=new DOMParser().parseFromString(html,"text/html")}catch(e){return null}
+  const cellTxt=td=>{const w=doc.createTreeWalker(td,NodeFilter.SHOW_TEXT);let x;while((x=w.nextNode()))if(x.nodeValue.trim())return x.nodeValue.trim();return ""};
+  for(const t of doc.querySelectorAll("table")){const grid=[],taken=[];
+    [...t.rows].forEach((tr,ri)=>{grid[ri]??=[];let ci=0;
+      for(const td of tr.cells){while(grid[ri][ci]!==undefined)ci++;const tx=cellTxt(td),rs=Math.min(+td.rowSpan||1,20),cs=Math.min(+td.colSpan||1,10);
+        for(let a=0;a<rs;a++)for(let b=0;b<cs;b++){(grid[ri+a]??=[])[ci+b]=tx}ci+=cs}});
+    const r=gridToPlan(grid.map(row=>[...row].map(c=>c??"")));if(r)return r}
+  return null}
+// Text mit Tabs. Mit Anführungszeichen (mehrzeilige Zellen) eindeutig, sonst gehen leere Tage zwischen zwei Fächern verloren.
+function tsvRows(txt){const rows=[[]];let cur="",q=false;
+  for(let i=0;i<txt.length;i++){const ch=txt[i];
+    if(q){if(ch==='"'){if(txt[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+    else if(ch==='"'&&cur==="")q=true;else if(ch==="\t"){rows.at(-1).push(cur);cur=""}else if(ch==="\n"){rows.at(-1).push(cur);cur="";rows.push([])}else if(ch!=="\r")cur+=ch}
+  rows.at(-1).push(cur);return rows}
+function planFromText(txt){txt=String(txt||"").slice(0,20000);
+  if(txt.includes('"')){const r=gridToPlan(tsvRows(txt));if(r)return r}
+  const lines=txt.split(/\r?\n/),plan={},unsure=[];let row=null,n=0;
+  const close=()=>{if(!row)return;const {h,lead,z}=row;z.forEach((x,i)=>{const wd=lead+i+1;if(wd<=5){(plan[wd]??={})[h]=x;n++}});
+    if(z.length>1&&lead+z.length<5)unsure.push(h)};
+  for(const l of lines){const m=l.match(/^\s*(\d{1,2})(\t.*)?$/);
+    if(m&&+m[1]<=15){close();const cells=(m[2]||"").split("\t").slice(1),z=[];let lead=0;
+      // einzeilige Tabellen: Zellen stehen direkt in der Zeile
+      if(cells.some(c=>c.trim())&&cells.length>=2){cells.forEach((c,i)=>{const t=firstTok(c);if(okKz(t)&&i<5){(plan[i+1]??={})[+m[1]]=t;n++}});row=null;continue}
+      lead=Math.max(0,cells.length-1);row={h:+m[1],lead,z};continue}
+    // Fachzeile: mindestens drei Wörter („D L1 NAP“), Raumzeilen haben zwei („P 101“)
+    if(row&&/^\s*\S+\s+\S+\s+\S+/.test(l.replace(/\t/g," "))){const t=firstTok(l);if(okKz(t))row.z.push(t)}}
+  close();return n?{plan,unsure}:null}
+let PL=null;
+function openPlan(id){const k=kidById(id);PL={kid:id,plan:structuredClone(k.plan||{}),map:{...(db.planMap||{})},unsure:[],dirty:false};go({tab:view.tab,kid:id,plan:true})}
+function planPaste(e){const cd=e.clipboardData;if(!cd)return;e.preventDefault();
+  const html=cd.getData("text/html"),txt=cd.getData("text/plain");let r=html?planFromHTML(html):null,src="html";
+  if(!r){r=planFromText(txt);src="text"}
+  planTake(r,src);e.target.value=""}
+function planTake(r,src){if(!r){toast("Kein Stundenplan erkannt. Kopiere die ganze Tabelle mit der Kopfzeile Montag bis Freitag.");return}
+  PL.plan=r.plan;PL.unsure=r.unsure;PL.dirty=true;
+  for(const z of planKz(PL.plan))if(!(z in PL.map)){const v=planSug(z);if(v)PL.map[z]=v}
+  render();toast(r.unsure.length?"Plan erkannt. Bitte die markierten Zeilen prüfen.":src==="html"?"Plan erkannt. Bitte kurz prüfen.":"Plan erkannt. Bitte kurz prüfen.")}
+const planKz=p=>[...new Set(Object.values(p||{}).flatMap(h=>Object.values(h)))].sort((a,b)=>a.localeCompare(b,"de"));
+async function planCell(wd,h){const cur=PL.plan[wd]?.[h]||"",ks=planKz(PL.plan);
+  const v=await dlg(`<p style="font-weight:700;margin:0 0 4px">${WD[wd-1]}, ${h}. Stunde</p><p class="small muted" style="margin:0 0 12px">Welches Fach hat das Kind hier?</p>
+    <div class="catpick">${[...ks,""].map(z=>`<button class="${z===cur?"on":""}" data-z="${esc(z)}" style="min-height:40px">${z?esc(z):"frei"}</button>`).join("")}</div>
+    <div class="row" style="margin-top:12px"><input id="dlgIn" placeholder="anderes Kürzel" maxlength="12" autocomplete="off" autocapitalize="characters"><button class="btn" data-a="1">OK</button></div>
+    <button class="btn block" style="margin-top:12px" data-a="0">Abbrechen</button>`,
+    (el,done)=>{el.querySelectorAll("[data-z]").forEach(b=>b.onclick=()=>done({z:b.dataset.z}));el.querySelector('[data-a="0"]').onclick=()=>done(null);
+      const i=el.querySelector("#dlgIn"),ok=()=>{const z=i.value.trim();if(!okKz(z)){toast("Nur Buchstaben und Ziffern, ohne Leerzeichen");return}done({z})};el.querySelector('[data-a="1"]').onclick=ok;i.onkeydown=e=>{if(e.key==="Enter")ok()}});
+  if(!v)return;if(v.z){(PL.plan[wd]??={})[h]=v.z;const s=planSug(v.z);if(!(v.z in PL.map)&&s)PL.map[v.z]=s}else if(PL.plan[wd]){delete PL.plan[wd][h];if(!Object.keys(PL.plan[wd]).length)delete PL.plan[wd]}
+  PL.dirty=true;render()}
+function planSave(){const k=kidById(PL.kid);if(!k)return;
+  const ks=planKz(PL.plan),miss=ks.filter(z=>!(z in PL.map));
+  if(miss.length){toast(`Bitte noch zuordnen: ${miss.join(", ")}`);return}
+  db.planMap={...(db.planMap||{}),...Object.fromEntries(ks.map(z=>[z,PL.map[z]]))};
+  if(Object.keys(PL.plan).length)k.plan=PL.plan;else delete k.plan;k.upd=Date.now();save();PL=null;toast("Stundenplan gespeichert");back({tab:view.tab,kid:k.id})}
+async function planDel(){const k=kidById(PL.kid);if(!await ask(`Stundenplan von ${k.code} entfernen?`,{ok:"Entfernen",danger:true}))return;
+  delete k.plan;k.upd=Date.now();save();PL=null;back({tab:view.tab,kid:k.id})}
+async function planBack(){if(PL?.dirty&&!await ask("Änderungen am Stundenplan verwerfen?",{ok:"Verwerfen"}))return;PL=null;back({tab:view.tab,kid:view.kid})}
+function planV(){const k=kidById(view.kid);if(!k){view={tab:"klassen"};return klassenV()}
+  if(!PL||PL.kid!==k.id)PL={kid:k.id,plan:structuredClone(k.plan||{}),map:{...(db.planMap||{})},unsure:[],dirty:false};
+  const hrs=new Set(db.raster.map(r=>parseInt(r[0],10)).filter(n=>!isNaN(n)));Object.values(PL.plan).forEach(h=>Object.keys(h).forEach(n=>hrs.add(+n)));
+  const H=[...hrs].sort((a,b)=>a-b),inR=n=>db.raster.some(r=>parseInt(r[0],10)===n),ks=planKz(PL.plan),has=ks.length>0;
+  const notR=H.filter(n=>!inR(n)&&WD.some((_,i)=>PL.plan[i+1]?.[n]));
+  let h=`<button class="btn ghost noprint" onclick="planBack()">‹ Zurück</button>
+  <div class="row" style="margin:6px 0 4px">${kidIcon(k)}<div class="grow"><div class="code" style="font-size:1.3rem">${esc(k.code)}</div><span class="muted small">Stundenplan</span></div></div>
+  <div class="card"><b>Plan einfügen</b><ol class="small" style="padding-left:20px;margin:8px 0 10px"><li style="margin:4px 0">Öffne im Schulmanager den Stundenplan des Kindes. Nimm eine normale Woche ohne Vertretungen.</li><li style="margin:4px 0">Markiere die ganze Tabelle von „Stunde“ bis zur letzten Zeile und kopiere sie.</li><li style="margin:4px 0">Tippe ins Feld unten und wähle „Einsetzen“.</li></ol>
+  <textarea id="planIn" rows="2" placeholder="Hier einsetzen" onpaste="planPaste(event)" oninput="if(this.value.trim().length>15){planTake(planFromText(this.value),'text');this.value=''}" aria-label="Stundenplan hier einsetzen"></textarea>
+  <p class="small muted" style="margin:8px 0 0">Pfad übernimmt nur das Fach. Lehrkräfte, Räume und Daten werden nicht gespeichert.</p></div>`;
+  if(has||planHas(k)){
+    h+=`<h2>Kontrolle</h2>${PL.unsure.length?`<p class="small" style="border-left:4px solid var(--sig);padding:6px 10px;background:var(--news);border-radius:8px">Markierte Zeilen bitte prüfen: Dort ist ein Tag frei, Pfad weiß aber nicht welcher. Tippe auf ein Feld, um es zu ändern.</p>`:`<p class="small muted" style="margin:0 0 8px">Stimmt alles? Tippe auf ein Feld, um es zu ändern.</p>`}
+    <div class="card" style="padding:8px;overflow-x:auto"><table class="plan"><thead><tr><th></th>${WD.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>
+    ${H.map(n=>`<tr class="${PL.unsure.includes(n)?"unsure":""}"><th>${n}.</th>${WD.map((_,i)=>{const z=PL.plan[i+1]?.[n]||"";return `<td><button onclick="planCell(${i+1},${n})" aria-label="${WD[i]}, ${n}. Stunde: ${z?esc(z):"frei"}" class="${z?"":"free"}">${z?esc(z):"–"}</button></td>`}).join("")}</tr>`).join("")}
+    </tbody></table></div>
+    ${notR.length?`<p class="small muted">Die ${notR.map(n=>n+".").join(", ")} Stunde fehlt in deinem Stundenraster (Einstellungen). Dort wählt Pfad das Fach erst, wenn die Stunde im Raster steht.</p>`:""}`;
+    if(has)h+=`<h2>Kürzel zuordnen</h2><p class="small muted" style="margin:0 0 8px">Einmal festlegen, das gilt für alle Kinder.</p><div class="card">${ks.map(z=>{const v=PL.map[z],miss=v===undefined;
+      return `<div class="row" style="margin:6px 0"><b style="min-width:3.2em">${esc(z)}</b><select aria-label="Fach für ${esc(z)}" style="${miss?"border:2px solid var(--sig)":""}" onchange="PL.map[${ja(z)}]=this.value==='-'?'':this.value;PL.dirty=true;render()">${miss?`<option value="" selected disabled>Fach wählen …</option>`:""}<option value="-" ${v===""?"selected":""}>kein Fach (nicht vorauswählen)</option>${[...new Set([...db.subjects,...(v?[v]:[])])].map(x=>`<option value="${esc(x)}" ${x===v?"selected":""}>${esc(x)}</option>`).join("")}</select></div>`}).join("")}</div>`;
+    h+=`<p style="margin-top:16px"><button class="btn pri block" onclick="planSave()">Speichern</button></p>${planHas(k)?`<p><button class="btn ghost danger" onclick="planDel()">Stundenplan entfernen</button></p>`:""}`}
+  return h}
 
 /* ===== Tagebuch ===== */
 const CATS=["Beobachtung","Gespräch","Elternkontakt","Absprache","Vorfall","Erfolg"];
@@ -1256,7 +1361,7 @@ function mergeKid(k,kids=db.kids,classes=db.classes){const ex=kids.find(x=>x.id=
   if(!ex){kids.push(k);if(k.cls&&!classes.includes(k.cls))classes.push(k.cls);return 1}
   const del=new Set([...(ex.del||[]),...(k.del||[])]),before=JSON.stringify(ex);
   if(ver(k)>ver(ex))Object.assign(ex,{code:k.code,cls:k.cls,upd:k.upd,...(k.icon?{icon:k.icon}:{})});
-  if(k.team)ex.team=k.team;if(k.pending)ex.pending=k.pending;
+  if(k.team)ex.team=k.team;if(k.pending)ex.pending=k.pending;if(k.plan&&(ver(k)>ver(ex)||!ex.plan))ex.plan=k.plan;
   const eg=new Map(ex.goals.map(g=>[g.id,g]));
   ex.goals=mergeList(ex.goals,k.goals,del).map(g=>{const a=eg.get(g.id)?.entries||[],b=(k.goals.find(x=>x.id===g.id)||{}).entries||[];return {...g,entries:mergeList(a,b,del)}});
   ex.diary=mergeList(ex.diary,k.diary,del);ex.del=[...del];ex.delTs=Math.max(ex.delTs||0,k.delTs||0);if(ex.cls&&!classes.includes(ex.cls))classes.push(ex.cls);
@@ -1534,12 +1639,12 @@ function importV(){if(!IMP){view={tab:"profil"};return profilV()}
   ${IMP.d.subjects?`<label class="row" style="margin:12px 0;font-weight:600"><input type="checkbox" style="width:auto" ${IMP.settings?"checked":""} onchange="IMP.settings=this.checked"> Auch Einstellungen übernehmen (Fächer, Stundenraster, Wochenziel${IMP.files>1?", aus der neuesten Sicherung":""})</label>`:""}
   <p><button class="btn pri block" ${IMP.sel.size||IMP.settings?"":"disabled"} onclick="applyImport()">${IMP.sel.size?`${IMP.sel.size} Kind${IMP.sel.size===1?"":"er"} übernehmen`:"Übernehmen"}</button></p>`}
 function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=mergeKid(structuredClone(k))}
-  if(IMP.settings){const d=IMP.d;for(const f of ["subjects","raster","game"])if(d[f]){if(okSetting[f](d[f]))db[f]=d[f];else toast("Einstellungen aus der Datei teilweise ungültig, nicht übernommen")}if(!db.me&&d.me)db.me=d.me;(d.classes||[]).forEach(c=>db.classes.includes(c)||db.classes.push(c))}
+  if(IMP.settings){const d=IMP.d;for(const f of ["subjects","raster","game","planMap"])if(d[f]){if(okSetting[f](d[f]))db[f]=d[f];else toast("Einstellungen aus der Datei teilweise ungültig, nicht übernommen")}if(!db.me&&d.me)db.me=d.me;(d.classes||[]).forEach(c=>db.classes.includes(c)||db.classes.push(c))}
   const m=IMP.sel.size;IMP=null;save();toast(m?`${m} Kind${m===1?"":"er"} übernommen${n<m?` (${m-n} ohne Änderung)`:""}`:"Einstellungen übernommen");go({tab:"klassen"})}
 function exportCSV(kid,gid){const k=kidById(kid),g=goalById(k,gid);
   const rows=[["Kennung","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value==null?"nicht beobachtet":dv(g,e.value),e.note,e.rater]));
   download(`verlauf-${k.code}-${today()}.csv`,"﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/^[=+\-@\t\r]/,"'$&").replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
-async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,team:db.team,shareTip:db.shareTip,lock:db.lock,setupDone:db.setupDone,classes:[],kids:[]};save();go({tab:"heute"})} // App-Sperre und Einrichtung bleiben, damit neue Einträge weiter verschlüsselt sind (1.3.3)
+async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,planMap:db.planMap,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,team:db.team,shareTip:db.shareTip,lock:db.lock,setupDone:db.setupDone,classes:[],kids:[]};save();go({tab:"heute"})} // App-Sperre und Einrichtung bleiben, damit neue Einträge weiter verschlüsselt sind (1.3.3)
 async function delDemo(){if(!await ask("Den fiktiven Beispielfall entfernen? Deine eigenen Kinder bleiben.",{ok:"Entfernen"}))return;db.kids=db.kids.filter(k=>!k.demo);save();render();toast("Beispielfall entfernt")}
 /* ===== Schuljahreswechsel ===== */
 const syNow=()=>{const d=new Date(),y=d.getFullYear()-(d.getMonth()<7?1:0);return `${y}/${String(y+1).slice(2)}`};
@@ -1622,7 +1727,7 @@ async function lockPress(d){if(LOCKWAIT>Date.now()||LOCKBUSY)return;const len=db
   LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**Math.min(LOCKFAIL-5,10);saveFail();try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
 async function lockForgot(){if(!await ask("Code vergessen? Ohne Code lassen sich die Daten nicht entschlüsseln. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden.",{ok:"Alles löschen",danger:true}))return;
   const keep=ENCWAIT?{}:db;ENCWAIT=null;LKEY=null;
-  db={v:2,me:keep.me||"",subjects:keep.subjects||SUBJECTS.slice(),raster:keep.raster,game:keep.game,theme:keep.theme,fs:keep.fs,bsalt:keep.bsalt,yearSY:keep.yearSY,classes:[],kids:[]};migrate();
+  db={v:2,me:keep.me||"",subjects:keep.subjects||SUBJECTS.slice(),raster:keep.raster,planMap:keep.planMap,game:keep.game,theme:keep.theme,fs:keep.fs,bsalt:keep.bsalt,yearSY:keep.yearSY,classes:[],kids:[]};migrate();
   localStorage.removeItem(KEY);save();LOCKED=false;document.body.classList.remove("locked");renderLock();applyTheme();go({tab:"profil"});toast("Alles gelöscht. Lade jetzt deine letzte Sicherung.")}
 document.addEventListener("visibilitychange",()=>{if(!db?.lock)return;if(document.hidden){HIDDEN_AT=Date.now();if(!db.lock.after)lockNow()}
   else if(!LOCKED&&HIDDEN_AT&&Date.now()-HIDDEN_AT>=db.lock.after*6e4)lockNow()});
