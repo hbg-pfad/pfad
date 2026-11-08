@@ -304,7 +304,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.3.1",PFAD_STAND="08.11.2026";
+const PFAD_VERSION="1.3.2",PFAD_STAND="08.11.2026";
 const KEY="verlaufsbogen-v2";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
 const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
@@ -411,20 +411,20 @@ const ARROW={besser:"↗",schlechter:"↘",stabil:"→",gemischt:"↕",neu:"…"
 const badge=t=>`<span class="trend t-${t.k}"><i></i>${t.t}</span>`;
 // Neutrale Symbole: nichts, was auf Hobby, Herkunft, Religion oder Aussehen eines Kindes schließen lässt
 const ICONS=["🦊","🐢","🦉","🐝","🐬","🦋","🐙","🦒","🐧","🦔","🐳","🦜","🐌","🐞","🦁","🐼","🐨","🦓","🦩","🐸","🐠","🦀","🐘","🦭","🐿","🌻","🌵","🍀","🌲","🍄","🌈","⭐","🌙","🚀","⛵","🎈","🪁","🔑","🧭","💎","🍐","🍋","🍉","🫐","🥕","🍒"];
-/* Einheitliche Kennung: Klasse (Jahrgang 5–10 + Buchstabe) und Platz in der Klassenliste im Schulmanager, z. B. 8A-07 */
-const CLS_RE=/^(?:[5-9]|10)[A-Z]$/,normCls=c=>String(c||"").replace(/klasse|\s|-/gi,"").toUpperCase();
-const mkCode=(cls,nr)=>`${cls}-${String(nr).padStart(2,"0")}`,okNr=n=>/^\d{1,2}$/.test(String(n))&&+n>=1&&+n<=40;
-const okKennung=k=>k.demo||(CLS_RE.test(k.cls||"")&&new RegExp(`^${k.cls}-(0[1-9]|[1-3]\\d|40)$`).test(k.code));
+/* Einheitliche Kennung: Klasse wie im Schulmanager (5.1 bis 10.9, EF, Q1, Q2) und Platz in der Klassenliste, z. B. 8.1-07 */
+const CLS_RE=/^(?:(?:[5-9]|10)\.[1-9]|EF|Q1|Q2)$/,normCls=c=>{let x=String(c||"").replace(/klasse|stufe|\s/gi,"").replace(/[,\/\-]/g,".").toUpperCase();const m=/^([5-9]|10)([1-9])$/.exec(x);return m?m[1]+"."+m[2]:x};
+const mkCode=(cls,nr)=>`${cls}-${String(nr).padStart(2,"0")}`,okNr=n=>/^\d{1,3}$/.test(String(n))&&+n>=1&&+n<=199;
+const okKennung=k=>{if(k.demo)return true;const pre=(k.cls||"")+"-",n=String(k.code||"").slice(pre.length);return CLS_RE.test(k.cls||"")&&k.code.startsWith(pre)&&okNr(n)&&k.code===mkCode(k.cls,+n)};
 const clsOpts=v=>`<option value="">Klasse wählen …</option>${db.classes.filter(c=>CLS_RE.test(c)).map(c=>`<option ${c===v?"selected":""}>${esc(c)}</option>`).join("")}`;
 const nrHint=`Nummer = Platz des Kindes in der Klassenliste im Schulmanager. Sie bleibt fest, auch wenn sich die Liste später ändert.`;
 // Kennung prüfen und vergeben; gibt die neue Kennung zurück oder null
 function takeCode(cls,nr,selfId){if(!CLS_RE.test(cls)){toast("Bitte eine Klasse wählen.");return null}
-  if(!okNr(nr)){toast("Bitte die Nummer aus der Klassenliste eintragen (1 bis 40).");return null}
+  if(!okNr(nr)){toast("Bitte die Nummer aus der Klassenliste eintragen.");return null}
   const code=mkCode(cls,+nr);if(db.kids.some(k=>k.id!==selfId&&k.code.toLowerCase()===code.toLowerCase())){toast(`${code} gibt es schon.`);return null}return code}
-async function editCode(id){const k=kidById(id),m=(k.code||"").match(/-(\d{1,2})$/);
+async function editCode(id){const k=kidById(id),m=(k.code||"").match(/-(\d{1,3})$/);
   const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Kennung ändern</p>
   <label style="margin-top:0">Klasse</label><select id="ecls">${clsOpts(CLS_RE.test(k.cls||"")?k.cls:"")}</select>
-  <label>Nr. in der Klassenliste</label><input id="enr" inputmode="numeric" maxlength="2" value="${m&&CLS_RE.test(k.cls||"")?+m[1]:""}" placeholder="z. B. 7">
+  <label>Nr. in der Klassenliste</label><input id="enr" inputmode="numeric" maxlength="3" value="${m&&CLS_RE.test(k.cls||"")?+m[1]:""}" placeholder="z. B. 7">
   <div class="sub" style="margin-top:4px">${nrHint}</div>
   <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Speichern</button></div>`,
   (el,done)=>{el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done({cls:el.querySelector("#ecls").value,nr:el.querySelector("#enr").value.trim()})});
@@ -512,7 +512,8 @@ async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-s
 // Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
 // Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
 const NEU=[
- ["1.3.1",["Kinder haben jetzt eine einheitliche Kennung: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8A-07. Beim Anlegen wählst du die Klasse und trägst die Nummer ein.","Passt eine ältere Kennung nicht dazu, zeigt Pfad beim Kind „Kennung anpassen“.","Jedes Kind hat jetzt ein Symbol."]],
+ ["1.3.2",["Klassen heißen jetzt wie im Schulmanager: 5.1 bis 10.8, dazu EF, Q1 und Q2."]],
+ ["1.3.1",["Kinder haben jetzt eine einheitliche Kennung: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8.1-07. Beim Anlegen wählst du die Klasse und trägst die Nummer ein.","Passt eine ältere Kennung nicht dazu, zeigt Pfad beim Kind „Kennung anpassen“.","Jedes Kind hat jetzt ein Symbol."]],
  ["1.3.0",["Auf „Heute“ stehen deine Kinder jetzt ganz oben. Wer heute noch nicht bewertet ist, kommt zuerst. Tippe einfach auf das Kind, um zu bewerten.","Hinweise wie die Sicherung findest du jetzt unter der Kinderliste.","„Sicherung speichern“ heißt jetzt „Sicherungskopie ablegen“. Pfad speichert deine Einträge sowieso automatisch, die Kopie ist für den Notfall."]],
  ["1.2.9",["Nach einem Update zeigt dir Pfad einmal, was neu ist. In den Einstellungen ganz unten findest du es jederzeit wieder („Was ist neu?“)."]],
  ["1.2.8",["Bewerten passt jetzt auf einen Bildschirm. Das Fach wählst du aus einer Liste.","Wenn du eine Zahl, Stunde oder ein Fach antippst, springt die Ansicht nicht mehr nach oben."]],
@@ -722,13 +723,13 @@ function closedHint(){const due=db.kids.filter(k=>k.closed&&k.delAt&&k.delAt<=to
   return `<div class="card" style="border:2px solid var(--new)"><b>Löschen fällig</b><p class="small" style="margin:6px 0 8px">Die Förderung ist abgeschlossen bei: ${due.map(k=>esc(k.code)).join(", ")}. Liegt der Bericht in der Förderakte? Dann lösche die Daten von diesem Gerät.</p>
   <p class="row" style="flex-wrap:wrap;margin:0">${due.map(k=>`<button class="btn" onclick="go({tab:'klassen',kid:${ja(k.id)}})">${esc(k.code)} ansehen</button>`).join("")}</p></div>`}
 function yearHint(){if(db.yearSY===syNow()||!db.kids.some(k=>!k.demo&&upCls(k.cls||"")))return "";
-  return `<div class="card" style="border:2px solid var(--sig)"><b>Neues Schuljahr ${syNow()}</b><p class="small" style="margin:6px 0 10px">Sollen alle Klassen eine Stufe hoch? Aus 7B wird 8B, aus 7B-01 wird 8B-01.</p>
+  return `<div class="card" style="border:2px solid var(--sig)"><b>Neues Schuljahr ${syNow()}</b><p class="small" style="margin:6px 0 10px">Sollen alle Klassen eine Stufe hoch? Aus 7.2 wird 8.2, aus 7.2-01 wird 8.2-01, aus EF wird Q1.</p>
   <p class="row" style="flex-wrap:wrap;margin:0"><button class="btn pri" onclick="yearUp()">Klassen hochsetzen</button><button class="btn ghost" onclick="db.yearSY=syNow();save();render()">Nicht nötig</button></p></div>`}
 
 /* ===== Anleitung ===== */
 const HELP=[
- {t:"Willkommen bei Pfad",p:"Die Anleitung zeigt dir die App mit einem fiktiven Beispielfall. Mit Pfad schätzt du das Verhalten einzelner Kinder direkt nach der Stunde ein. Das dauert wenige Sekunden. Mit der Zeit siehst du, ob sich etwas verbessert, und hast Belege für Förderplan und Gespräche.",l:["Alles bleibt auf deinem Gerät.","Kinder haben nur eine Kennung wie 8A-07, keinen Namen.","Unten (markiert) wechselst du zwischen Heute, Kinder, Verlauf und Einstellungen."]},
- {t:"Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen und die Nummer aus der Klassenliste im Schulmanager eintragen. Daraus wird die Kennung, z. B. 8A-07.","Dazu kommt ein zufälliges Symbol wie 🦊 zum schnellen Wiedererkennen.","Keine Namen oder Initialen eintragen."]},
+ {t:"Willkommen bei Pfad",p:"Die Anleitung zeigt dir die App mit einem fiktiven Beispielfall. Mit Pfad schätzt du das Verhalten einzelner Kinder direkt nach der Stunde ein. Das dauert wenige Sekunden. Mit der Zeit siehst du, ob sich etwas verbessert, und hast Belege für Förderplan und Gespräche.",l:["Alles bleibt auf deinem Gerät.","Kinder haben nur eine Kennung wie 8.1-07, keinen Namen.","Unten (markiert) wechselst du zwischen Heute, Kinder, Verlauf und Einstellungen."]},
+ {t:"Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen und die Nummer aus der Klassenliste im Schulmanager eintragen. Daraus wird die Kennung, z. B. 8.1-07.","Dazu kommt ein zufälliges Symbol wie 🦊 zum schnellen Wiedererkennen.","Keine Namen oder Initialen eintragen."]},
  {t:"Verhalten festlegen",p:"Pro Kind legst du ein bis drei Verhalten fest, die du beobachten willst.",l:["So formulieren, dass man es sehen kann: „Ruft ohne Melden in die Klasse“ statt „ist unruhig“.","Richtung wählen: Soll es weniger oder mehr werden?","Skala wählen: 0 bis 10, 1 bis 5 oder ja/nein."]},
  {t:"Nach der Stunde bewerten",p:"Auf „Heute“ tippst du auf das Kind oder auf „Bewerten“. Wer heute noch offen ist, steht oben.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
  {t:"Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
@@ -773,7 +774,7 @@ function klassenV(){
   ${db.classes.map(c=>`<option value="${esc(c)}" ${f===c?"selected":""}>Klasse ${esc(c)} (${count(c)})</option>`).join("")}
   ${count("")?`<option value="" ${f===""?"selected":""}>ohne Klasse (${count("")})</option>`:""}</select>
   <button class="btn noprint" onclick="addClass()">Neue Klasse</button></div>`;
-  if(view.adding)h+=`<div class="card"><div style="display:grid;grid-template-columns:auto 1fr 1fr;column-gap:12px;align-items:center"><label style="margin-top:0">Symbol</label><label style="margin-top:0">Klasse</label><label style="margin-top:0">Nr. in Liste</label><button id="nicon" class="kic big icpick" data-i="${view.newIcon||(view.newIcon=freeIcon())}" onclick="newKidIcon()" aria-label="Symbol ändern">${view.newIcon}</button><select id="ncls" onchange="codePrev()">${clsOpts(f)}</select><input id="nnr" inputmode="numeric" maxlength="2" placeholder="z. B. 7" oninput="codePrev()"></div>
+  if(view.adding)h+=`<div class="card"><div style="display:grid;grid-template-columns:auto 1fr 1fr;column-gap:12px;align-items:center"><label style="margin-top:0">Symbol</label><label style="margin-top:0">Klasse</label><label style="margin-top:0">Nr. in Liste</label><button id="nicon" class="kic big icpick" data-i="${view.newIcon||(view.newIcon=freeIcon())}" onclick="newKidIcon()" aria-label="Symbol ändern">${view.newIcon}</button><select id="ncls" onchange="codePrev()">${clsOpts(f)}</select><input id="nnr" inputmode="numeric" maxlength="3" placeholder="z. B. 7" oninput="codePrev()"></div>
   <p class="small" style="margin:10px 0 0">Kennung: <b id="nprev">–</b></p>
   <div class="sub" style="margin-top:4px">${nrHint} Keine Namen oder Initialen. Das Symbol hilft beim schnellen Wiedererkennen.</div>
   ${db.classes.some(c=>CLS_RE.test(c))?"":`<p class="small" style="color:var(--down)">Lege zuerst oben eine Klasse an („Neue Klasse“).</p>`}
@@ -782,10 +783,10 @@ function klassenV(){
   for(const k of list)h+=`<div class="card tap row kcard" style="--kc:${kidColor(k)}" onclick="go({tab:'klassen',kid:${ja(k.id)}})">${kidIcon(k)}
   <div class="grow"><div class="code">${esc(k.code)} ${k.demo?'<span class="tag">fiktiv</span>':""}${k.closed?'<span class="tag">abgeschlossen</span>':""}</div><div class="muted small">${k.cls?esc(k.cls)+" · ":""}${k.goals.length} ${k.goals.length===1?"Verhalten":"Verhalten"}</div></div>${badge(kidTrend(k))}</div>`;
   if(!view.adding)h+=`<p style="margin-top:14px"><button class="btn block noprint" onclick="view.adding=true;render();($('#ncls').value?$('#nnr'):$('#ncls')).focus()">+ Kind anlegen</button></p>`;
-  h+=`<p class="muted small" style="text-align:center">Nur Kennungen wie 8A-07, keine Namen.</p>`;
+  h+=`<p class="muted small" style="text-align:center">Nur Kennungen wie 8.1-07, keine Namen.</p>`;
   return h;
 }
-async function addClass(){const c=normCls((await askText("Neue Klasse: Jahrgang und Buchstabe","z. B. 7B"))||"");if(!c)return;if(!CLS_RE.test(c))return toast("Bitte Jahrgang 5 bis 10 und einen Buchstaben, z. B. 7B.");if(!db.classes.includes(c))db.classes.push(c);db.classes.sort();save();view.filter=c;render()}
+async function addClass(){const c=normCls((await askText("Neue Klasse, wie im Schulmanager","z. B. 8.1 oder EF"))||"");if(!c)return;if(!CLS_RE.test(c))return toast("Bitte wie im Schulmanager: 5.1 bis 10.9 oder EF, Q1, Q2.");if(!db.classes.includes(c))db.classes.push(c);db.classes.sort(byNum);save();view.filter=c;render()}
 function codePrev(){const c=$("#ncls").value,n=$("#nnr").value.trim();$("#nprev").textContent=CLS_RE.test(c)&&okNr(n)?mkCode(c,+n):"–"}
 function addKid(){const cls=$("#ncls").value,code=takeCode(cls,$("#nnr").value.trim());if(!code)return;
   const k={id:uid(),code,icon:$("#nicon").dataset.i,cls,goals:[],diary:[],ts:Date.now()};db.yearSY??=syNow();delete view.newIcon;db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
@@ -801,7 +802,7 @@ function kidV(){
   let h=`<button class="btn ghost noprint" onclick="back({tab:'${view.tab}'})">‹ Zurück</button>
   <div class="row" style="margin:6px 0 4px"><button class="icbtn" aria-label="Symbol ändern" onclick="setKidIcon(${ja(k.id)})">${k.icon?kidIcon(k,1):`<span class="kic big add" style="--kc:${kidColor(k)}">+</span>`}</button><div class="grow"><div class="code" style="font-size:1.4rem">${esc(k.code)}</div>
   ${k.demo?`<span class="muted small">Klasse ${esc(k.cls||"")} · fiktiv</span>`:`<button class="btn ghost small" style="padding-left:0" onclick="editCode(${ja(k.id)})">Kennung ändern</button>`}</div>${badge(kidTrend(k))}</div>
-  ${okKennung(k)?"":`<div class="card" style="border:2px solid var(--sig);margin-top:12px"><b>Kennung anpassen</b><p class="small" style="margin:6px 0 10px">Kennungen sind jetzt einheitlich: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8A-07.</p><button class="btn pri" onclick="editCode(${ja(k.id)})">Kennung ändern</button></div>`}
+  ${okKennung(k)?"":`<div class="card" style="border:2px solid var(--sig);margin-top:12px"><b>Kennung anpassen</b><p class="small" style="margin:6px 0 10px">Kennungen sind jetzt einheitlich: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8.1-07.</p><button class="btn pri" onclick="editCode(${ja(k.id)})">Kennung ändern</button></div>`}
   ${k.closed?`<div class="card" style="border:2px solid var(--new);margin-top:12px"><b>Förderung abgeschlossen am ${dDEy(k.closed)}</b><p class="small" style="margin:6px 0 10px">Das Kind erscheint nicht mehr auf „Heute“. Lege den Bericht in die Förderakte und lösche die Daten danach von diesem Gerät.${k.delAt?` Pfad erinnert dich am ${dDEy(k.delAt)}.`:""}</p>
   <p class="row" style="flex-wrap:wrap;margin:0"><button class="btn pri" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},report:true})">Bericht (PDF)</button><button class="btn danger" onclick="delKid(${ja(k.id)})">Jetzt löschen</button><button class="btn ghost" onclick="reopenKid(${ja(k.id)})">Wieder aufnehmen</button></p></div>`:""}
   ${k.goals.length&&!k.closed?`<p style="margin:14px 0 0"><button class="btn pri block" onclick="startRate(${ja(k.id)})">Jetzt bewerten</button></p>`:""}${k.goals.length?docTiles(k,view.tab):""}
@@ -881,7 +882,7 @@ function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getM
 function startRate(kidId,queue=[],slot=""){const k=kidById(kidId);if(!k.goals.length)return;
   const cs=slot||currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
   rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:innerHeight>=720,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
-// Mehrere Kinder nacheinander, z. B. alle aus 8A
+// Mehrere Kinder nacheinander, z. B. alle aus 8.1
 async function pickMulti(){const ks=db.kids.filter(k=>k.goals.length&&!k.closed).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true}));
   const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))],noSlot=!currentSlot();
   const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Wen bewertest du nacheinander?</p>
@@ -1541,17 +1542,17 @@ async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät lösc
 async function delDemo(){if(!await ask("Den fiktiven Beispielfall entfernen? Deine eigenen Kinder bleiben.",{ok:"Entfernen"}))return;db.kids=db.kids.filter(k=>!k.demo);save();render();toast("Beispielfall entfernt")}
 /* ===== Schuljahreswechsel ===== */
 const syNow=()=>{const d=new Date(),y=d.getFullYear()-(d.getMonth()<7?1:0);return `${y}/${String(y+1).slice(2)}`};
-// 7B → 8B; Jahrgang 10 und Klassen ohne Zahl bleiben
-const upCls=c=>{const m=/^(\d{1,2})(.*)$/.exec(c||"");if(!m)return null;const n=+m[1];return n>=10||n<1?null:(n+1)+m[2]};
+// 7.2 → 8.2, EF → Q1 → Q2; Jahrgang 10, Q2 und Klassen ohne Zahl bleiben
+const upCls=c=>{if(c==="EF")return "Q1";if(c==="Q1")return "Q2";const m=/^(\d{1,2})(.*)$/.exec(c||"");if(!m)return null;const n=+m[1];return n>=10||n<1?null:(n+1)+m[2]};
 const byNum=(a,b)=>a.localeCompare(b,"de",{numeric:true});
 function yearV(){const u=db.yearUndo;
-  return `<div class="card"><h2 style="margin-top:0">Schuljahreswechsel</h2><div class="sub">Setzt alle Klassen eine Stufe hoch: 7B wird 8B, 7B-01 wird 8B-01. Einträge bleiben, wie sie sind. Jahrgang 10 bleibt.</div>
+  return `<div class="card"><h2 style="margin-top:0">Schuljahreswechsel</h2><div class="sub">Setzt alle Klassen eine Stufe hoch: 7.2 wird 8.2, 7.2-01 wird 8.2-01, EF wird Q1, Q1 wird Q2. Einträge bleiben, wie sie sind. Jahrgang 10 und Q2 bleiben.</div>
   <p class="row" style="flex-wrap:wrap;margin:10px 0 0"><button class="btn" onclick="yearUp()">Klassen hochsetzen</button>${u?`<button class="btn ghost" onclick="yearBack()">Wechsel vom ${dDEy(iso(new Date(u.ts)))} rückgängig machen</button>`:""}</p></div>`}
 async function yearUp(){const map={};db.classes.forEach(c=>{const u=upCls(c);if(u)map[c]=u});db.kids.forEach(k=>{const u=upCls(k.cls);if(u)map[k.cls]=u});
-  if(!Object.keys(map).length)return toast("Keine Klasse mit Jahrgang gefunden, z. B. 7B.");
+  if(!Object.keys(map).length)return toast("Keine Klasse mit Jahrgang gefunden, z. B. 7.2.");
   const n=c=>db.kids.filter(k=>!k.demo&&k.cls===c).length,stay=[...new Set([...db.classes,...db.kids.map(k=>k.cls).filter(Boolean)])].filter(c=>!map[c]).sort(byNum);
   const ok=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Schuljahreswechsel</p>
-  <p class="small" style="margin:0 0 8px">Alle Klassen gehen eine Stufe hoch. Kennungen ändern sich mit, z. B. 7B-04 → 8B-04. Hat sich die Klassenliste geändert, passt du die Nummer beim Kind an.</p>
+  <p class="small" style="margin:0 0 8px">Alle Klassen gehen eine Stufe hoch. Kennungen ändern sich mit, z. B. 7.2-04 → 8.2-04. Hat sich die Klassenliste geändert, passt du die Nummer beim Kind an.</p>
   <ul class="small" style="padding-left:20px;margin:0 0 8px;max-height:34vh;overflow:auto">${Object.keys(map).sort(byNum).map(c=>`<li>${esc(c)} → <b>${esc(map[c])}</b> <span class="muted">(${n(c)} Kind${n(c)===1?"":"er"})</span></li>`).join("")}</ul>
   ${stay.length?`<p class="small muted" style="margin:0 0 8px">Bleiben: ${stay.map(esc).join(", ")}. Für Kinder, die die Schule verlassen, nutze beim Kind „Förderung abschließen“.</p>`:""}
   <p class="small muted" style="margin:0 0 14px">Du kannst den Wechsel danach in den Einstellungen rückgängig machen.</p>
@@ -1628,7 +1629,7 @@ document.addEventListener("keydown",e=>{if(!LOCKED||e.target.closest?.(".cele"))
 
 function demo(quiet){
   if(db.kids.some(k=>k.demo))return quiet?null:toast("Beispielfall ist schon da");
-  if(!db.classes.includes("7B"))db.classes.push("7B");
+  if(!db.classes.includes("7.2"))db.classes.push("7.2");
   const t=today(),start=addDays(t,-14);
   const g1={id:uid(),title:"Stört den Unterricht",how:"Ruft rein, verlässt ohne Erlaubnis den Platz, lenkt andere ab.",fp:"Fiktiv: Ich melde mich, bevor ich etwas sage.",dir:"down",a0:"nie",a10:"ständig",target:3,start,entries:[]};
   const g2={id:uid(),title:"Beginnt Aufgaben selbstständig",how:"Hat nach 3 Minuten das Material da und fängt an.",fp:"Fiktiv: Ich fange Aufgaben ohne Erinnerung an.",dir:"up",a0:"gar nicht",a10:"durchgehend",target:7,start,entries:[]};
@@ -1641,7 +1642,7 @@ function demo(quiet){
     g2.entries.push({id:uid(),date:d,slot:sl,subj:s,value:v2[i]==null?null:Math.max(0,v2[i]-adj),note:i===13?"Mit Wochenplan deutlich schneller gestartet.":"",rater:"MU",ts,gen:true});i++}d=addDays(d,1)}
   const diary=[[-25,"Beobachtung","Mathe","Kommt nach der Pause oft unruhig in die Stunde. Erste 10 Minuten am schwierigsten."],[-20,"Gespräch","","Kurzes Gespräch nach der Stunde: wünscht sich einen Platz weiter vorne."],[-14,"Absprache","","Mit Klassenleitung: Sitzplatz vorne, Wochenplan mit Startsignal. Ab heute Förderung."],[-9,"Elternkontakt","","Telefonat mit der Mutter: zu Hause läuft es ähnlich, Unterstützung bei Wochenplan zugesagt."],[-4,"Erfolg","Mathe","Hat heute als Erste:r angefangen und das stolz gezeigt."],[-2,"Vorfall","Deutsch","Streit in der Gruppenarbeit, Auszeit nötig. Danach wieder gut eingestiegen."]]
     .map(([o,cat,subj,text],i)=>({id:uid(),date:addDays(t,o),cat,subj,text,rater:"MU",ts:new Date(addDays(t,o)+"T15:00").getTime()+i,gen:true}));
-  db.kids.push({id:uid(),code:"7B-99",icon:"🦉",cls:"7B",demo:true,goals:[g1,g2],diary});save();if(quiet)return;toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
+  db.kids.push({id:uid(),code:"7.2-99",icon:"🦉",cls:"7.2",demo:true,goals:[g1,g2],diary});save();if(quiet)return;toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
 
 load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();checkNeu();
 </script>
