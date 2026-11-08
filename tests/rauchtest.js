@@ -102,6 +102,23 @@ const ok=(c,m)=>{if(!c)throw new Error("FEHLER: "+m);console.log("✓ "+m)};
   await p.reload();ok(await p.locator("#lock").count()===1,"Nach dem Löschen weiter gesperrt");
   await code("2468");await p.waitForSelector("#lock",{state:"detached"});
 
+  // Stundenplan: Tabelle aus dem Schulmanager einfügen, leere Tage bleiben erhalten (ab 1.3.4). Nur erfundene Kürzel.
+  {const html=`<table><tr><th>Stunde</th><th>Montag</th><th>Dienstag</th><th>Mittwoch</th><th>Donnerstag</th><th>Freitag</th></tr>
+<tr><td>1</td><td><b>D</b> G1 XA<br>R 1</td><td></td><td><b>M</b> G1 XB</td><td></td><td><b>SP</b> G1 XC</td></tr>
+<tr><td>2</td><td rowspan="2">E5 G2 XD</td><td></td><td></td><td>QQ L1 XE</td><td></td></tr><tr><td>3</td><td></td><td></td><td></td><td></td></tr></table>`;
+   const r=await p.evaluate(h=>planFromHTML(h),html);
+   ok(JSON.stringify(r.plan)===JSON.stringify({1:{1:"D",2:"E5",3:"E5"},3:{1:"M"},4:{2:"QQ"},5:{1:"SP"}}),"Stundenplan aus Tabelle mit Lücken und Doppelstunde gelesen");
+   const t=await p.evaluate(()=>planFromText("1\t\nD G1 XA\nR 1\nM G1 XB\nR 2\n2\t\t\t\nSP G1 XC\nR 3"));
+   ok(t.plan[1][1]==="D"&&t.plan[2][1]==="M"&&t.plan[3][2]==="SP"&&t.unsure.join()==="1","Stundenplan aus Text: unklare Zeile markiert");
+   const k0=await p.evaluate(()=>db.kids[0].id);await p.evaluate(id=>go({tab:"klassen",kid:id}),k0);
+   await p.click("main .card button:has-text('Einfügen')");
+   await p.evaluate(h=>{const dt=new DataTransfer();dt.setData("text/html",h);document.querySelector("#planIn").dispatchEvent(new ClipboardEvent("paste",{clipboardData:dt,bubbles:true,cancelable:true}))},html);
+   ok(await p.locator("table.plan td button",{hasText:"QQ"}).count()===1,"Kontroll-Raster zeigt den Plan");
+   await p.selectOption("select[aria-label='Fach für E5']","Englisch");await p.selectOption("select[aria-label='Fach für QQ']","-");
+   await p.click("main button:has-text('Speichern')");
+   ok(await p.evaluate(id=>{const k=kidById(id);return okKid(k)&&planSubj(k,"2026-11-09","1. Std.")==="Deutsch"&&planSubj(k,"2026-11-09","3. Std.")==="Englisch"&&planSubj(k,"2026-11-12","2. Std.")===""&&planSubj(k,"2026-11-09","Große Pause")===""},k0),"Stundenplan gespeichert, Fach je Stunde");
+   ok(await p.evaluate(()=>!okKid({...db.kids[0],plan:{9:{1:"D"}}})&&!okKid({...db.kids[0],plan:{1:{1:"<b>"}}})),"Fremde Stundenpläne werden geprüft")}
+
   // PDF-Text: Minuszeichen bleibt lesbar (ab 1.3.3)
   ok(await p.evaluate(()=>pdfTxt("−2 → 3").includes("-2 -> 3")),"Minuszeichen im PDF als -");
 
