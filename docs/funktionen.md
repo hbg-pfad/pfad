@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.3.2 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.3.3 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -75,7 +75,7 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 - Das Passwort ist nicht wiederherstellbar. Ohne Passwort lässt sich die Sicherung nicht öffnen.
 - Empfehlung: spätestens alle 5 Tage sichern (die App erinnert daran), zusätzlich vor jedem Gerätewechsel und vor dem Löschen des App-Symbols.
 - Symbol pro Kind (z. B. 🦊) zum schnellen Wiedererkennen: 46 neutrale Motive (Tiere, Pflanzen, Dinge), die App schlägt ein freies zufällig vor, änderbar per Tipp auf das Symbol beim Kind. Nicht passend zum Kind wählen (kein Fußball für das Fußballkind). Das Symbol wird beim Teilen und am Server mitgegeben und steht auch auf dem Gesprächsblatt.
-- Kinder haben eine **Kennung** (ab 1.3.1, vorher „Kürzel“; „Kürzel“ meint nur noch die Lehrkraft): Klasse und Platz in der Klassenliste im Schulmanager, z. B. `8A-07`. Beim Anlegen wählt man die Klasse (Jahrgang 5 bis 10 plus Buchstabe, Eingabe wird vereinheitlicht: „8 a“ → 8A) und trägt die Nummer ein (1 bis 40). Freitext gibt es nicht mehr, doppelte Kennungen lehnt die App ab. Die Kennung bleibt fest, auch wenn sich die Klassenliste später ändert; beim Kind „Kennung ändern“ (Klasse und Nummer). Ältere Kennungen, die nicht ins Schema passen, zeigen beim Kind den Hinweis „Kennung anpassen“. Jedes Kind hat ein Symbol (fehlende werden beim Start zufällig ergänzt). Der Beispielfall heißt ab 1.3.1 `7B-99`.
+- Kinder haben eine **Kennung** (ab 1.3.1, vorher „Kürzel“; „Kürzel“ meint nur noch die Lehrkraft): Klasse und Platz in der Klassenliste im Schulmanager, z. B. `8.1-07` oder `EF-112`. Klassen wie im Schulmanager (ab 1.3.2): 5.1 bis 10.9 sowie EF, Q1, Q2; Eingaben werden vereinheitlicht („8 1“, „8/1“, „81“ → 8.1). Beim Anlegen wählt man die Klasse und trägt die Nummer ein (1 bis 199, wegen der Stufenlisten der Oberstufe). Freitext gibt es nicht mehr, doppelte Kennungen lehnt die App ab. Die Kennung bleibt fest, auch wenn sich die Klassenliste später ändert; beim Kind „Kennung ändern“ (Klasse und Nummer). Ältere Kennungen, die nicht ins Schema passen, zeigen beim Kind den Hinweis „Kennung anpassen“. Jedes Kind hat ein Symbol (fehlende werden beim Start zufällig ergänzt). Der Beispielfall heißt ab 1.3.2 `7.2-99`.
 - Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Deshalb nur dienstliche Geräte mit Code-Sperre nutzen.
 
 ## Laden und selektiv ergänzen
@@ -152,7 +152,7 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 - Wurde ein Kind 7 Tage nicht eingeschätzt, steht das auf „Heute“ bei dem Kind.
 
 ## Schuljahreswechsel
-- Einstellungen → „Schuljahreswechsel“ → „Klassen hochsetzen“: 7B wird 8B, Kennung 7B-01 wird 8B-01. Einträge bleiben unverändert. Jahrgang 10 und Klassen ohne Zahl bleiben.
+- Einstellungen → „Schuljahreswechsel“ → „Klassen hochsetzen“: 7.2 wird 8.2, Kennung 7.2-01 wird 8.2-01, EF wird Q1, Q1 wird Q2 (ab 1.3.2). Jahrgang 10 und Q2 bleiben. Einträge bleiben unverändert. Jahrgang 10 und Klassen ohne Zahl bleiben.
 - Vorher zeigt Pfad, welche Klasse wohin geht. Danach kurz „Rückgängig“ im Hinweis und dauerhaft in den Einstellungen („Wechsel vom … rückgängig machen“), bis zum nächsten Wechsel.
 - Ab August erinnert „Heute“ einmal an das neue Schuljahr („Nicht nötig“ blendet es aus).
 
@@ -162,7 +162,7 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 
 ## App-Sperre mit Verschlüsselung (optional, Standard aus, in der Einrichtung empfohlen)
 - Einstellungen → „App-Sperre und Verschlüsselung“: Code mit 4 bis 6 Ziffern (entschieden 24.10.2026), Sperre sofort, nach 1 oder nach 5 Minuten im Hintergrund, beim Start immer.
-- „Alle Daten auf diesem Gerät löschen“ lässt die App-Sperre an (ab 1.3.2). Neue Einträge danach sind weiter verschlüsselt.
+- „Alle Daten auf diesem Gerät löschen“ lässt die App-Sperre an (ab 1.3.3). Neue Einträge danach sind weiter verschlüsselt.
 - Ist sie an, liegen die Daten im Browserspeicher nur verschlüsselt (AES-GCM, Schlüssel per PBKDF2 mit 600 000 Runden aus dem Code). Ohne Code sind sie nicht lesbar.
 - Grenze: Ein Ziffern-Code lässt sich mit viel Aufwand durchprobieren, wenn jemand den Speicher kopiert. Der Gerätecode bleibt Pflicht.
 - Nach 5 Fehlversuchen Wartezeit (30 Sekunden, dann länger). Code vergessen: alles auf dem Gerät löschen und die letzte Sicherung laden. Der Code steckt nicht in Sicherungen.
