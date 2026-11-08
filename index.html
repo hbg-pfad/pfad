@@ -30,7 +30,7 @@ html,body{overscroll-behavior-y:none}
 main{max-width:640px;margin:0 auto;padding:16px 16px 96px}
 /* Home-Bildschirm-App: iOS verwischt den oberen Rand der Ansicht. Ein ruhiger Streifen in Hintergrundfarbe deckt diese Zone ab,
    der Inhalt beginnt darunter, damit Datum und Überschrift scharf bleiben. */
-@media (display-mode:standalone){body::before{content:"";position:fixed;top:0;left:0;right:0;height:calc(env(safe-area-inset-top,0px) + 30px);background:var(--bg);z-index:4;pointer-events:none}main{padding-top:calc(env(safe-area-inset-top,0px) + 38px)}.rate .inner{padding-top:calc(env(safe-area-inset-top,0px) + 34px)}}
+@media (display-mode:standalone){main{padding-top:calc(env(safe-area-inset-top,0px) + 38px)}.rate .inner{padding-top:calc(env(safe-area-inset-top,0px) + 34px)}}
 @media (min-width:900px) and (orientation:landscape){main{max-width:860px;padding-left:24px;padding-right:24px}body .rate .inner{max-width:760px}}
 h1{font-size:1.7rem;margin:6px 0 12px;letter-spacing:-.01em}
 h2{font-size:1.1rem;margin:18px 0 8px}
@@ -223,6 +223,12 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 .tile svg{width:30px;height:30px;color:var(--acc);margin-bottom:6px}.tile b{font-size:1.02rem}.tile span{font-size:.85rem;color:var(--muted)}.pick.slots{grid-template-columns:repeat(7,1fr)}.pick.subjs{grid-template-columns:repeat(4,1fr)}
 .pick button,.pick select{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:11px;padding:8px 2px;font:inherit;font-weight:700;font-size:.82rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pick select{padding:8px 6px}
+/* Bewerten: alles auf einen Bildschirm (Nick, 07.11.2026). Fach als Auswahlliste statt Knopf-Raster, Abstände knapper */
+.pick button,.pick select{min-height:40px}.pick.subjs{grid-template-columns:1fr}.pick.subjs select{font-size:1rem}
+.rate .goalTitle{margin:14px 0 2px}.rate .big{height:52px;font-size:2.6rem;margin-top:4px}.rate .ruler{margin:6px 0 4px}
+.rate textarea{min-height:48px;height:56px}.rate label{margin-top:8px}.rate .foot{padding-top:10px}
+@media (max-width:600px){.rate .pinsub{display:none}.rate .ends{font-size:.82rem}}
+@media (max-height:760px),(max-width:600px){.rate .goalTitle{font-size:1.35rem;margin-top:8px}.rate .big{height:40px;font-size:2rem}.rate .step{margin:0 0 6px}.ctx{padding:8px;gap:6px}.rate .ruler.s5 button,.rate .ruler.sc button{height:54px}.rate .ruler.s2 button{height:56px}.rate textarea{height:44px;min-height:44px;padding:9px 12px}.rate label{margin-top:6px;margin-bottom:4px}.rate .foot{padding-top:8px}}
 .pick .on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 .ctxline{width:100%;border:none;background:var(--soft);border-radius:14px;padding:10px 12px;font:inherit;font-weight:700;color:var(--ink);text-align:left}
 .ctxline span{float:right;color:var(--acc)}
@@ -298,8 +304,10 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.2.5",PFAD_STAND="03.11.2026";
+const PFAD_VERSION="1.3.4",PFAD_STAND="08.11.2026";
 const KEY="verlaufsbogen-v2";
+// Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
+const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
 const SUBJECTS=["Deutsch","Mathe","Englisch","Franz.","Spanisch","Latein","Türkisch","GL","NW","Bio","Chemie","Physik","WAW","Technik","HW","Info","Kunst","Musik","Sport","D&G","Rel. ev.","Rel. kath.","PP","FUF"];
@@ -318,6 +326,7 @@ function migrate(){if(!db||!Array.isArray(db.kids))db={v:2,me:"",subjects:SUBJEC
   if(JSON.stringify(db.raster)===OLD_RASTER)db.raster=RASTER.map(r=>r.slice());
   db.raster.forEach(r=>{if(typeof r[3]==="string"||typeof r[4]==="string"){const d=[r[3]||"",r[4]||""];r.length=3;r[3]={2:d,5:d.slice()}}});
   db.yearSY??=syNow();
+  db.kids.forEach(k=>{if(!k.icon)k.icon=freeIcon()});
   db.kids.forEach(k=>k.goals.forEach(g=>g.entries.forEach(e=>{if(e.slot==="Pause")e.slot="Große Pause"})));
   if(db.lock?.hash){delete db.lock;setTimeout(()=>toast("Die App-Sperre verschlüsselt jetzt auch die Daten. Bitte in den Einstellungen neu einschalten."),600)}}
 function applyTheme(){const t=db?.theme,r=document.documentElement;if(t==="light"||t==="dark")r.dataset.theme=t;else delete r.dataset.theme;
@@ -402,6 +411,24 @@ const ARROW={besser:"↗",schlechter:"↘",stabil:"→",gemischt:"↕",neu:"…"
 const badge=t=>`<span class="trend t-${t.k}"><i></i>${t.t}</span>`;
 // Neutrale Symbole: nichts, was auf Hobby, Herkunft, Religion oder Aussehen eines Kindes schließen lässt
 const ICONS=["🦊","🐢","🦉","🐝","🐬","🦋","🐙","🦒","🐧","🦔","🐳","🦜","🐌","🐞","🦁","🐼","🐨","🦓","🦩","🐸","🐠","🦀","🐘","🦭","🐿","🌻","🌵","🍀","🌲","🍄","🌈","⭐","🌙","🚀","⛵","🎈","🪁","🔑","🧭","💎","🍐","🍋","🍉","🫐","🥕","🍒"];
+/* Einheitliche Kennung: Klasse wie im Schulmanager (5.1 bis 10.9, EF, Q1, Q2) und Platz in der Klassenliste, z. B. 8.1-07 */
+const CLS_RE=/^(?:(?:[5-9]|10)\.[1-9]|EF|Q1|Q2)$/,normCls=c=>{let x=String(c||"").replace(/klasse|stufe|\s/gi,"").replace(/[,\/\-]/g,".").toUpperCase();const m=/^([5-9]|10)([1-9])$/.exec(x);return m?m[1]+"."+m[2]:x};
+const mkCode=(cls,nr)=>`${cls}-${String(nr).padStart(2,"0")}`,okNr=n=>/^\d{1,3}$/.test(String(n))&&+n>=1&&+n<=199;
+const okKennung=k=>{if(k.demo)return true;const pre=(k.cls||"")+"-",n=String(k.code||"").slice(pre.length);return CLS_RE.test(k.cls||"")&&k.code.startsWith(pre)&&okNr(n)&&k.code===mkCode(k.cls,+n)};
+const clsOpts=v=>`<option value="">Klasse wählen …</option>${db.classes.filter(c=>CLS_RE.test(c)).map(c=>`<option ${c===v?"selected":""}>${esc(c)}</option>`).join("")}`;
+const nrHint=`Nummer = Platz des Kindes in der Klassenliste im Schulmanager. Sie bleibt fest, auch wenn sich die Liste später ändert.`;
+// Kennung prüfen und vergeben; gibt die neue Kennung zurück oder null
+function takeCode(cls,nr,selfId){if(!CLS_RE.test(cls)){toast("Bitte eine Klasse wählen.");return null}
+  if(!okNr(nr)){toast("Bitte die Nummer aus der Klassenliste eintragen.");return null}
+  const code=mkCode(cls,+nr);if(db.kids.some(k=>k.id!==selfId&&k.code.toLowerCase()===code.toLowerCase())){toast(`${code} gibt es schon.`);return null}return code}
+async function editCode(id){const k=kidById(id),m=(k.code||"").match(/-(\d{1,3})$/);
+  const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Kennung ändern</p>
+  <label style="margin-top:0">Klasse</label><select id="ecls">${clsOpts(CLS_RE.test(k.cls||"")?k.cls:"")}</select>
+  <label>Nr. in der Klassenliste</label><input id="enr" inputmode="numeric" maxlength="3" value="${m&&CLS_RE.test(k.cls||"")?+m[1]:""}" placeholder="z. B. 7">
+  <div class="sub" style="margin-top:4px">${nrHint}</div>
+  <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Speichern</button></div>`,
+  (el,done)=>{el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done({cls:el.querySelector("#ecls").value,nr:el.querySelector("#enr").value.trim()})});
+  if(!r)return;const code=takeCode(r.cls,r.nr,k.id);if(!code)return;Object.assign(k,{cls:r.cls,code,upd:Date.now()});save();render();toast(`Kennung: ${code}`)}
 function freeIcon(){const used=new Set(db.kids.map(k=>k.icon)),free=ICONS.filter(i=>!used.has(i));const pool=free.length?free:ICONS;return pool[Math.floor(Math.random()*pool.length)]}
 const kidIcon=(k,big)=>k.icon?`<span class="kic${big?" big":""}" style="--kc:${kidColor(k)}" aria-hidden="true">${esc(k.icon)}</span>`:`<span class="kdot" style="--kc:${kidColor(k)}${big?";width:22px;height:22px":""}"></span>`;
 async function pickIcon(cur){const used=new Set(db.kids.map(k=>k.icon));
@@ -481,6 +508,33 @@ function dlg(html,onMount){return new Promise(res=>{const el=document.createElem
 async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 16px">${esc(msg)}</p>
   <div class="duo"><button class="btn" data-a="0">${esc(o.cancel||"Abbrechen")}</button><button class="btn pri" data-a="1" style="${o.danger?"background:var(--down);border-color:var(--down)":""}">${esc(o.ok||"OK")}</button></div>`,
   (el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"));el.querySelector('[data-a="1"]').focus()});return r===true}
+/* ===== Neu in Pfad: nach jedem Update einmal zeigen, was sich geändert hat ===== */
+// Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
+// Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
+const NEU=[
+ ["1.3.2",["Klassen heißen jetzt wie im Schulmanager: 5.1 bis 10.9, dazu EF, Q1 und Q2."]],
+ ["1.3.1",["Kinder haben jetzt eine einheitliche Kennung: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8.1-07. Beim Anlegen wählst du die Klasse und trägst die Nummer ein.","Passt eine ältere Kennung nicht dazu, zeigt Pfad beim Kind „Kennung anpassen“.","Jedes Kind hat jetzt ein Symbol."]],
+ ["1.3.0",["Auf „Heute“ stehen deine Kinder jetzt ganz oben. Wer heute noch nicht bewertet ist, kommt zuerst. Tippe einfach auf das Kind, um zu bewerten.","Hinweise wie die Sicherung findest du jetzt unter der Kinderliste.","„Sicherung speichern“ heißt jetzt „Sicherungskopie ablegen“. Pfad speichert deine Einträge sowieso automatisch, die Kopie ist für den Notfall."]],
+ ["1.2.9",["Nach einem Update zeigt dir Pfad einmal, was neu ist. In den Einstellungen ganz unten findest du es jederzeit wieder („Was ist neu?“)."]],
+ ["1.2.8",["Bewerten passt jetzt auf einen Bildschirm. Das Fach wählst du aus einer Liste.","Wenn du eine Zahl, Stunde oder ein Fach antippst, springt die Ansicht nicht mehr nach oben."]],
+ ["1.2.7",["„Mehrere nacheinander“: Ist gerade keine Stunde hinterlegt, zum Beispiel am Nachmittag, wählst du die Stunde aus einer Liste."]],
+ ["1.2.6",["Als App auf dem Home-Bildschirm: Oben verschwindet beim Scrollen nichts mehr hinter einem Streifen."]]];
+const NEUKEY=KEY+"-gesehen";
+const vnum=v=>{const m=String(v).match(/\d+/g)||[];return [0,1,2].map(i=>+m[i]||0)};
+const vNeuer=(a,b)=>{const x=vnum(a),y=vnum(b);for(let i=0;i<3;i++)if(x[i]!==y[i])return x[i]>y[i];return false};
+function neuDlg(list,all){return dlg(`<h2 style="margin:0 0 4px;font-size:1.3rem">${all?"Was ist neu?":"Neu in Pfad"}</h2>
+  <p class="small muted" style="margin:0">${all?"Die letzten Änderungen, neueste oben.":"Pfad wurde aktualisiert. Das hat sich geändert:"}</p>
+  <div style="max-height:52vh;overflow:auto">${list.map(([v,t])=>`<p style="font-weight:800;margin:14px 0 4px">Version ${esc(v)}</p><ul style="margin:0;padding-left:20px;display:grid;gap:6px">${t.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`).join("")}</div>
+  <button class="btn pri block" style="margin-top:18px" data-a="1">Alles klar</button>`,
+  (el,done)=>{const b=el.querySelector("[data-a]");b.onclick=()=>done(true);b.focus()})}
+let NEUCHECK=false;
+function checkNeu(){if(NEUCHECK||LOCKED||setupMode())return;NEUCHECK=true;
+  let seen=null;try{seen=localStorage.getItem(NEUKEY)}catch(e){}
+  const mark=()=>{try{localStorage.setItem(NEUKEY,PFAD_VERSION)}catch(e){}};
+  if(!seen&&!HADDATA)return mark(); // neues Gerät: Einrichtung und Anleitung reichen
+  const list=NEU.filter(([v])=>!seen||vNeuer(v,seen)).slice(0,8);
+  if(!list.length)return mark();
+  const show=()=>document.querySelector(".cele")?setTimeout(show,1500):neuDlg(list).then(mark);setTimeout(show,500)}
 async function askText(msg,ph,type){return dlg(`<p style="font-weight:700;margin:0 0 10px">${esc(msg)}</p><input id="dlgIn" type="${type||"text"}" autocomplete="${type==="password"?"current-password":"off"}" placeholder="${esc(ph||"")}">
   <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">OK</button></div>`,
   (el,done)=>{const i=el.querySelector("#dlgIn");i.focus();i.onkeydown=e=>{if(e.key==="Enter")done(i.value)};el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done(i.value)})}
@@ -614,7 +668,7 @@ function installV(){
 const SETUP=[
  {k:"me",t:"Dein Kürzel eintragen",done:()=>!!db.me,tip:"Trag hier dein Lehrkraft-Kürzel ein."},
  {k:"demo",t:"Fiktiven Beispielfall laden",done:()=>db.kids.length>0,tip:"Tippe auf „Fiktiven Beispielfall laden“."},
- {k:"backup",t:"Erste Sicherung speichern",done:()=>!!db.lastBackup,tip:"Tippe auf „Sicherung speichern“ und lege ein Passwort fest."},
+ {k:"backup",t:"Erste Sicherungskopie ablegen",done:()=>!!db.lastBackup,tip:"Tippe auf „Sicherungskopie ablegen“ und lege ein Passwort fest."},
  {k:"lock",t:"App-Sperre einschalten (empfohlen)",done:()=>!!db.lock||!!db.lockSkip,tip:"Schalte die App-Sperre ein. Empfohlen, vor allem wenn du dein iPad auch mal aus der Hand gibst. Kein Muss: „Ohne Sperre weiter“ überspringt den Schritt."}];
 const setupOpen=()=>isWeb&&!db.setupDone&&!(DEV&&!standalone)?SETUP.filter(s=>!s.done()):[];
 function setupCard(){const open=setupOpen();if(!open.length)return "";const nx=open[0];
@@ -645,17 +699,21 @@ function heuteV(){
   const week=all.filter(e=>e.date>=wk).length,todayN=all.filter(e=>e.date===t).length;
   const kids=db.kids.filter(k=>k.goals.length&&!k.closed);
   const dateLong=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${setupCard()}${invitesV()}${backupHint()}${yearHint()}${closedHint()}${db.seenHelp||db.kids.some(k=>!k.demo)||setupOpen().length?"":`<div class="card" style="border:2px solid var(--sig)"><b>${db.setupDone?"Einrichtung fertig. Jetzt die Anleitung":"Neu hier?"}</b><p class="small" style="margin:6px 0 10px">Pfad führt dich in 8 kurzen Schritten durch die App und zeigt dir, wo du was findest.</p>${db.setupDone?`<div class="marktip">Tippe auf „Anleitung starten“.</div>`:""}<button class="btn pri${db.setupDone?" mark":""}" onclick="openHelp()">Anleitung starten</button></div>`}
-  ${G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`}`+motivationV();
-  if(!kids.length)return h+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button><button class="btn" onclick="openHelp()">Anleitung ansehen</button></p></div>`;
+  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${setupCard()}${invitesV()}${db.seenHelp||db.kids.some(k=>!k.demo)||setupOpen().length?"":`<div class="card" style="border:2px solid var(--sig)"><b>${db.setupDone?"Einrichtung fertig. Jetzt die Anleitung":"Neu hier?"}</b><p class="small" style="margin:6px 0 10px">Pfad führt dich in 8 kurzen Schritten durch die App und zeigt dir, wo du was findest.</p>${db.setupDone?`<div class="marktip">Tippe auf „Anleitung starten“.</div>`:""}<button class="btn pri${db.setupDone?" mark":""}" onclick="openHelp()">Anleitung starten</button></div>`}
+`;
+  // Unter der Kinderliste: Hinweise, Zahlen und Wochenziel, damit es oben direkt mit dem Bewerten losgeht
+  const below=backupHint()+yearHint()+closedHint()+(G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`)+motivationV();
+  if(!kids.length)return h+below+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kennung an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button><button class="btn" onclick="openHelp()">Anleitung ansehen</button></p></div>`;
   h+=`<div class="between"><h2>Wen bewertest du?</h2>${kids.length>1?`<button class="btn ghost" onclick="pickMulti()">Mehrere nacheinander</button>`:""}</div>`;
-  for(const k of kids){
-    const done=k.goals.filter(g=>g.entries.some(e=>e.date===t)).length,gap=daysSince(k);
-    h+=`<div class="card row kcard" style="--kc:${kidColor(k)}">${kidIcon(k)}<div class="grow"><div class="code">${esc(k.code)}</div>
+  // Wer heute noch offen ist, steht oben; sonst bleibt die gewohnte Reihenfolge
+  const doneN=k=>k.goals.filter(g=>g.entries.some(e=>e.date===t)).length,open=k=>doneN(k)<k.goals.length;
+  for(const k of [...kids.filter(open),...kids.filter(k=>!open(k))]){
+    const done=doneN(k),gap=daysSince(k);
+    h+=`<div class="card tap row kcard" style="--kc:${kidColor(k)}" onclick="startRate(${ja(k.id)})">${kidIcon(k)}<div class="grow"><div class="code">${esc(k.code)}</div>
     <div class="muted small">${k.cls?esc(k.cls)+" · ":""}${done===k.goals.length?"✓ heute erledigt":`heute ${done} von ${k.goals.length} Verhalten`}</div>${gap>=7?`<div class="small late">seit ${gap} Tagen keine Einschätzung</div>`:""}</div>
-    <button class="btn ghost" aria-label="Notiz zu ${esc(k.code)}" onclick="openDiary(${ja(k.id)})">Notiz</button><button class="btn ${done===k.goals.length?"":"pri"}" aria-label="${esc(k.code)} bewerten" onclick="startRate(${ja(k.id)})">Bewerten</button></div>`;
+    <button class="btn ghost" aria-label="Notiz zu ${esc(k.code)}" onclick="event.stopPropagation();openDiary(${ja(k.id)})">Notiz</button><button class="btn ${done===k.goals.length?"":"pri"}" aria-label="${esc(k.code)} bewerten" onclick="event.stopPropagation();startRate(${ja(k.id)})">Bewerten</button></div>`;
   }
-  return h+`<p class="muted small">Tipp: Direkt nach der Stunde bewerten. Das dauert pro Ziel nur wenige Sekunden.</p>`;
+  return h+`<p class="muted small">Tipp: Direkt nach der Stunde bewerten. Tippe dafür einfach auf das Kind.</p>`+below;
 }
 
 // Tage seit der letzten Einschätzung (oder seit dem Anlegen)
@@ -665,18 +723,18 @@ function closedHint(){const due=db.kids.filter(k=>k.closed&&k.delAt&&k.delAt<=to
   return `<div class="card" style="border:2px solid var(--new)"><b>Löschen fällig</b><p class="small" style="margin:6px 0 8px">Die Förderung ist abgeschlossen bei: ${due.map(k=>esc(k.code)).join(", ")}. Liegt der Bericht in der Förderakte? Dann lösche die Daten von diesem Gerät.</p>
   <p class="row" style="flex-wrap:wrap;margin:0">${due.map(k=>`<button class="btn" onclick="go({tab:'klassen',kid:${ja(k.id)}})">${esc(k.code)} ansehen</button>`).join("")}</p></div>`}
 function yearHint(){if(db.yearSY===syNow()||!db.kids.some(k=>!k.demo&&upCls(k.cls||"")))return "";
-  return `<div class="card" style="border:2px solid var(--sig)"><b>Neues Schuljahr ${syNow()}</b><p class="small" style="margin:6px 0 10px">Sollen alle Klassen eine Stufe hoch? Aus 7B wird 8B, aus 7B-01 wird 8B-01.</p>
+  return `<div class="card" style="border:2px solid var(--sig)"><b>Neues Schuljahr ${syNow()}</b><p class="small" style="margin:6px 0 10px">Sollen alle Klassen eine Stufe hoch? Aus 7.2 wird 8.2, aus 7.2-01 wird 8.2-01, aus EF wird Q1.</p>
   <p class="row" style="flex-wrap:wrap;margin:0"><button class="btn pri" onclick="yearUp()">Klassen hochsetzen</button><button class="btn ghost" onclick="db.yearSY=syNow();save();render()">Nicht nötig</button></p></div>`}
 
 /* ===== Anleitung ===== */
 const HELP=[
- {t:"Willkommen bei Pfad",p:"Die Anleitung zeigt dir die App mit einem fiktiven Beispielfall. Mit Pfad schätzt du das Verhalten einzelner Kinder direkt nach der Stunde ein. Das dauert wenige Sekunden. Mit der Zeit siehst du, ob sich etwas verbessert, und hast Belege für Förderplan und Gespräche.",l:["Alles bleibt auf deinem Gerät.","Kinder haben nur ein Kürzel, keinen Namen.","Unten (markiert) wechselst du zwischen Heute, Kinder, Verlauf und Einstellungen."]},
- {t:"Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen: Die App schlägt ein Kürzel vor, z. B. 8A-01, und ein zufälliges Symbol wie 🦊 zum schnellen Wiedererkennen.","Keine Namen oder Initialen eintragen.","Welches Kürzel zu welchem Kind gehört, steht nur in der Förderakte."]},
+ {t:"Willkommen bei Pfad",p:"Die Anleitung zeigt dir die App mit einem fiktiven Beispielfall. Mit Pfad schätzt du das Verhalten einzelner Kinder direkt nach der Stunde ein. Das dauert wenige Sekunden. Mit der Zeit siehst du, ob sich etwas verbessert, und hast Belege für Förderplan und Gespräche.",l:["Alles bleibt auf deinem Gerät.","Kinder haben nur eine Kennung wie 8.1-07, keinen Namen.","Unten (markiert) wechselst du zwischen Heute, Kinder, Verlauf und Einstellungen."]},
+ {t:"Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen und die Nummer aus der Klassenliste im Schulmanager eintragen. Daraus wird die Kennung, z. B. 8.1-07.","Dazu kommt ein zufälliges Symbol wie 🦊 zum schnellen Wiedererkennen.","Keine Namen oder Initialen eintragen."]},
  {t:"Verhalten festlegen",p:"Pro Kind legst du ein bis drei Verhalten fest, die du beobachten willst.",l:["So formulieren, dass man es sehen kann: „Ruft ohne Melden in die Klasse“ statt „ist unruhig“.","Richtung wählen: Soll es weniger oder mehr werden?","Skala wählen: 0 bis 10, 1 bis 5 oder ja/nein."]},
- {t:"Nach der Stunde bewerten",p:"Auf „Heute“ tippst du beim Kind auf „Bewerten“.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
+ {t:"Nach der Stunde bewerten",p:"Auf „Heute“ tippst du auf das Kind oder auf „Bewerten“. Wer heute noch offen ist, steht oben.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
  {t:"Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
  {t:"Verlauf ansehen",p:"Unter „Verlauf“ siehst du jedes Verhalten als Kurve mit Ziel und Förderbeginn.",l:["Die App sagt in Worten, ob es eher besser, stabil oder eher schwieriger wird.","Der Text für die Evaluation im Förderplan lässt sich kopieren.","Gesprächsblatt für Kind und Eltern und Bericht für die Förderakte gibt es als PDF."]},
- {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Spätestens alle 5 Tage: Einstellungen → „Sicherung speichern“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder weitergeben“, nur die Kinder auswählen, um die es geht, und die Datei per AirDrop oder Dienstmail schicken.","Mit dem Team-Passwort tippt niemand ein Passwort ein. Beim Einlesen kommt Neues dazu, deine Einträge bleiben."]},
+ {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherungskopie schützt vor Verlust.",l:["Für den Notfall legst du spätestens alle 5 Tage eine Sicherungskopie ab: Einstellungen → „Sicherungskopie ablegen“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder weitergeben“, nur die Kinder auswählen, um die es geht, und die Datei per AirDrop oder Dienstmail schicken.","Mit dem Team-Passwort tippt niemand ein Passwort ein. Beim Einlesen kommt Neues dazu, deine Einträge bleiben."]},
  {t:"Sicher arbeiten",p:"Ein paar Regeln, damit die Daten geschützt bleiben.",l:["Nur auf dem Dienstgerät mit Gerätecode und automatischer Sperre.","Auf iPad und iPhone: In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Mit iOS 27 liegt „Teilen“ im Seitenmenü links neben der Adresse.","Das Symbol nicht löschen, ohne vorher zu sichern. Sonst sind die Daten weg."]}];
 // Geführte Anleitung: zeigt die echten Bildschirme mit dem fiktiven Beispielfall und markiert die Stelle
 const demoKid=()=>db.kids.find(k=>k.demo);
@@ -689,7 +747,7 @@ const TOUR=[
  {v:()=>({tab:"heute"}),sel:()=>findBtn("Bewerten",demoCard())},
  {v:()=>({tab:"heute"}),sel:()=>findBtn("Notiz",demoCard())},
  {v:()=>({tab:"analyse",aKid:demoKid().id}),sel:()=>$("#app svg.chart")},
- {v:()=>({tab:"profil"}),sel:()=>findBtn("Sicherung speichern")},
+ {v:()=>({tab:"profil"}),sel:()=>findBtn("Sicherungskopie ablegen")},
  {v:()=>({tab:"profil"}),sel:()=>[...document.querySelectorAll("#app h2")].find(h=>h.textContent.trim()==="Datenschutz")?.closest(".card")}];
 function openHelp(){db.seenHelp=1;demo(true);save();tourGo(0)}
 function tourGo(i){if(i<0)return;if(i>=TOUR.length)return tourEnd(true);if(!demoKid())demo(true);go({...TOUR[i].v(),tour:i})}
@@ -716,23 +774,22 @@ function klassenV(){
   ${db.classes.map(c=>`<option value="${esc(c)}" ${f===c?"selected":""}>Klasse ${esc(c)} (${count(c)})</option>`).join("")}
   ${count("")?`<option value="" ${f===""?"selected":""}>ohne Klasse (${count("")})</option>`:""}</select>
   <button class="btn noprint" onclick="addClass()">Neue Klasse</button></div>`;
-  if(view.adding)h+=`<div class="card"><div style="display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center"><label style="margin-top:0">Symbol</label><label style="margin-top:0">Kürzel</label><button id="nicon" class="kic big icpick" data-i="${view.newIcon||(view.newIcon=freeIcon())}" onclick="newKidIcon()" aria-label="Symbol ändern">${view.newIcon}</button><div><input id="ncode" value="${f&&f!=="alle"?newCode(f):""}" placeholder="z. B. 8A-01" oninput="this.dataset.auto='';$('#nw').hidden=!looksLikeName(this.value)" data-auto="1"></div></div>
-  <div class="sub" style="margin-top:4px">Symbol zum schnellen Wiedererkennen, zufällig gewählt. Kürzel: Klasse und laufende Nummer, keine Namen oder Initialen. Die Zuordnung steht nur in der Förderakte.</div>
-  <p id="nw" class="small" style="color:var(--down)" hidden>Das sieht nach einem Namen aus. Bitte ein Kürzel verwenden.</p>
-  <label>Klasse</label><select id="ncls" onchange="const i=$('#ncode');if(this.value&&(i.dataset.auto||!i.value)){i.value=newCode(this.value);i.dataset.auto='1'}"><option value="">Ohne Klasse</option>${db.classes.map(c=>`<option ${c===f?"selected":""}>${esc(c)}</option>`).join("")}</select>
+  if(view.adding)h+=`<div class="card"><div style="display:grid;grid-template-columns:auto 1fr 1fr;column-gap:12px;align-items:center"><label style="margin-top:0">Symbol</label><label style="margin-top:0">Klasse</label><label style="margin-top:0">Nr. in Liste</label><button id="nicon" class="kic big icpick" data-i="${view.newIcon||(view.newIcon=freeIcon())}" onclick="newKidIcon()" aria-label="Symbol ändern">${view.newIcon}</button><select id="ncls" onchange="codePrev()">${clsOpts(f)}</select><input id="nnr" inputmode="numeric" maxlength="3" placeholder="z. B. 7" oninput="codePrev()"></div>
+  <p class="small" style="margin:10px 0 0">Kennung: <b id="nprev">–</b></p>
+  <div class="sub" style="margin-top:4px">${nrHint} Keine Namen oder Initialen. Das Symbol hilft beim schnellen Wiedererkennen.</div>
+  ${db.classes.some(c=>CLS_RE.test(c))?"":`<p class="small" style="color:var(--down)">Lege zuerst oben eine Klasse an („Neue Klasse“).</p>`}
   <p style="margin-top:12px" class="row"><button class="btn pri" onclick="addKid()">Anlegen</button><button class="btn ghost" onclick="view.adding=false;render()">Abbrechen</button></p></div>`;
-  if(!list.length&&!view.adding)h+=`<p class="muted">Hier ist noch niemand. Lege unten ein Kind mit Kürzel an.</p>`;
+  if(!list.length&&!view.adding)h+=`<p class="muted">Hier ist noch niemand. Lege unten ein Kind mit Kennung an.</p>`;
   for(const k of list)h+=`<div class="card tap row kcard" style="--kc:${kidColor(k)}" onclick="go({tab:'klassen',kid:${ja(k.id)}})">${kidIcon(k)}
   <div class="grow"><div class="code">${esc(k.code)} ${k.demo?'<span class="tag">fiktiv</span>':""}${k.closed?'<span class="tag">abgeschlossen</span>':""}</div><div class="muted small">${k.cls?esc(k.cls)+" · ":""}${k.goals.length} ${k.goals.length===1?"Verhalten":"Verhalten"}</div></div>${badge(kidTrend(k))}</div>`;
-  if(!view.adding)h+=`<p style="margin-top:14px"><button class="btn block noprint" onclick="view.adding=true;render();$('#ncode').focus()">+ Kind anlegen</button></p>`;
-  h+=`<p class="muted small" style="text-align:center">Nur Kürzel verwenden, keine Namen.</p>`;
+  if(!view.adding)h+=`<p style="margin-top:14px"><button class="btn block noprint" onclick="view.adding=true;render();($('#ncls').value?$('#nnr'):$('#ncls')).focus()">+ Kind anlegen</button></p>`;
+  h+=`<p class="muted small" style="text-align:center">Nur Kennungen wie 8.1-07, keine Namen.</p>`;
   return h;
 }
-async function addClass(){const c=((await askText("Name der neuen Klasse","z. B. 7B"))||"").trim();if(!c)return;if(!db.classes.includes(c))db.classes.push(c);db.classes.sort();save();view.filter=c;render()}
-function newCode(cls){let n=1,c;do{c=`${cls}-${String(n++).padStart(2,"0")}`}while(db.kids.some(k=>k.code.toLowerCase()===c.toLowerCase()));return c}
-async function addKid(){const code=$("#ncode").value.trim();if(!code)return toast("Bitte ein Kürzel eingeben.");
-  if(looksLikeName(code)&&!await ask("Das Kürzel sieht nach einem Namen aus. Trotzdem speichern?",{ok:"Trotzdem speichern"}))return;
-  const k={id:uid(),code,icon:$("#nicon").dataset.i,cls:$("#ncls").value,goals:[],diary:[],ts:Date.now()};db.yearSY??=syNow();delete view.newIcon;db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
+async function addClass(){const c=normCls((await askText("Neue Klasse, wie im Schulmanager","z. B. 8.1 oder EF"))||"");if(!c)return;if(!CLS_RE.test(c))return toast("Bitte wie im Schulmanager: 5.1 bis 10.9 oder EF, Q1, Q2.");if(!db.classes.includes(c))db.classes.push(c);db.classes.sort(byNum);save();view.filter=c;render()}
+function codePrev(){const c=$("#ncls").value,n=$("#nnr").value.trim();$("#nprev").textContent=CLS_RE.test(c)&&okNr(n)?mkCode(c,+n):"–"}
+function addKid(){const cls=$("#ncls").value,code=takeCode(cls,$("#nnr").value.trim());if(!code)return;
+  const k={id:uid(),code,icon:$("#nicon").dataset.i,cls,goals:[],diary:[],ts:Date.now()};db.yearSY??=syNow();delete view.newIcon;db.kids.push(k);save();go({tab:"klassen",kid:k.id})}
 
 /* ===== Kind ===== */
 function spark(g){
@@ -744,7 +801,8 @@ function kidV(){
   const k=kidById(view.kid);if(!k){view={tab:"klassen"};return klassenV()}
   let h=`<button class="btn ghost noprint" onclick="back({tab:'${view.tab}'})">‹ Zurück</button>
   <div class="row" style="margin:6px 0 4px"><button class="icbtn" aria-label="Symbol ändern" onclick="setKidIcon(${ja(k.id)})">${k.icon?kidIcon(k,1):`<span class="kic big add" style="--kc:${kidColor(k)}">+</span>`}</button><div class="grow"><div class="code" style="font-size:1.4rem">${esc(k.code)}</div>
-  <select class="chip" style="margin-top:4px;width:auto" onchange="Object.assign(kidById(${ja(k.id)}),{cls:this.value,upd:Date.now()});save();render()"><option value="">Ohne Klasse</option>${db.classes.map(c=>`<option ${c===k.cls?"selected":""}>${esc(c)}</option>`).join("")}</select></div>${badge(kidTrend(k))}</div>
+  ${k.demo?`<span class="muted small">Klasse ${esc(k.cls||"")} · fiktiv</span>`:`<button class="btn ghost small" style="padding-left:0" onclick="editCode(${ja(k.id)})">Kennung ändern</button>`}</div>${badge(kidTrend(k))}</div>
+  ${okKennung(k)?"":`<div class="card" style="border:2px solid var(--sig);margin-top:12px"><b>Kennung anpassen</b><p class="small" style="margin:6px 0 10px">Kennungen sind jetzt einheitlich: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8.1-07.</p><button class="btn pri" onclick="editCode(${ja(k.id)})">Kennung ändern</button></div>`}
   ${k.closed?`<div class="card" style="border:2px solid var(--new);margin-top:12px"><b>Förderung abgeschlossen am ${dDEy(k.closed)}</b><p class="small" style="margin:6px 0 10px">Das Kind erscheint nicht mehr auf „Heute“. Lege den Bericht in die Förderakte und lösche die Daten danach von diesem Gerät.${k.delAt?` Pfad erinnert dich am ${dDEy(k.delAt)}.`:""}</p>
   <p class="row" style="flex-wrap:wrap;margin:0"><button class="btn pri" onclick="go({tab:'${view.tab}',kid:${ja(k.id)},report:true})">Bericht (PDF)</button><button class="btn danger" onclick="delKid(${ja(k.id)})">Jetzt löschen</button><button class="btn ghost" onclick="reopenKid(${ja(k.id)})">Wieder aufnehmen</button></p></div>`:""}
   ${k.goals.length&&!k.closed?`<p style="margin:14px 0 0"><button class="btn pri block" onclick="startRate(${ja(k.id)})">Jetzt bewerten</button></p>`:""}${k.goals.length?docTiles(k,view.tab):""}
@@ -821,21 +879,26 @@ const hm=t=>{const[a,b]=t.split(":");return +a*60+ +b};
 const rTime=(r,wd)=>{const d=r[3]?.[wd];return [d?.[0]||r[1],d?.[1]||r[2]]};
 function currentSlot(){const n=new Date(),wd=n.getDay(),m=n.getHours()*60+n.getMinutes();if(wd===0||wd===6)return "";
   let best="";for(const r of db.raster){const [a,b]=rTime(r,wd),st=hm(a),en=hm(b);if(m>=st-5){best=m>en+90?"":slotName(r)}}return best}
-function startRate(kidId,queue=[]){const k=kidById(kidId);if(!k.goals.length)return;
-  const cs=currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
-  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:true,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
-// Mehrere Kinder nacheinander, z. B. alle aus 8A
+function startRate(kidId,queue=[],slot=""){const k=kidById(kidId);if(!k.goals.length)return;
+  const cs=slot||currentSlot(),same=lastCtx&&lastCtx.slot===cs&&lastCtx.day===today()&&Date.now()-lastCtx.ts<75*6e4;
+  rs={kid:kidId,i:0,date:today(),slot:cs,subj:same?lastCtx.subj:"",cur:{value:null,na:false,note:"",pin:false},count:0,ctxOpen:innerHeight>=720,queue,qi:1,qn:queue.length+1,saved:[]};renderRate()}
+// Mehrere Kinder nacheinander, z. B. alle aus 8.1
 async function pickMulti(){const ks=db.kids.filter(k=>k.goals.length&&!k.closed).sort((a,b)=>a.code.localeCompare(b.code,"de",{numeric:true}));
-  const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))];
+  const cls=[...new Set(ks.map(k=>k.cls).filter(Boolean))],noSlot=!currentSlot();
   const sel=await dlg(`<p style="font-weight:700;margin:0 0 6px">Wen bewertest du nacheinander?</p>
     ${cls.length?`<p class="row" style="flex-wrap:wrap;gap:6px;margin:0 0 8px">${cls.map(c=>`<button class="btn small" data-c="${esc(c)}">Alle aus ${esc(c)}</button>`).join("")}</p>`:""}
     <div style="max-height:46vh;overflow:auto">${ks.map(k=>`<label class="row" style="margin:6px 0;font-weight:600"><input type="checkbox" style="width:auto" value="${esc(k.id)}" data-k="${esc(k.cls||"")}"> ${kidIcon(k)} ${esc(k.code)}</label>`).join("")}</div>
+    ${noSlot?`<label for="mslot" style="margin-top:10px">Stunde <span class="sub">(gilt für alle)</span></label>${slotSelect("mslot","")}`:""}
     <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Los geht's</button></div>`,
     (el,done)=>{el.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>el.querySelectorAll("input").forEach(i=>i.checked=i.dataset.k===b.dataset.c));
-      el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done([...el.querySelectorAll("input:checked")].map(i=>i.value))});
-  if(!sel?.length)return;startRate(sel[0],sel.slice(1))}
+      el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done({ids:[...el.querySelectorAll("input:checked")].map(i=>i.value),slot:el.querySelector("#mslot")?.value||""})});
+  if(!sel?.ids.length)return;startRate(sel.ids[0],sel.ids.slice(1),sel.slot)}
+// Auswahlliste für die Stunde, falls keine hinterlegt ist
+const slotSelect=(id,v,on="")=>`<select id="${id}" ${on}><option value="">Stunde wählen …</option>${SLOTS_ALL().map(x=>`<option value="${esc(x)}" ${x===v?"selected":""}>${esc(x)}</option>`).join("")}</select>`;
 function renderRate(){
   const o=$("#overlay");if(!rs){o.innerHTML="";return}
+  // Scrollstand halten, solange dasselbe Verhalten offen ist (sonst springt die Ansicht beim Antippen nach oben)
+  const rk=rs.kid+"|"+rs.i,old=o.querySelector(".rate"),top=old&&o.dataset.rk===rk?old.scrollTop:0;o.dataset.rk=rk;
   const k=kidById(rs.kid),g=k.goals[rs.i],c=rs.cur,t=today();
   const days=[...Array(7)].map((_,i)=>addDays(t,-i));
   const dayLbl=d=>d===t?"Heute":d===addDays(t,-1)?"Gestern":new Date(d+"T12:00").toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"numeric"});
@@ -846,8 +909,8 @@ function renderRate(){
    <div class="pick days">${days.slice(0,2).map(d=>`<button class="${d===rs.date?"on":""}" onclick="rs.date='${d}';renderRate()">${dayLbl(d)}</button>`).join("")}<select class="${days.slice(2).includes(rs.date)?"on":""}" onchange="rs.date=this.value;renderRate()"><option value="">früher …</option>${days.slice(2).map(d=>`<option value="${d}" ${d===rs.date?"selected":""}>${dayLbl(d)}</option>`).join("")}</select></div>
    <div class="pick slots">${db.raster.map(slotName).map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x.replace(" Std.",""))}</button>`).join("")}</div>
    <div class="pick pauses">${PAUSES.map(x=>`<button class="${x===rs.slot?"on":""}" onclick="rs.slot=rs.slot===${ja(x)}?'':${ja(x)};renderRate()">${esc(x)}</button>`).join("")}</div>
-   <div class="pick subjs">${db.subjects.map(x=>`<button class="${x===rs.subj?"on":""}" onclick="rs.subj=rs.subj===this.textContent?'':this.textContent;renderRate()">${esc(x)}</button>`).join("")}</div></div>`
-  :`<button class="ctxline" onclick="rs.ctxOpen=true;renderRate()">${dayLbl(rs.date)} · ${rs.slot||"ohne Stunde"} · ${esc(rs.subj||"ohne Fach")} <span>ändern</span></button>`}
+   <div class="pick subjs"><select class="${rs.subj?"on":""}" aria-label="Fach" onchange="rs.subj=this.value;renderRate()"><option value="">Fach wählen …</option>${[...new Set([...db.subjects,...(rs.subj?[rs.subj]:[])])].map(x=>`<option value="${esc(x)}" ${x===rs.subj?"selected":""}>${esc(x)}</option>`).join("")}</select></div></div>`
+  :`<button class="ctxline" onclick="rs.ctxOpen=true;renderRate()">${dayLbl(rs.date)} · ${rs.slot||"ohne Stunde"} · ${esc(rs.subj||"ohne Fach")} <span>ändern</span></button>${!rs.slot&&rs.qn>1?`<div style="margin-top:8px">${slotSelect("qslot","",'aria-label="Stunde wählen" onchange="rs.slot=this.value;renderRate()"')}</div>`:""}`}
   ${rs.date!==t?`<p class="small" style="text-align:center;color:var(--new)">Eintrag für einen vergangenen Tag (${dDEy(rs.date)})</p>`:""}
   <div class="goalTitle">${esc(g.title)}</div>
   ${g.how?`<p class="muted small" style="text-align:center">${esc(g.how)}</p>`:""}
@@ -855,11 +918,12 @@ function renderRate(){
   <div class="ruler s${sc(g)==="c"&&scaleOpts(g).length>7?"10":sc(g)} ${c.na?"off":""}" style="${sc(g)==="c"?`grid-template-columns:repeat(${scaleOpts(g).length},1fr)`:""}" id="ruler" role="radiogroup" aria-label="Einschätzung: ${esc(g.title)}">${scaleOpts(g).map(o=>`<button data-v="${o.v}" role="radio" aria-label="${esc(o.l)}${sc(g)==="2"?"":` von ${rng(g)[1]}`}" aria-checked="${c.value===o.v}" class="${c.value===o.v?"sel":sc(g)!=="2"&&c.value!=null&&o.v<c.value?"lit":""}">${esc(o.l)}</button>`).join("")}</div>
   ${sc(g)==="2"?"":`<div class="ends"><span>${rng(g)[0]} = ${esc(g.a0)}</span><span>${esc(g.a10)} = ${rng(g)[1]}</span></div>`}
   <label>Kommentar <span class="sub">(optional)</span></label>
-  <textarea id="note" placeholder="Was war los? Was hat geholfen? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
-  <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" id="pin" style="width:auto" ${c.pin?"checked":""} onchange="rs.cur.pin=this.checked"> Im Verlauf markieren <span class="sub" style="font-weight:400">(erscheint als Markierung im Graphen)</span></label>
+  <textarea id="note" rows="2" placeholder="Was war los? Was hat geholfen? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
+  <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" id="pin" style="width:auto" ${c.pin?"checked":""} onchange="rs.cur.pin=this.checked"> Im Verlauf markieren <span class="sub pinsub" style="font-weight:400">(erscheint als Markierung im Graphen)</span></label>
   <div class="foot duo"><button class="btn ${c.na?"na-on":""}" onclick="rs.cur.na=!rs.cur.na;if(rs.cur.na)rs.cur.value=null;renderRate()">${c.na?"✓ Heute nicht gesehen":"Heute nicht gesehen"}</button>
   <button class="btn pri" ${c.value==null&&!c.na?"disabled":""} onclick="nextRate()">${rs.i<k.goals.length-1?"Weiter":"Speichern"}</button></div>
   </div></div>`;
+  if(top)o.querySelector(".rate").scrollTop=top;
   const ru=$("#ruler");let down=false;
   const pick=e=>{const el=document.elementFromPoint(e.clientX,e.clientY);if(!el||el.dataset.v==null)return;const v=+el.dataset.v;if(v!==rs.cur.value){rs.cur.value=v;markRuler();try{navigator.vibrate?.(5)}catch(e){}}};
   ru.onpointerdown=e=>{down=true;ru.setPointerCapture(e.pointerId);pick(e)};
@@ -970,7 +1034,7 @@ function talkV(){
 const HW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,350,556,350,222,556,333,1000,556,556,333,1000,667,333,1000,350,611,350,350,222,222,333,333,350,556,1000,333,1000,500,333,944,350,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
 const HBW=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,350,556,350,278,556,500,1000,556,556,333,1000,667,333,1000,350,611,350,350,278,278,500,500,350,556,1000,333,1000,556,333,944,350,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
 const WINA={"€":128,"‚":130,"„":132,"…":133,"‘":145,"’":146,"“":147,"”":148,"•":149,"–":150,"—":151};
-function pdfTxt(t){let o="";for(const ch of String(t??"").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/→/g,"->").replace(/\s+/g," ")){let c=WINA[ch]||ch.codePointAt(0);if(!WINA[ch]&&(c>255||(c>=127&&c<160)||c<32))continue;o+=String.fromCharCode(c)}return o}
+function pdfTxt(t){let o="";for(const ch of String(t??"").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/→/g,"->").replace(/−/g,"-").replace(/\s+/g," ")){let c=WINA[ch]||ch.codePointAt(0);if(!WINA[ch]&&(c>255||(c>=127&&c<160)||c<32))continue;o+=String.fromCharCode(c)}return o}
 const PC={ink:[43,36,32],muted:[110,98,89],acc:[208,100,60],up:[76,138,90],down:[192,72,58],line:[221,210,196],soft:[245,236,224],white:[255,255,255]};
 class Pdf{constructor(w,h,m=40){this.W=w;this.H=h;this.M=m;this.pages=[];this.add()}
   add(){this.c=[];this.pages.push(this.c);this.y=this.M+8}
@@ -1011,8 +1075,8 @@ async function reportPdf(){const k=kidById(view.kid);if(!k)return;
   const all=k.goals.flatMap(g=>g.entries).filter(inR),dates=all.map(q=>q.date).sort(),raters=[...new Set(all.map(q=>q.rater).filter(Boolean))];
   const d=new Pdf(595,842),L=40,W=515;
   d.text(L,d.y+14,"Verlauf für die Förderakte",{size:18,bold:1});d.y+=30;
-  const meta=[["Kürzel",k.code+(k.cls?` · Klasse ${k.cls}`:"")],["Name",""],["Zeitraum",`${RANGES[r][0]}: ${dates.length?dDEy(dates[0])+" bis "+dDEy(dates.at(-1)):"noch keine Einschätzungen"}`],["Eingeschätzt von",raters.join(", ")||"–"],["Erstellt",dDEy(today())+(db.me?` von ${db.me}`:"")+(k.closed?` · Förderung abgeschlossen am ${dDEy(k.closed)}`:"")]];
-  for(const [a,b] of meta){d.text(L,d.y+10,a,{size:9,color:"muted"});if(a==="Name"){d.line(L+105,d.y+12,L+330,d.y+12,{color:"muted",w:.8});d.text(L+338,d.y+10,"(nur auf dem Ausdruck von Hand)",{size:8,color:"muted"});d.y+=17}else{const y0=d.y;d.wrap(b,L+105,W-105,{size:9.5,bold:a==="Kürzel"});d.y=Math.max(d.y,y0+14)+3}}
+  const meta=[["Kennung",k.code+(k.cls?` · Klasse ${k.cls}`:"")],["Name",""],["Zeitraum",`${RANGES[r][0]}: ${dates.length?dDEy(dates[0])+" bis "+dDEy(dates.at(-1)):"noch keine Einschätzungen"}`],["Eingeschätzt von",raters.join(", ")||"–"],["Erstellt",dDEy(today())+(db.me?` von ${db.me}`:"")+(k.closed?` · Förderung abgeschlossen am ${dDEy(k.closed)}`:"")]];
+  for(const [a,b] of meta){d.text(L,d.y+10,a,{size:9,color:"muted"});if(a==="Name"){d.line(L+105,d.y+12,L+330,d.y+12,{color:"muted",w:.8});d.text(L+338,d.y+10,"(nur auf dem Ausdruck von Hand)",{size:8,color:"muted"});d.y+=17}else{const y0=d.y;d.wrap(b,L+105,W-105,{size:9.5,bold:a==="Kennung"});d.y=Math.max(d.y,y0+14)+3}}
   for(const g0 of k.goals){const g={...g0,entries:g0.entries.filter(inR)},s=summary(k,g),t=trend(g);
     d.need(240);d.y+=10;d.line(L,d.y,L+W,d.y,{w:.8});d.y+=8;
     d.wrap(g.title,L,W,{size:12.5,bold:1});
@@ -1072,7 +1136,7 @@ function reportV(){
    <button class="btn pri" onclick="reportPdf()">PDF erstellen</button></span></div>
   <p class="noprint small muted">${pdfHint()}</p>
   <h1>Verlauf für die Förderakte</h1>
-  <table class="meta"><tr><td>Kürzel</td><td><b>${esc(k.code)}</b>${k.cls?` · Klasse ${esc(k.cls)}`:""}</td></tr>
+  <table class="meta"><tr><td>Kennung</td><td><b>${esc(k.code)}</b>${k.cls?` · Klasse ${esc(k.cls)}`:""}</td></tr>
   <tr><td>Name</td><td><span style="display:inline-block;min-width:220px;border-bottom:1.5px solid var(--line)">&nbsp;</span> <span class="muted small">(nur auf dem Ausdruck von Hand)</span></td></tr>
   <tr><td>Zeitraum</td><td>${RANGES[r][0]}: ${span}</td></tr>
   <tr><td>Eingeschätzt von</td><td>${raters.length?raters.map(esc).join(", "):"–"}</td></tr>
@@ -1358,15 +1422,16 @@ function profilV(){
   ${srvCard()}
   <div class="card"><h2 style="margin-top:0">Datenschutz</h2>
   <p>Die Daten liegen in diesem Browser auf diesem Gerät. Sie verlassen es nur als verschlüsselte Datei, wenn du sicherst oder teilst${srvOn()?", oder für freigegebene Kinder an euren Schulserver":""}.</p>
-  <p>Lege Kinder nur mit Kürzel an. Schreibe in Kommentare keine Namen.</p>
+  <p>Lege Kinder nur mit Kennung an (Klasse und Nummer aus der Klassenliste). Schreibe in Kommentare keine Namen.</p>
   <p>Sicherungen und geteilte Stände sind mit Passwort verschlüsselt. Speichere sie trotzdem nur auf dienstlichem Speicher.</p><p>Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Nutze deshalb nur dienstliche Geräte mit Code-Sperre.</p>
   <p>Vor dem Einsatz mit echten Fällen: Absprache mit Schulleitung und Datenschutzbeauftragten.</p></div>
-  <p class="muted small" style="text-align:center">Pfad ${PFAD_VERSION} · Stand ${PFAD_STAND} · schulintern</p>`;
+  <p class="muted small" style="text-align:center;margin-bottom:0">Pfad ${PFAD_VERSION} · Stand ${PFAD_STAND} · schulintern</p>
+  <p style="text-align:center;margin-top:0"><button class="btn ghost" style="min-height:44px" onclick="neuDlg(NEU,true)">Was ist neu?</button></p>`;
 }
 // Sichern (nur für dich) und Austausch im Team, oben in den Einstellungen
 function austauschV(){const last=db.lastBackup;
-  return `<div class="card"><h2 style="margin-top:0">Sichern</h2><p class="small muted" style="margin-top:0">Alle deine Kinder in einer Datei, nur für dich. Spätestens alle 5 Tage, Pfad erinnert dich daran.</p>
-  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="$('#imp').click()">Sicherung laden</button><button class="btn" onclick="$('#chk').click()">Sicherung prüfen</button></p>
+  return `<div class="card"><h2 style="margin-top:0">Sichern</h2><p class="small muted" style="margin-top:0">Pfad speichert deine Einträge automatisch auf diesem Gerät. Die Sicherungskopie ist für den Notfall: alle deine Kinder in einer Datei, nur für dich. Spätestens alle 5 Tage, Pfad erinnert dich daran.</p>
+  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherungskopie ablegen</button><button class="btn" onclick="$('#imp').click()">Sicherung laden</button><button class="btn" onclick="$('#chk').click()">Sicherung prüfen</button></p>
   <p class="small muted">${last?`Letzte Sicherung: ${dDEy(iso(new Date(last)))}. `:"Noch keine Sicherung. "}Neues Gerät, App-Symbol gelöscht oder Code der App-Sperre vergessen? Dann lädst du hier deine letzte Sicherung. „Prüfen“ zeigt, was in einer Sicherung steckt, ohne etwas zu übernehmen.</p>
   ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}</div>
   <div class="card"><h2 style="margin-top:0">Austausch im Team</h2><p class="small muted" style="margin-top:0">Du gibst nur die Kinder weiter, an denen ihr gemeinsam arbeitet. Beim Einlesen kommt Neues dazu, deine eigenen Einträge bleiben.</p>
@@ -1449,7 +1514,7 @@ async function checkFile(inp){const f=inp.files[0];inp.value="";if(!f)return;con
   const last=ks.flatMap(k=>[...k.goals.flatMap(g=>g.entries),...(k.diary||[])].map(e=>e.date)).sort().pop();
   await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 6px">✓ Die Datei lässt sich öffnen</p>
   <p class="small" style="margin:0 0 8px">${o.art==="teilen"?"Geteilter Stand":"Sicherung"}${o.von||d.me?` von ${esc(o.von||d.me)}`:""}${o.erstellt?`, erstellt am ${dDEy(o.erstellt.slice(0,10))}`:""}. ${ks.length} Kind${ks.length===1?"":"er"}${last?`, letzter Eintrag am ${dDEy(last)}`:""}.</p>
-  <div style="max-height:42vh;overflow:auto"><table class="small"><tr><th>Kürzel</th><th>Verhalten</th><th>Einschätz.</th><th>Tagebuch</th></tr>${ks.map(k=>`<tr><td>${esc(k.code)}${kidById(k.id)?"":' <span class="tag">nicht auf dem Gerät</span>'}</td><td>${k.goals.length}</td><td>${ne(k)}</td><td>${(k.diary||[]).length}</td></tr>`).join("")}</table></div>
+  <div style="max-height:42vh;overflow:auto"><table class="small"><tr><th>Kennung</th><th>Verhalten</th><th>Einschätz.</th><th>Tagebuch</th></tr>${ks.map(k=>`<tr><td>${esc(k.code)}${kidById(k.id)?"":' <span class="tag">nicht auf dem Gerät</span>'}</td><td>${k.goals.length}</td><td>${ne(k)}</td><td>${(k.diary||[]).length}</td></tr>`).join("")}</table></div>
   <p class="small muted" style="margin:10px 0 14px">Es wurde nichts übernommen. Zum Übernehmen nutze „Sicherung laden“.</p>
   <button class="btn pri block" data-a="1">Schließen</button>`,(el,done)=>{el.querySelector("[data-a]").onclick=()=>done(true);el.querySelector("[data-a]").focus()})}
 function importV(){if(!IMP){view={tab:"profil"};return profilV()}
@@ -1471,23 +1536,23 @@ function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=
   if(IMP.settings){const d=IMP.d;for(const f of ["subjects","raster","game"])if(d[f]){if(okSetting[f](d[f]))db[f]=d[f];else toast("Einstellungen aus der Datei teilweise ungültig, nicht übernommen")}if(!db.me&&d.me)db.me=d.me;(d.classes||[]).forEach(c=>db.classes.includes(c)||db.classes.push(c))}
   const m=IMP.sel.size;IMP=null;save();toast(m?`${m} Kind${m===1?"":"er"} übernommen${n<m?` (${m-n} ohne Änderung)`:""}`:"Einstellungen übernommen");go({tab:"klassen"})}
 function exportCSV(kid,gid){const k=kidById(kid),g=goalById(k,gid);
-  const rows=[["Kürzel","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value==null?"nicht beobachtet":dv(g,e.value),e.note,e.rater]));
+  const rows=[["Kennung","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value==null?"nicht beobachtet":dv(g,e.value),e.note,e.rater]));
   download(`verlauf-${k.code}-${today()}.csv`,"﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/^[=+\-@\t\r]/,"'$&").replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
-async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,team:db.team,shareTip:db.shareTip,classes:[],kids:[]};save();go({tab:"heute"})}
+async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,team:db.team,shareTip:db.shareTip,lock:db.lock,setupDone:db.setupDone,classes:[],kids:[]};save();go({tab:"heute"})} // App-Sperre und Einrichtung bleiben, damit neue Einträge weiter verschlüsselt sind (1.3.3)
 async function delDemo(){if(!await ask("Den fiktiven Beispielfall entfernen? Deine eigenen Kinder bleiben.",{ok:"Entfernen"}))return;db.kids=db.kids.filter(k=>!k.demo);save();render();toast("Beispielfall entfernt")}
 /* ===== Schuljahreswechsel ===== */
 const syNow=()=>{const d=new Date(),y=d.getFullYear()-(d.getMonth()<7?1:0);return `${y}/${String(y+1).slice(2)}`};
-// 7B → 8B; Jahrgang 10 und Klassen ohne Zahl bleiben
-const upCls=c=>{const m=/^(\d{1,2})(.*)$/.exec(c||"");if(!m)return null;const n=+m[1];return n>=10||n<1?null:(n+1)+m[2]};
+// 7.2 → 8.2, EF → Q1 → Q2; Jahrgang 10, Q2 und Klassen ohne Zahl bleiben
+const upCls=c=>{if(c==="EF")return "Q1";if(c==="Q1")return "Q2";const m=/^(\d{1,2})(.*)$/.exec(c||"");if(!m)return null;const n=+m[1];return n>=10||n<1?null:(n+1)+m[2]};
 const byNum=(a,b)=>a.localeCompare(b,"de",{numeric:true});
 function yearV(){const u=db.yearUndo;
-  return `<div class="card"><h2 style="margin-top:0">Schuljahreswechsel</h2><div class="sub">Setzt alle Klassen eine Stufe hoch: 7B wird 8B, 7B-01 wird 8B-01. Einträge bleiben, wie sie sind. Jahrgang 10 bleibt.</div>
+  return `<div class="card"><h2 style="margin-top:0">Schuljahreswechsel</h2><div class="sub">Setzt alle Klassen eine Stufe hoch: 7.2 wird 8.2, 7.2-01 wird 8.2-01, EF wird Q1, Q1 wird Q2. Einträge bleiben, wie sie sind. Jahrgang 10 und Q2 bleiben.</div>
   <p class="row" style="flex-wrap:wrap;margin:10px 0 0"><button class="btn" onclick="yearUp()">Klassen hochsetzen</button>${u?`<button class="btn ghost" onclick="yearBack()">Wechsel vom ${dDEy(iso(new Date(u.ts)))} rückgängig machen</button>`:""}</p></div>`}
 async function yearUp(){const map={};db.classes.forEach(c=>{const u=upCls(c);if(u)map[c]=u});db.kids.forEach(k=>{const u=upCls(k.cls);if(u)map[k.cls]=u});
-  if(!Object.keys(map).length)return toast("Keine Klasse mit Jahrgang gefunden, z. B. 7B.");
+  if(!Object.keys(map).length)return toast("Keine Klasse mit Jahrgang gefunden, z. B. 7.2.");
   const n=c=>db.kids.filter(k=>!k.demo&&k.cls===c).length,stay=[...new Set([...db.classes,...db.kids.map(k=>k.cls).filter(Boolean)])].filter(c=>!map[c]).sort(byNum);
   const ok=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 8px">Schuljahreswechsel</p>
-  <p class="small" style="margin:0 0 8px">Alle Klassen gehen eine Stufe hoch. Kürzel, die mit der Klasse beginnen, ändern sich mit.</p>
+  <p class="small" style="margin:0 0 8px">Alle Klassen gehen eine Stufe hoch. Kennungen ändern sich mit, z. B. 7.2-04 → 8.2-04. Hat sich die Klassenliste geändert, passt du die Nummer beim Kind an.</p>
   <ul class="small" style="padding-left:20px;margin:0 0 8px;max-height:34vh;overflow:auto">${Object.keys(map).sort(byNum).map(c=>`<li>${esc(c)} → <b>${esc(map[c])}</b> <span class="muted">(${n(c)} Kind${n(c)===1?"":"er"})</span></li>`).join("")}</ul>
   ${stay.length?`<p class="small muted" style="margin:0 0 8px">Bleiben: ${stay.map(esc).join(", ")}. Für Kinder, die die Schule verlassen, nutze beim Kind „Förderung abschließen“.</p>`:""}
   <p class="small muted" style="margin:0 0 14px">Du kannst den Wechsel danach in den Einstellungen rückgängig machen.</p>
@@ -1502,12 +1567,12 @@ async function yearUp(){const map={};db.classes.forEach(c=>{const u=upCls(c);if(
   db.classes=[...new Set(db.classes.map(c=>map[c]||c))].sort(byNum);db.yearSY=syNow();view.filter="alle";save();render();
   undoToast(`${up.filter(k=>!k.demo).length} Kinder hochgesetzt`,()=>yearBack(true))}
 async function yearBack(quick){const u=db.yearUndo;if(!u)return;
-  if(!quick&&!await ask(`Schuljahreswechsel vom ${dDEy(iso(new Date(u.ts)))} rückgängig machen? Klassen und Kürzel bekommen den alten Stand.`,{ok:"Rückgängig machen"}))return;
+  if(!quick&&!await ask(`Schuljahreswechsel vom ${dDEy(iso(new Date(u.ts)))} rückgängig machen? Klassen und Kennungen bekommen den alten Stand.`,{ok:"Rückgängig machen"}))return;
   const now=Date.now(),back=new Set(u.kids.map(x=>x.id));let clash=0;
   for(const x of u.kids){const k=kidById(x.id);if(!k)continue;
     if(db.kids.some(o=>!back.has(o.id)&&o.code.toLowerCase()===x.code.toLowerCase())){clash++;k.cls=x.cls}else Object.assign(k,{cls:x.cls,code:x.code});k.upd=now}
   db.classes=[...new Set([...u.classes,...db.kids.map(k=>k.cls).filter(Boolean)])].sort(byNum);db.yearSY=u.sy||syNow();delete db.yearUndo;view.filter="alle";save();render();
-  toast(clash?`Zurückgesetzt. ${clash} Kürzel waren inzwischen vergeben und bleiben neu.`:"Schuljahreswechsel zurückgenommen")}
+  toast(clash?`Zurückgesetzt. ${clash} Kennungen waren inzwischen vergeben und bleiben neu.`:"Schuljahreswechsel zurückgenommen")}
 
 /* ===== App-Sperre mit Verschlüsselung (optional, Standard aus) =====
    Aus dem Code (4 bis 6 Ziffern) wird per PBKDF2 (600 000 Runden) ein AES-Schlüssel. Im Browserspeicher liegen die Daten dann
@@ -1552,7 +1617,7 @@ function renderLock(msg,busy){let el=$("#lock");if(!LOCKED){el?.remove();return}
 let LOCKBUSY=false;
 async function lockPress(d){if(LOCKWAIT>Date.now()||LOCKBUSY)return;const len=db.lock.len||4;if(LOCKIN.length>=len)return;LOCKIN+=d;renderLock();if(LOCKIN.length<len)return;
   LOCKBUSY=true;renderLock("",true);const r=await tryCode(LOCKIN);LOCKBUSY=false;LOCKIN="";
-  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT){ENCWAIT=null;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();return}
+  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT){ENCWAIT=null;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();checkNeu();return}
   LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**Math.min(LOCKFAIL-5,10);saveFail();try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
 async function lockForgot(){if(!await ask("Code vergessen? Ohne Code lassen sich die Daten nicht entschlüsseln. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden.",{ok:"Alles löschen",danger:true}))return;
   const keep=ENCWAIT?{}:db;ENCWAIT=null;LKEY=null;
@@ -1564,7 +1629,7 @@ document.addEventListener("keydown",e=>{if(!LOCKED||e.target.closest?.(".cele"))
 
 function demo(quiet){
   if(db.kids.some(k=>k.demo))return quiet?null:toast("Beispielfall ist schon da");
-  if(!db.classes.includes("7B"))db.classes.push("7B");
+  if(!db.classes.includes("7.2"))db.classes.push("7.2");
   const t=today(),start=addDays(t,-14);
   const g1={id:uid(),title:"Stört den Unterricht",how:"Ruft rein, verlässt ohne Erlaubnis den Platz, lenkt andere ab.",fp:"Fiktiv: Ich melde mich, bevor ich etwas sage.",dir:"down",a0:"nie",a10:"ständig",target:3,start,entries:[]};
   const g2={id:uid(),title:"Beginnt Aufgaben selbstständig",how:"Hat nach 3 Minuten das Material da und fängt an.",fp:"Fiktiv: Ich fange Aufgaben ohne Erinnerung an.",dir:"up",a0:"gar nicht",a10:"durchgehend",target:7,start,entries:[]};
@@ -1577,9 +1642,9 @@ function demo(quiet){
     g2.entries.push({id:uid(),date:d,slot:sl,subj:s,value:v2[i]==null?null:Math.max(0,v2[i]-adj),note:i===13?"Mit Wochenplan deutlich schneller gestartet.":"",rater:"MU",ts,gen:true});i++}d=addDays(d,1)}
   const diary=[[-25,"Beobachtung","Mathe","Kommt nach der Pause oft unruhig in die Stunde. Erste 10 Minuten am schwierigsten."],[-20,"Gespräch","","Kurzes Gespräch nach der Stunde: wünscht sich einen Platz weiter vorne."],[-14,"Absprache","","Mit Klassenleitung: Sitzplatz vorne, Wochenplan mit Startsignal. Ab heute Förderung."],[-9,"Elternkontakt","","Telefonat mit der Mutter: zu Hause läuft es ähnlich, Unterstützung bei Wochenplan zugesagt."],[-4,"Erfolg","Mathe","Hat heute als Erste:r angefangen und das stolz gezeigt."],[-2,"Vorfall","Deutsch","Streit in der Gruppenarbeit, Auszeit nötig. Danach wieder gut eingestiegen."]]
     .map(([o,cat,subj,text],i)=>({id:uid(),date:addDays(t,o),cat,subj,text,rater:"MU",ts:new Date(addDays(t,o)+"T15:00").getTime()+i,gen:true}));
-  db.kids.push({id:uid(),code:"DEMO-7B",icon:"🦉",cls:"7B",demo:true,goals:[g1,g2],diary});save();if(quiet)return;toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
+  db.kids.push({id:uid(),code:"7.2-99",icon:"🦉",cls:"7.2",demo:true,goals:[g1,g2],diary});save();if(quiet)return;toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
 
-load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();
+load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();checkNeu();
 </script>
 </body>
 </html>

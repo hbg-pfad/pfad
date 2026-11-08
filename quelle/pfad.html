@@ -304,7 +304,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.3.3",PFAD_STAND="08.11.2026";
+const PFAD_VERSION="1.3.4",PFAD_STAND="08.11.2026";
 const KEY="verlaufsbogen-v2";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
 const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
@@ -512,7 +512,7 @@ async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-s
 // Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
 // Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
 const NEU=[
- ["1.3.2",["Klassen heißen jetzt wie im Schulmanager: 5.1 bis 10.8, dazu EF, Q1 und Q2."]],
+ ["1.3.2",["Klassen heißen jetzt wie im Schulmanager: 5.1 bis 10.9, dazu EF, Q1 und Q2."]],
  ["1.3.1",["Kinder haben jetzt eine einheitliche Kennung: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8.1-07. Beim Anlegen wählst du die Klasse und trägst die Nummer ein.","Passt eine ältere Kennung nicht dazu, zeigt Pfad beim Kind „Kennung anpassen“.","Jedes Kind hat jetzt ein Symbol."]],
  ["1.3.0",["Auf „Heute“ stehen deine Kinder jetzt ganz oben. Wer heute noch nicht bewertet ist, kommt zuerst. Tippe einfach auf das Kind, um zu bewerten.","Hinweise wie die Sicherung findest du jetzt unter der Kinderliste.","„Sicherung speichern“ heißt jetzt „Sicherungskopie ablegen“. Pfad speichert deine Einträge sowieso automatisch, die Kopie ist für den Notfall."]],
  ["1.2.9",["Nach einem Update zeigt dir Pfad einmal, was neu ist. In den Einstellungen ganz unten findest du es jederzeit wieder („Was ist neu?“)."]],
@@ -532,7 +532,7 @@ function checkNeu(){if(NEUCHECK||LOCKED||setupMode())return;NEUCHECK=true;
   let seen=null;try{seen=localStorage.getItem(NEUKEY)}catch(e){}
   const mark=()=>{try{localStorage.setItem(NEUKEY,PFAD_VERSION)}catch(e){}};
   if(!seen&&!HADDATA)return mark(); // neues Gerät: Einrichtung und Anleitung reichen
-  const list=NEU.filter(([v])=>!seen||vNeuer(v,seen)).slice(0,5);
+  const list=NEU.filter(([v])=>!seen||vNeuer(v,seen)).slice(0,8);
   if(!list.length)return mark();
   const show=()=>document.querySelector(".cele")?setTimeout(show,1500):neuDlg(list).then(mark);setTimeout(show,500)}
 async function askText(msg,ph,type){return dlg(`<p style="font-weight:700;margin:0 0 10px">${esc(msg)}</p><input id="dlgIn" type="${type||"text"}" autocomplete="${type==="password"?"current-password":"off"}" placeholder="${esc(ph||"")}">
