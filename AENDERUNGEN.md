@@ -4,6 +4,7 @@ Neueste oben. „Mails/Anleitungen“ = ja, wenn sich Adresse, Einrichtung, Sich
 
 | Datum | Version | Was | Beta/Haupt | Mails/Anleitungen |
 |---|---|---|---|---|
+| 08.11.2026 | – | Funktionsbeschreibung (`docs/funktionen.md`) auf Stand 1.2.9 gebracht: Versionsangabe, Bewerten mit Fach-Auswahlliste, Streifen oben weg, kein Nachfedern | – | nein |
 | 08.11.2026 | 1.2.9 | Nach einem Update erscheint einmal das Fenster „Neu in Pfad“ mit kurzen Texten zu den Neuerungen. Jederzeit wieder unter Einstellungen → „Was ist neu?“. Neue Geräte ohne Daten sehen es nicht (Nick) | Beta | nein |
 | 07.11.2026 | 1.2.8 | Bewerten: Ansicht springt beim Antippen einer Zahl, Stunde oder eines Fachs nicht mehr nach oben. Alles passt auf einen Bildschirm (Nick): Fach als Auswahlliste statt 24 Knöpfe, Abstände knapper, Kommentarfeld kleiner. Auf kleinen iPhones (z. B. SE) startet die Zeile Tag/Stunde/Fach zugeklappt („ändern“) | Beta | nein |
 | 07.11.2026 | 1.2.7 | „Mehrere nacheinander“: Ist keine Stunde hinterlegt (z. B. außerhalb der Stundenzeiten oder am Wochenende), gibt es eine Auswahlliste „Stunde“. Im Dialog gilt sie für alle Kinder, beim Bewerten erscheint sie unter der Zeile „ohne Stunde“ (Nick) | Beta | nein |

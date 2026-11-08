@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.1.9 in der Beta, Hauptversion 1.1.3, Stand 29.10.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.2.9 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -11,7 +11,7 @@ Gestaltung bewusst eigenständig (Entwurf B „warm und freundlich“, 23.10.202
 - **Klassen:** Kinder mit Kürzel, nach Klassen gefiltert, mit Trend-Hinweis (eher besser / stabil / eher schwieriger / noch sammeln).
 - **Kind:** Zielverhalten mit Mini-Verlauf, „Jetzt bewerten“.
 - **Zielverhalten bearbeiten:** Titel, „Woran erkennst du es?“, Tipp zum beobachtbaren Formulieren, Richtung (weniger/mehr davon), Skala (10-stufig 0–10, 5-stufig 1–5, ja/nein oder eigene Skala mit frei wählbarem Bereich, z. B. 1 bis 4 oder 0 bis 6), Beschriftung der Enden bzw. Knöpfe, Bezug zum Förderplan, Zielwert, Datum des Förderbeginns (alles außer dem Titel optional).
-- **Bewerten:** alle Verhalten eines Kindes nacheinander. Tag (Heute, Gestern, früher bis 7 Tage), Stunde und Fach als Knöpfe mit einem Tipp. Die laufende Stunde ist nach Uhrzeit vorausgewählt, in Pausen die Stunde davor. Für Beobachtungen in der Pause: „Kleine Pause“, „Große Pause“, „Mittagspause“ (alte Einträge „Pause“ zählen als Große Pause). Ab dem zweiten Verhalten nur noch eine Zeile „Heute · 3. Std. · Mathe – ändern“. Zahlenleiste je nach Skala, Kommentar mit Schalter „Im Verlauf markieren“ (wichtige Kommentare erscheinen dann wie Tagebucheinträge als Markierung im Graphen, Art „Notiz“; nachträglich unter „Alle Einschätzungen“ änderbar), „Heute nicht gesehen“.
+- **Bewerten:** alle Verhalten eines Kindes nacheinander. Tag (Heute, Gestern, früher bis 7 Tage) und Stunde als Knöpfe mit einem Tipp, das Fach als Auswahlliste (ab 1.2.8, vorher 24 Knöpfe). Die Ansicht springt beim Antippen nicht nach oben und passt auf einen Bildschirm. Auf kleinen iPhones (z. B. SE) startet die Zeile Tag/Stunde/Fach zugeklappt („ändern“). Die laufende Stunde ist nach Uhrzeit vorausgewählt, in Pausen die Stunde davor. Für Beobachtungen in der Pause: „Kleine Pause“, „Große Pause“, „Mittagspause“ (alte Einträge „Pause“ zählen als Große Pause). Ab dem zweiten Verhalten nur noch eine Zeile „Heute · 3. Std. · Mathe – ändern“. Zahlenleiste je nach Skala, Kommentar mit Schalter „Im Verlauf markieren“ (wichtige Kommentare erscheinen dann wie Tagebucheinträge als Markierung im Graphen, Art „Notiz“; nachträglich unter „Alle Einschätzungen“ änderbar), „Heute nicht gesehen“.
 - **Tagebuch (pro Kind):** freie Notizen ohne Skala mit Art (Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall, Erfolg), Datum und Fach. Schnell erreichbar über „Notiz“ auf der Seite Heute. In der Analyse erscheinen die Einträge als nummerierte, farbige Markierungen im Verlaufsgraphen, darunter mit Text.
 - **Analyse:** Verlauf mit Zielwert und Förderbeginn, Zusammenfassung in Worten, Vergleich nach Fach und Stunde, letzte Kommentare, Text für die Evaluation im Förderplan (kopieren, drucken, CSV).
 - **Einstellungen:** ganz oben „Sichern“ (Sicherung speichern, laden, prüfen) und „Austausch im Team“ (Kinder weitergeben, geteilte Datei einlesen, Team-Passwort), dann Kürzel, Fächer (Reihenfolge = Knöpfe), Klassen, Stundenraster (abweichende Zeiten für jeden Wochentag einzeln möglich), Wochenziel, Beispielfall, Datenschutz. Der Bereich Schulserver ist ausgeblendet, solange der Server geparkt ist (ab 1.1.4).
@@ -60,7 +60,7 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 
 ## Installation auf iPad und Handy (wichtig für sicheres Speichern)
 - Die App wird über eine feste Internetadresse geöffnet (derzeit GitHub Pages, Hauptordner: `index.html`, `manifest.webmanifest`, `sw.js`, Symbole). Auf dem Server liegt nur der App-Code, keine Förderdaten.
-- Offline zuerst (ab Beta 1.2.0): Pfad startet aus dem Zwischenspeicher des Geräts. Der Browser prüft nur `sw.js` auf eine neue Fassung. Ist eine da, erscheint unten „Neue Version von Pfad geladen. Tippe hier zum Aktualisieren.“
+- Offline zuerst (ab 1.2.0): Pfad startet aus dem Zwischenspeicher des Geräts. Der Browser prüft nur `sw.js` auf eine neue Fassung. Ist eine da, erscheint unten „Neue Version von Pfad geladen. Tippe hier zum Aktualisieren.“
 - In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Dann startet sie wie eine App, läuft offline, und Safari löscht die Daten nicht nach Wochen ohne Nutzung. Die App fordert außerdem dauerhaften Speicher an.
 - Gespeichert wird automatisch nach jeder Eingabe, auf dem Gerät.
 - **Achtung iOS:** Die App auf dem Home-Bildschirm hat einen eigenen Speicher, getrennt vom Safari-Tab. Was im Safari-Tab eingetragen wurde, erscheint nicht in der Home-Bildschirm-App. Wird das Symbol gelöscht, löscht iOS auch die Daten. Vor dem Löschen oder Neu-Hinzufügen (z. B. für ein neues Symbol) deshalb immer eine Sicherung speichern und danach wieder laden.
@@ -140,7 +140,8 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 
 ## Erscheinungsbild
 - iPad quer: breitere Darstellung.
-- Home-Bildschirm-App (ab 1.1.8): oben ein Streifen in Hintergrundfarbe, der Inhalt beginnt etwas tiefer. So bleiben Datum und Überschrift scharf, obwohl iOS den oberen Rand verwischt.
+- Home-Bildschirm-App: Der Inhalt beginnt etwas tiefer (ab 1.1.8), damit Datum und Überschrift scharf bleiben, obwohl iOS den oberen Rand verwischt. Der feste Streifen oben ist seit 1.2.6 weg, weil der Inhalt beim Scrollen dahinter verschwand.
+- Die Seite federt am Ende nicht nach (ab 1.2.5). Sonst zog das iPad die Menüleiste unten mit nach oben.
 - Einstellungen → „Erscheinungsbild“: „Wie Gerät“ (Standard), „Hell“ oder „Dunkel“.
 - Markierungen (Einrichtung, Anleitung) in Senfgelb, passend zur Palette.
 - Schriftgröße: Normal, Groß, Sehr groß. Knöpfe ohne Text haben Beschriftungen für VoiceOver.
