@@ -304,8 +304,10 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.2.8",PFAD_STAND="07.11.2026";
+const PFAD_VERSION="1.2.9",PFAD_STAND="08.11.2026";
 const KEY="verlaufsbogen-v2";
+// Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
+const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
 const SUBJECTS=["Deutsch","Mathe","Englisch","Franz.","Spanisch","Latein","Türkisch","GL","NW","Bio","Chemie","Physik","WAW","Technik","HW","Info","Kunst","Musik","Sport","D&G","Rel. ev.","Rel. kath.","PP","FUF"];
@@ -487,6 +489,30 @@ function dlg(html,onMount){return new Promise(res=>{const el=document.createElem
 async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 16px">${esc(msg)}</p>
   <div class="duo"><button class="btn" data-a="0">${esc(o.cancel||"Abbrechen")}</button><button class="btn pri" data-a="1" style="${o.danger?"background:var(--down);border-color:var(--down)":""}">${esc(o.ok||"OK")}</button></div>`,
   (el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"));el.querySelector('[data-a="1"]').focus()});return r===true}
+/* ===== Neu in Pfad: nach jedem Update einmal zeigen, was sich geändert hat ===== */
+// Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
+// Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
+const NEU=[
+ ["1.2.9",["Nach einem Update zeigt dir Pfad einmal, was neu ist. In den Einstellungen ganz unten findest du es jederzeit wieder („Was ist neu?“)."]],
+ ["1.2.8",["Bewerten passt jetzt auf einen Bildschirm. Das Fach wählst du aus einer Liste.","Wenn du eine Zahl, Stunde oder ein Fach antippst, springt die Ansicht nicht mehr nach oben."]],
+ ["1.2.7",["„Mehrere nacheinander“: Ist gerade keine Stunde hinterlegt, zum Beispiel am Nachmittag, wählst du die Stunde aus einer Liste."]],
+ ["1.2.6",["Als App auf dem Home-Bildschirm: Oben verschwindet beim Scrollen nichts mehr hinter einem Streifen."]]];
+const NEUKEY=KEY+"-gesehen";
+const vnum=v=>{const m=String(v).match(/\d+/g)||[];return [0,1,2].map(i=>+m[i]||0)};
+const vNeuer=(a,b)=>{const x=vnum(a),y=vnum(b);for(let i=0;i<3;i++)if(x[i]!==y[i])return x[i]>y[i];return false};
+function neuDlg(list,all){return dlg(`<h2 style="margin:0 0 4px;font-size:1.3rem">${all?"Was ist neu?":"Neu in Pfad"}</h2>
+  <p class="small muted" style="margin:0">${all?"Die letzten Änderungen, neueste oben.":"Pfad wurde aktualisiert. Das hat sich geändert:"}</p>
+  <div style="max-height:52vh;overflow:auto">${list.map(([v,t])=>`<p style="font-weight:800;margin:14px 0 4px">Version ${esc(v)}</p><ul style="margin:0;padding-left:20px;display:grid;gap:6px">${t.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`).join("")}</div>
+  <button class="btn pri block" style="margin-top:18px" data-a="1">Alles klar</button>`,
+  (el,done)=>{const b=el.querySelector("[data-a]");b.onclick=()=>done(true);b.focus()})}
+let NEUCHECK=false;
+function checkNeu(){if(NEUCHECK||LOCKED||setupMode())return;NEUCHECK=true;
+  let seen=null;try{seen=localStorage.getItem(NEUKEY)}catch(e){}
+  const mark=()=>{try{localStorage.setItem(NEUKEY,PFAD_VERSION)}catch(e){}};
+  if(!seen&&!HADDATA)return mark(); // neues Gerät: Einrichtung und Anleitung reichen
+  const list=NEU.filter(([v])=>!seen||vNeuer(v,seen)).slice(0,5);
+  if(!list.length)return mark();
+  const show=()=>document.querySelector(".cele")?setTimeout(show,1500):neuDlg(list).then(mark);setTimeout(show,500)}
 async function askText(msg,ph,type){return dlg(`<p style="font-weight:700;margin:0 0 10px">${esc(msg)}</p><input id="dlgIn" type="${type||"text"}" autocomplete="${type==="password"?"current-password":"off"}" placeholder="${esc(ph||"")}">
   <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">OK</button></div>`,
   (el,done)=>{const i=el.querySelector("#dlgIn");i.focus();i.onkeydown=e=>{if(e.key==="Enter")done(i.value)};el.querySelector('[data-a="0"]').onclick=()=>done(null);el.querySelector('[data-a="1"]').onclick=()=>done(i.value)})}
@@ -1373,7 +1399,8 @@ function profilV(){
   <p>Lege Kinder nur mit Kürzel an. Schreibe in Kommentare keine Namen.</p>
   <p>Sicherungen und geteilte Stände sind mit Passwort verschlüsselt. Speichere sie trotzdem nur auf dienstlichem Speicher.</p><p>Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Nutze deshalb nur dienstliche Geräte mit Code-Sperre.</p>
   <p>Vor dem Einsatz mit echten Fällen: Absprache mit Schulleitung und Datenschutzbeauftragten.</p></div>
-  <p class="muted small" style="text-align:center">Pfad ${PFAD_VERSION} · Stand ${PFAD_STAND} · schulintern</p>`;
+  <p class="muted small" style="text-align:center;margin-bottom:0">Pfad ${PFAD_VERSION} · Stand ${PFAD_STAND} · schulintern</p>
+  <p style="text-align:center;margin-top:0"><button class="btn ghost" style="min-height:44px" onclick="neuDlg(NEU,true)">Was ist neu?</button></p>`;
 }
 // Sichern (nur für dich) und Austausch im Team, oben in den Einstellungen
 function austauschV(){const last=db.lastBackup;
@@ -1564,7 +1591,7 @@ function renderLock(msg,busy){let el=$("#lock");if(!LOCKED){el?.remove();return}
 let LOCKBUSY=false;
 async function lockPress(d){if(LOCKWAIT>Date.now()||LOCKBUSY)return;const len=db.lock.len||4;if(LOCKIN.length>=len)return;LOCKIN+=d;renderLock();if(LOCKIN.length<len)return;
   LOCKBUSY=true;renderLock("",true);const r=await tryCode(LOCKIN);LOCKBUSY=false;LOCKIN="";
-  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT){ENCWAIT=null;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();return}
+  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT){ENCWAIT=null;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();checkNeu();return}
   LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**Math.min(LOCKFAIL-5,10);saveFail();try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
 async function lockForgot(){if(!await ask("Code vergessen? Ohne Code lassen sich die Daten nicht entschlüsseln. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden.",{ok:"Alles löschen",danger:true}))return;
   const keep=ENCWAIT?{}:db;ENCWAIT=null;LKEY=null;
@@ -1591,7 +1618,7 @@ function demo(quiet){
     .map(([o,cat,subj,text],i)=>({id:uid(),date:addDays(t,o),cat,subj,text,rater:"MU",ts:new Date(addDays(t,o)+"T15:00").getTime()+i,gen:true}));
   db.kids.push({id:uid(),code:"DEMO-7B",icon:"🦉",cls:"7B",demo:true,goals:[g1,g2],diary});save();if(quiet)return;toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
 
-load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();
+load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();checkNeu();
 </script>
 </body>
 </html>
