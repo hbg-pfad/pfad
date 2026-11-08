@@ -305,7 +305,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.2.9 Beta",PFAD_STAND="08.11.2026";
+const PFAD_VERSION="1.3.0 Beta",PFAD_STAND="08.11.2026";
 const KEY="pfad-beta";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
 const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
@@ -494,6 +494,7 @@ async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-s
 // Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
 // Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
 const NEU=[
+ ["1.3.0",["Auf „Heute“ stehen deine Kinder jetzt ganz oben. Wer heute noch nicht bewertet ist, kommt zuerst. Tippe einfach auf das Kind, um zu bewerten.","Hinweise wie die Sicherung findest du jetzt unter der Kinderliste.","„Sicherung speichern“ heißt jetzt „Sicherungskopie ablegen“. Pfad speichert deine Einträge sowieso automatisch, die Kopie ist für den Notfall."]],
  ["1.2.9",["Nach einem Update zeigt dir Pfad einmal, was neu ist. In den Einstellungen ganz unten findest du es jederzeit wieder („Was ist neu?“)."]],
  ["1.2.8",["Bewerten passt jetzt auf einen Bildschirm. Das Fach wählst du aus einer Liste.","Wenn du eine Zahl, Stunde oder ein Fach antippst, springt die Ansicht nicht mehr nach oben."]],
  ["1.2.7",["„Mehrere nacheinander“: Ist gerade keine Stunde hinterlegt, zum Beispiel am Nachmittag, wählst du die Stunde aus einer Liste."]],
@@ -647,7 +648,7 @@ function installV(){
 const SETUP=[
  {k:"me",t:"Dein Kürzel eintragen",done:()=>!!db.me,tip:"Trag hier dein Lehrkraft-Kürzel ein."},
  {k:"demo",t:"Fiktiven Beispielfall laden",done:()=>db.kids.length>0,tip:"Tippe auf „Fiktiven Beispielfall laden“."},
- {k:"backup",t:"Erste Sicherung speichern",done:()=>!!db.lastBackup,tip:"Tippe auf „Sicherung speichern“ und lege ein Passwort fest."},
+ {k:"backup",t:"Erste Sicherungskopie ablegen",done:()=>!!db.lastBackup,tip:"Tippe auf „Sicherungskopie ablegen“ und lege ein Passwort fest."},
  {k:"lock",t:"App-Sperre einschalten (empfohlen)",done:()=>!!db.lock||!!db.lockSkip,tip:"Schalte die App-Sperre ein. Empfohlen, vor allem wenn du dein iPad auch mal aus der Hand gibst. Kein Muss: „Ohne Sperre weiter“ überspringt den Schritt."}];
 const setupOpen=()=>isWeb&&!db.setupDone&&!(DEV&&!standalone)?SETUP.filter(s=>!s.done()):[];
 function setupCard(){const open=setupOpen();if(!open.length)return "";const nx=open[0];
@@ -678,17 +679,21 @@ function heuteV(){
   const week=all.filter(e=>e.date>=wk).length,todayN=all.filter(e=>e.date===t).length;
   const kids=db.kids.filter(k=>k.goals.length&&!k.closed);
   const dateLong=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
-  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${setupCard()}${invitesV()}${backupHint()}${yearHint()}${closedHint()}${db.seenHelp||db.kids.some(k=>!k.demo)||setupOpen().length?"":`<div class="card" style="border:2px solid var(--sig)"><b>${db.setupDone?"Einrichtung fertig. Jetzt die Anleitung":"Neu hier?"}</b><p class="small" style="margin:6px 0 10px">Pfad führt dich in 8 kurzen Schritten durch die App und zeigt dir, wo du was findest.</p>${db.setupDone?`<div class="marktip">Tippe auf „Anleitung starten“.</div>`:""}<button class="btn pri${db.setupDone?" mark":""}" onclick="openHelp()">Anleitung starten</button></div>`}
-  ${G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`}`+motivationV();
-  if(!kids.length)return h+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button><button class="btn" onclick="openHelp()">Anleitung ansehen</button></p></div>`;
+  let h=`<p class="muted">${dateLong}</p><h1>Heute</h1>${envHint()}${setupCard()}${invitesV()}${db.seenHelp||db.kids.some(k=>!k.demo)||setupOpen().length?"":`<div class="card" style="border:2px solid var(--sig)"><b>${db.setupDone?"Einrichtung fertig. Jetzt die Anleitung":"Neu hier?"}</b><p class="small" style="margin:6px 0 10px">Pfad führt dich in 8 kurzen Schritten durch die App und zeigt dir, wo du was findest.</p>${db.setupDone?`<div class="marktip">Tippe auf „Anleitung starten“.</div>`:""}<button class="btn pri${db.setupDone?" mark":""}" onclick="openHelp()">Anleitung starten</button></div>`}
+`;
+  // Unter der Kinderliste: Hinweise, Zahlen und Wochenziel, damit es oben direkt mit dem Bewerten losgeht
+  const below=backupHint()+yearHint()+closedHint()+(G().on?"":`<div class="stat"><div>Heute<b>${todayN}</b><span class="muted small">Einschätzungen</span></div><div>7 Tage<b>${week}</b><span class="muted small">Einschätzungen</span></div><div>Kinder<b>${kids.length}</b><span class="muted small">mit Verhalten</span></div></div>`)+motivationV();
+  if(!kids.length)return h+below+`<div class="card"><p>Noch keine Kinder mit beobachtetem Verhalten.</p><p class="muted">Lege unter „Kinder“ ein Kind mit Kürzel an oder lade unter „Einstellungen“ den fiktiven Beispielfall.</p><p class="row" style="flex-wrap:wrap"><button class="btn pri" onclick="go({tab:'klassen'})">Zu den Kindern</button><button class="btn" onclick="openHelp()">Anleitung ansehen</button></p></div>`;
   h+=`<div class="between"><h2>Wen bewertest du?</h2>${kids.length>1?`<button class="btn ghost" onclick="pickMulti()">Mehrere nacheinander</button>`:""}</div>`;
-  for(const k of kids){
-    const done=k.goals.filter(g=>g.entries.some(e=>e.date===t)).length,gap=daysSince(k);
-    h+=`<div class="card row kcard" style="--kc:${kidColor(k)}">${kidIcon(k)}<div class="grow"><div class="code">${esc(k.code)}</div>
+  // Wer heute noch offen ist, steht oben; sonst bleibt die gewohnte Reihenfolge
+  const doneN=k=>k.goals.filter(g=>g.entries.some(e=>e.date===t)).length,open=k=>doneN(k)<k.goals.length;
+  for(const k of [...kids.filter(open),...kids.filter(k=>!open(k))]){
+    const done=doneN(k),gap=daysSince(k);
+    h+=`<div class="card tap row kcard" style="--kc:${kidColor(k)}" onclick="startRate(${ja(k.id)})">${kidIcon(k)}<div class="grow"><div class="code">${esc(k.code)}</div>
     <div class="muted small">${k.cls?esc(k.cls)+" · ":""}${done===k.goals.length?"✓ heute erledigt":`heute ${done} von ${k.goals.length} Verhalten`}</div>${gap>=7?`<div class="small late">seit ${gap} Tagen keine Einschätzung</div>`:""}</div>
-    <button class="btn ghost" aria-label="Notiz zu ${esc(k.code)}" onclick="openDiary(${ja(k.id)})">Notiz</button><button class="btn ${done===k.goals.length?"":"pri"}" aria-label="${esc(k.code)} bewerten" onclick="startRate(${ja(k.id)})">Bewerten</button></div>`;
+    <button class="btn ghost" aria-label="Notiz zu ${esc(k.code)}" onclick="event.stopPropagation();openDiary(${ja(k.id)})">Notiz</button><button class="btn ${done===k.goals.length?"":"pri"}" aria-label="${esc(k.code)} bewerten" onclick="event.stopPropagation();startRate(${ja(k.id)})">Bewerten</button></div>`;
   }
-  return h+`<p class="muted small">Tipp: Direkt nach der Stunde bewerten. Das dauert pro Ziel nur wenige Sekunden.</p>`;
+  return h+`<p class="muted small">Tipp: Direkt nach der Stunde bewerten. Tippe dafür einfach auf das Kind.</p>`+below;
 }
 
 // Tage seit der letzten Einschätzung (oder seit dem Anlegen)
@@ -706,10 +711,10 @@ const HELP=[
  {t:"Willkommen bei Pfad",p:"Die Anleitung zeigt dir die App mit einem fiktiven Beispielfall. Mit Pfad schätzt du das Verhalten einzelner Kinder direkt nach der Stunde ein. Das dauert wenige Sekunden. Mit der Zeit siehst du, ob sich etwas verbessert, und hast Belege für Förderplan und Gespräche.",l:["Alles bleibt auf deinem Gerät.","Kinder haben nur ein Kürzel, keinen Namen.","Unten (markiert) wechselst du zwischen Heute, Kinder, Verlauf und Einstellungen."]},
  {t:"Kind anlegen",p:"Unter „Kinder“ tippst du auf „+ Kind anlegen“.",l:["Klasse wählen: Die App schlägt ein Kürzel vor, z. B. 8A-01, und ein zufälliges Symbol wie 🦊 zum schnellen Wiedererkennen.","Keine Namen oder Initialen eintragen.","Welches Kürzel zu welchem Kind gehört, steht nur in der Förderakte."]},
  {t:"Verhalten festlegen",p:"Pro Kind legst du ein bis drei Verhalten fest, die du beobachten willst.",l:["So formulieren, dass man es sehen kann: „Ruft ohne Melden in die Klasse“ statt „ist unruhig“.","Richtung wählen: Soll es weniger oder mehr werden?","Skala wählen: 0 bis 10, 1 bis 5 oder ja/nein."]},
- {t:"Nach der Stunde bewerten",p:"Auf „Heute“ tippst du beim Kind auf „Bewerten“.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
+ {t:"Nach der Stunde bewerten",p:"Auf „Heute“ tippst du auf das Kind oder auf „Bewerten“. Wer heute noch offen ist, steht oben.",l:["Tag, Stunde und Fach sind schon ausgewählt. Bei Bedarf tippst du auf „ändern“.","Eine Zahl antippen, fertig. Danach kommt das nächste Verhalten.","Nicht gesehen? „Heute nicht gesehen“ antippen. Das zählt nicht in den Verlauf."]},
  {t:"Notizen im Tagebuch",p:"Für alles, was nicht in eine Zahl passt, gibt es das Tagebuch. Auf „Heute“ geht es über „Notiz“.",l:["Art wählen: Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall oder Erfolg.","Statt zu tippen kannst du das Mikrofon der Tastatur nutzen.","Notizen erscheinen später als Markierung im Verlauf."]},
  {t:"Verlauf ansehen",p:"Unter „Verlauf“ siehst du jedes Verhalten als Kurve mit Ziel und Förderbeginn.",l:["Die App sagt in Worten, ob es eher besser, stabil oder eher schwieriger wird.","Der Text für die Evaluation im Förderplan lässt sich kopieren.","Gesprächsblatt für Kind und Eltern und Bericht für die Förderakte gibt es als PDF."]},
- {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherung schützt vor Verlust.",l:["Spätestens alle 5 Tage: Einstellungen → „Sicherung speichern“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder weitergeben“, nur die Kinder auswählen, um die es geht, und die Datei per AirDrop oder Dienstmail schicken.","Mit dem Team-Passwort tippt niemand ein Passwort ein. Beim Einlesen kommt Neues dazu, deine Einträge bleiben."]},
+ {t:"Sichern und teilen",p:"Die App speichert automatisch auf dem Gerät. Eine Sicherungskopie schützt vor Verlust.",l:["Für den Notfall legst du spätestens alle 5 Tage eine Sicherungskopie ab: Einstellungen → „Sicherungskopie ablegen“. Die App erinnert dich daran. Die Datei ist mit deinem Passwort verschlüsselt.","Mit Kolleg:innen: „Kinder weitergeben“, nur die Kinder auswählen, um die es geht, und die Datei per AirDrop oder Dienstmail schicken.","Mit dem Team-Passwort tippt niemand ein Passwort ein. Beim Einlesen kommt Neues dazu, deine Einträge bleiben."]},
  {t:"Sicher arbeiten",p:"Ein paar Regeln, damit die Daten geschützt bleiben.",l:["Nur auf dem Dienstgerät mit Gerätecode und automatischer Sperre.","Auf iPad und iPhone: In Safari öffnen → Teilen → „Zum Home-Bildschirm“. Mit iOS 27 liegt „Teilen“ im Seitenmenü links neben der Adresse.","Das Symbol nicht löschen, ohne vorher zu sichern. Sonst sind die Daten weg."]}];
 // Geführte Anleitung: zeigt die echten Bildschirme mit dem fiktiven Beispielfall und markiert die Stelle
 const demoKid=()=>db.kids.find(k=>k.demo);
@@ -722,7 +727,7 @@ const TOUR=[
  {v:()=>({tab:"heute"}),sel:()=>findBtn("Bewerten",demoCard())},
  {v:()=>({tab:"heute"}),sel:()=>findBtn("Notiz",demoCard())},
  {v:()=>({tab:"analyse",aKid:demoKid().id}),sel:()=>$("#app svg.chart")},
- {v:()=>({tab:"profil"}),sel:()=>findBtn("Sicherung speichern")},
+ {v:()=>({tab:"profil"}),sel:()=>findBtn("Sicherungskopie ablegen")},
  {v:()=>({tab:"profil"}),sel:()=>[...document.querySelectorAll("#app h2")].find(h=>h.textContent.trim()==="Datenschutz")?.closest(".card")}];
 function openHelp(){db.seenHelp=1;demo(true);save();tourGo(0)}
 function tourGo(i){if(i<0)return;if(i>=TOUR.length)return tourEnd(true);if(!demoKid())demo(true);go({...TOUR[i].v(),tour:i})}
@@ -1405,8 +1410,8 @@ function profilV(){
 }
 // Sichern (nur für dich) und Austausch im Team, oben in den Einstellungen
 function austauschV(){const last=db.lastBackup;
-  return `<div class="card"><h2 style="margin-top:0">Sichern</h2><p class="small muted" style="margin-top:0">Alle deine Kinder in einer Datei, nur für dich. Spätestens alle 5 Tage, Pfad erinnert dich daran.</p>
-  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherung speichern</button><button class="btn" onclick="$('#imp').click()">Sicherung laden</button><button class="btn" onclick="$('#chk').click()">Sicherung prüfen</button></p>
+  return `<div class="card"><h2 style="margin-top:0">Sichern</h2><p class="small muted" style="margin-top:0">Pfad speichert deine Einträge automatisch auf diesem Gerät. Die Sicherungskopie ist für den Notfall: alle deine Kinder in einer Datei, nur für dich. Spätestens alle 5 Tage, Pfad erinnert dich daran.</p>
+  ${mtip("backup")}<p class="row" style="flex-wrap:wrap"><button class="btn pri${mk("backup")}" onclick="exportJSON()">Sicherungskopie ablegen</button><button class="btn" onclick="$('#imp').click()">Sicherung laden</button><button class="btn" onclick="$('#chk').click()">Sicherung prüfen</button></p>
   <p class="small muted">${last?`Letzte Sicherung: ${dDEy(iso(new Date(last)))}. `:"Noch keine Sicherung. "}Neues Gerät, App-Symbol gelöscht oder Code der App-Sperre vergessen? Dann lädst du hier deine letzte Sicherung. „Prüfen“ zeigt, was in einer Sicherung steckt, ohne etwas zu übernehmen.</p>
   ${db.bsalt?`<p class="small">Sicherungs-Passwort ist auf diesem Gerät gemerkt. <button class="btn ghost small" onclick="forgetBackupPw()">Vergessen</button></p>`:""}</div>
   <div class="card"><h2 style="margin-top:0">Austausch im Team</h2><p class="small muted" style="margin-top:0">Du gibst nur die Kinder weiter, an denen ihr gemeinsam arbeitet. Beim Einlesen kommt Neues dazu, deine eigenen Einträge bleiben.</p>

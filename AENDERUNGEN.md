@@ -4,6 +4,7 @@ Neueste oben. „Mails/Anleitungen“ = ja, wenn sich Adresse, Einrichtung, Sich
 
 | Datum | Version | Was | Beta/Haupt | Mails/Anleitungen |
 |---|---|---|---|---|
+| 08.11.2026 | 1.3.0 | Feedback der Schulleitung: „Heute“ zeigt die Kinderliste ganz oben, heute noch offene Kinder zuerst, die ganze Kinderkarte startet das Bewerten. Hinweise (Sicherung, Schuljahr, Löschen fällig), Zähler und Wochenziel stehen darunter. Knopf „Sicherung speichern“ heißt jetzt „Sicherungskopie ablegen“, mit Satz „Pfad speichert deine Einträge automatisch …“ | Beta | ja (Knopfname „Sicherungskopie ablegen“ in Anleitungen und Mails) |
 | 08.11.2026 | – | Funktionsbeschreibung (`docs/funktionen.md`) auf Stand 1.2.9 gebracht: Versionsangabe, Bewerten mit Fach-Auswahlliste, Streifen oben weg, kein Nachfedern | – | nein |
 | 08.11.2026 | 1.2.9 | Nach einem Update erscheint einmal das Fenster „Neu in Pfad“ mit kurzen Texten zu den Neuerungen. Jederzeit wieder unter Einstellungen → „Was ist neu?“. Neue Geräte ohne Daten sehen es nicht (Nick) | Beta | nein |
 | 07.11.2026 | 1.2.8 | Bewerten: Ansicht springt beim Antippen einer Zahl, Stunde oder eines Fachs nicht mehr nach oben. Alles passt auf einen Bildschirm (Nick): Fach als Auswahlliste statt 24 Knöpfe, Abstände knapper, Kommentarfeld kleiner. Auf kleinen iPhones (z. B. SE) startet die Zeile Tag/Stunde/Fach zugeklappt („ändern“) | Beta | nein |

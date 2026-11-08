@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.2.9 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.3.0 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -7,14 +7,14 @@ Quelldatei: `quelle/pfad.html`. Eine einzelne Datei, die offline im Browser läu
 Gestaltung bewusst eigenständig (Entwurf B „warm und freundlich“, 23.10.2026): eigene Farben, Begriffe, Zahlenleiste statt Regler, Farbstreifen statt Kürzel-Kacheln, keine Filter-Chips.
 
 ## Bereiche
-- **Heute:** Wen bewerte ich jetzt? Zähler für heute und die letzten 7 Tage.
+- **Heute:** Wen bewerte ich jetzt? Die Kinderliste steht ganz oben, heute noch offene Kinder zuerst. Ein Tipp auf die Kinderkarte startet das Bewerten (ab 1.3.0). Darunter Hinweise (Sicherung, Schuljahr, Löschen fällig), Zähler für heute und die letzten 7 Tage bzw. Wochenziel.
 - **Klassen:** Kinder mit Kürzel, nach Klassen gefiltert, mit Trend-Hinweis (eher besser / stabil / eher schwieriger / noch sammeln).
 - **Kind:** Zielverhalten mit Mini-Verlauf, „Jetzt bewerten“.
 - **Zielverhalten bearbeiten:** Titel, „Woran erkennst du es?“, Tipp zum beobachtbaren Formulieren, Richtung (weniger/mehr davon), Skala (10-stufig 0–10, 5-stufig 1–5, ja/nein oder eigene Skala mit frei wählbarem Bereich, z. B. 1 bis 4 oder 0 bis 6), Beschriftung der Enden bzw. Knöpfe, Bezug zum Förderplan, Zielwert, Datum des Förderbeginns (alles außer dem Titel optional).
 - **Bewerten:** alle Verhalten eines Kindes nacheinander. Tag (Heute, Gestern, früher bis 7 Tage) und Stunde als Knöpfe mit einem Tipp, das Fach als Auswahlliste (ab 1.2.8, vorher 24 Knöpfe). Die Ansicht springt beim Antippen nicht nach oben und passt auf einen Bildschirm. Auf kleinen iPhones (z. B. SE) startet die Zeile Tag/Stunde/Fach zugeklappt („ändern“). Die laufende Stunde ist nach Uhrzeit vorausgewählt, in Pausen die Stunde davor. Für Beobachtungen in der Pause: „Kleine Pause“, „Große Pause“, „Mittagspause“ (alte Einträge „Pause“ zählen als Große Pause). Ab dem zweiten Verhalten nur noch eine Zeile „Heute · 3. Std. · Mathe – ändern“. Zahlenleiste je nach Skala, Kommentar mit Schalter „Im Verlauf markieren“ (wichtige Kommentare erscheinen dann wie Tagebucheinträge als Markierung im Graphen, Art „Notiz“; nachträglich unter „Alle Einschätzungen“ änderbar), „Heute nicht gesehen“.
 - **Tagebuch (pro Kind):** freie Notizen ohne Skala mit Art (Beobachtung, Gespräch, Elternkontakt, Absprache, Vorfall, Erfolg), Datum und Fach. Schnell erreichbar über „Notiz“ auf der Seite Heute. In der Analyse erscheinen die Einträge als nummerierte, farbige Markierungen im Verlaufsgraphen, darunter mit Text.
 - **Analyse:** Verlauf mit Zielwert und Förderbeginn, Zusammenfassung in Worten, Vergleich nach Fach und Stunde, letzte Kommentare, Text für die Evaluation im Förderplan (kopieren, drucken, CSV).
-- **Einstellungen:** ganz oben „Sichern“ (Sicherung speichern, laden, prüfen) und „Austausch im Team“ (Kinder weitergeben, geteilte Datei einlesen, Team-Passwort), dann Kürzel, Fächer (Reihenfolge = Knöpfe), Klassen, Stundenraster (abweichende Zeiten für jeden Wochentag einzeln möglich), Wochenziel, Beispielfall, Datenschutz. Der Bereich Schulserver ist ausgeblendet, solange der Server geparkt ist (ab 1.1.4).
+- **Einstellungen:** ganz oben „Sichern“ (Sicherungskopie ablegen, Sicherung laden, prüfen; Knopf hieß bis 1.2.9 „Sicherung speichern“) und „Austausch im Team“ (Kinder weitergeben, geteilte Datei einlesen, Team-Passwort), dann Kürzel, Fächer (Reihenfolge = Knöpfe), Klassen, Stundenraster (abweichende Zeiten für jeden Wochentag einzeln möglich), Wochenziel, Beispielfall, Datenschutz. Der Bereich Schulserver ist ausgeblendet, solange der Server geparkt ist (ab 1.1.4).
 
 ## Gesprächsblatt für Kind und Eltern
 - Aufruf: beim Kind „Gesprächsblatt“ oder im Verlauf unten.
@@ -65,11 +65,11 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 - Gespeichert wird automatisch nach jeder Eingabe, auf dem Gerät.
 - **Achtung iOS:** Die App auf dem Home-Bildschirm hat einen eigenen Speicher, getrennt vom Safari-Tab. Was im Safari-Tab eingetragen wurde, erscheint nicht in der Home-Bildschirm-App. Wird das Symbol gelöscht, löscht iOS auch die Daten. Vor dem Löschen oder Neu-Hinzufügen (z. B. für ein neues Symbol) deshalb immer eine Sicherung speichern und danach wieder laden.
 - Als Datei geöffnet (z. B. in der Vorschau der Dateien-App), zeigt die App eine Warnung: Dort kann das Gerät die Daten jederzeit löschen.
-- Auf „Heute“ steht nach der Einrichtung (auch nur mit dem Beispielfall, ab 1.1.7) eine Zeile „Letzte Sicherung am … Nächste in x Tagen fällig.“ mit Knopf „Sichern“ (ab 1.1.6). Nach 5 Tagen ohne Sicherung wird daraus ab 5 eigenen Einträgen ein deutlicher Hinweis.
+- Auf „Heute“ steht unter der Kinderliste (ab 1.3.0, vorher darüber) nach der Einrichtung (auch nur mit dem Beispielfall, ab 1.1.7) eine Zeile „Letzte Sicherung am … Nächste in x Tagen fällig.“ mit Knopf „Sichern“ (ab 1.1.6). Nach 5 Tagen ohne Sicherung wird daraus ab 5 eigenen Einträgen ein deutlicher Hinweis.
 - Updates: Eine neue Version auf GitHub Pages wird beim nächsten Start mit Internet geladen. Die Daten bleiben dabei erhalten.
 
 ## Sicherungen und Kürzel
-- Speichern: Einstellungen → Sichern → „Sicherung speichern“. Beim ersten Mal legst du ein Sicherungs-Passwort fest (mind. 8 Zeichen) und kannst es auf dem Gerät merken lassen. Dann geht jede weitere Sicherung mit einem Tipp. „Passwort vergessen“ löscht es nur auf diesem Gerät.
+- Speichern: Einstellungen → Sichern → „Sicherungskopie ablegen“. Beim ersten Mal legst du ein Sicherungs-Passwort fest (mind. 8 Zeichen) und kannst es auf dem Gerät merken lassen. Dann geht jede weitere Sicherung mit einem Tipp. „Passwort vergessen“ löscht es nur auf diesem Gerät.
 - Vor der ersten Sicherung erklärt die App, wohin die Datei gehört: iPad/iPhone „In Dateien sichern“ → „Auf meinem iPad“ → Ordner „Pfad“ → „Sichern“. Spätere Sicherungen kommen in denselben Ordner, jede als eigene Datei mit Datum.
 - Die Datei (`pfad-sicherung-NB-2026-10-23.json`) ist verschlüsselt und enthält alle eigenen Kinder und Einstellungen. Ablage nur lokal auf dem Dienstgerät (z. B. „Dateien“ → „Auf meinem iPad“), nicht in einer Cloud.
 - Das Passwort ist nicht wiederherstellbar. Ohne Passwort lässt sich die Sicherung nicht öffnen.
