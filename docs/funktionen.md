@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.3.2 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.3.3 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -162,6 +162,7 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 
 ## App-Sperre mit Verschlüsselung (optional, Standard aus, in der Einrichtung empfohlen)
 - Einstellungen → „App-Sperre und Verschlüsselung“: Code mit 4 bis 6 Ziffern (entschieden 24.10.2026), Sperre sofort, nach 1 oder nach 5 Minuten im Hintergrund, beim Start immer.
+- „Alle Daten auf diesem Gerät löschen“ lässt die App-Sperre an (ab 1.3.3). Neue Einträge danach sind weiter verschlüsselt.
 - Ist sie an, liegen die Daten im Browserspeicher nur verschlüsselt (AES-GCM, Schlüssel per PBKDF2 mit 600 000 Runden aus dem Code). Ohne Code sind sie nicht lesbar.
 - Grenze: Ein Ziffern-Code lässt sich mit viel Aufwand durchprobieren, wenn jemand den Speicher kopiert. Der Gerätecode bleibt Pflicht.
 - Nach 5 Fehlversuchen Wartezeit (30 Sekunden, dann länger). Code vergessen: alles auf dem Gerät löschen und die letzte Sicherung laden. Der Code steckt nicht in Sicherungen.
