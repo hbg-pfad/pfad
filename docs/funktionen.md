@@ -127,6 +127,12 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 - Kürzel (mit „Weiter“), Beispielfall, erste Sicherung, App-Sperre (ab 1.1.6, empfohlen, mit „Ohne Sperre weiter“ überspringbar). Danach Konfetti und „Geschafft, Pfad ist eingerichtet!“ mit Knopf „Anleitung starten“.
 - Der Beispielfall lässt sich in den Einstellungen mit „Beispielfall entfernen“ löschen.
 
+## Neu in Pfad (ab 1.2.9)
+- Nach einem Update zeigt Pfad beim nächsten Start einmal das Fenster „Neu in Pfad“ mit allen Neuerungen seit der zuletzt gesehenen Version (höchstens fünf Versionen). „Alles klar“ schließt es, danach erscheint es erst nach dem nächsten Update wieder.
+- Auf einem neuen Gerät ohne Daten erscheint nichts, dort reichen Einrichtung und Anleitung. Mit App-Sperre erscheint das Fenster erst nach dem Entsperren.
+- Jederzeit wieder: Einstellungen ganz unten → „Was ist neu?“.
+- Pflege: Die Texte stehen in `quelle/pfad.html` in der Liste `NEU` (neueste oben). Bei jeder Version mit sichtbarer Änderung einen kurzen Eintrag ohne Fachbegriffe ergänzen. Gemerkt wird nur die zuletzt gesehene Versionsnummer unter einem eigenen Schlüssel (`…-gesehen`), keine Daten.
+
 ## Anleitung in der App
 - Start: Einstellungen → „Anleitung“ → „Starten“. Nach der Einrichtung erscheint auf „Heute“ der Hinweis „Einrichtung fertig. Jetzt die Anleitung“.
 - 8 Schritte. Die Anleitung öffnet die echten Bildschirme mit dem fiktiven Beispielfall (wird bei Bedarf geladen) und markiert in Senfgelb die Stelle, um die es geht. Unten steht ein Feld mit Erklärung, „Zurück“, „Weiter“ und „Beenden“.
