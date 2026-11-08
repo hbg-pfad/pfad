@@ -1,4 +1,4 @@
-# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.3.0 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
+# Pfad – schulinterne App zur Verhaltensbeobachtung (Version 1.3.1 in der Beta, Hauptversion 1.2.5, Stand 08.11.2026)
 
 (Arbeitstitel bis 23.10.2026: Verlaufsbogen)
 
@@ -8,7 +8,7 @@ Gestaltung bewusst eigenständig (Entwurf B „warm und freundlich“, 23.10.202
 
 ## Bereiche
 - **Heute:** Wen bewerte ich jetzt? Die Kinderliste steht ganz oben, heute noch offene Kinder zuerst. Ein Tipp auf die Kinderkarte startet das Bewerten (ab 1.3.0). Darunter Hinweise (Sicherung, Schuljahr, Löschen fällig), Zähler für heute und die letzten 7 Tage bzw. Wochenziel.
-- **Klassen:** Kinder mit Kürzel, nach Klassen gefiltert, mit Trend-Hinweis (eher besser / stabil / eher schwieriger / noch sammeln).
+- **Klassen:** Kinder mit Kennung, nach Klassen gefiltert, mit Trend-Hinweis (eher besser / stabil / eher schwieriger / noch sammeln).
 - **Kind:** Zielverhalten mit Mini-Verlauf, „Jetzt bewerten“.
 - **Zielverhalten bearbeiten:** Titel, „Woran erkennst du es?“, Tipp zum beobachtbaren Formulieren, Richtung (weniger/mehr davon), Skala (10-stufig 0–10, 5-stufig 1–5, ja/nein oder eigene Skala mit frei wählbarem Bereich, z. B. 1 bis 4 oder 0 bis 6), Beschriftung der Enden bzw. Knöpfe, Bezug zum Förderplan, Zielwert, Datum des Förderbeginns (alles außer dem Titel optional).
 - **Bewerten:** alle Verhalten eines Kindes nacheinander. Tag (Heute, Gestern, früher bis 7 Tage) und Stunde als Knöpfe mit einem Tipp, das Fach als Auswahlliste (ab 1.2.8, vorher 24 Knöpfe). Die Ansicht springt beim Antippen nicht nach oben und passt auf einen Bildschirm. Auf kleinen iPhones (z. B. SE) startet die Zeile Tag/Stunde/Fach zugeklappt („ändern“). Die laufende Stunde ist nach Uhrzeit vorausgewählt, in Pausen die Stunde davor. Für Beobachtungen in der Pause: „Kleine Pause“, „Große Pause“, „Mittagspause“ (alte Einträge „Pause“ zählen als Große Pause). Ab dem zweiten Verhalten nur noch eine Zeile „Heute · 3. Std. · Mathe – ändern“. Zahlenleiste je nach Skala, Kommentar mit Schalter „Im Verlauf markieren“ (wichtige Kommentare erscheinen dann wie Tagebucheinträge als Markierung im Graphen, Art „Notiz“; nachträglich unter „Alle Einschätzungen“ änderbar), „Heute nicht gesehen“.
@@ -68,14 +68,14 @@ Heute · Kinder · Verlauf · Einstellungen. „Verhalten“ (statt Zielverhalte
 - Auf „Heute“ steht unter der Kinderliste (ab 1.3.0, vorher darüber) nach der Einrichtung (auch nur mit dem Beispielfall, ab 1.1.7) eine Zeile „Letzte Sicherung am … Nächste in x Tagen fällig.“ mit Knopf „Sichern“ (ab 1.1.6). Nach 5 Tagen ohne Sicherung wird daraus ab 5 eigenen Einträgen ein deutlicher Hinweis.
 - Updates: Eine neue Version auf GitHub Pages wird beim nächsten Start mit Internet geladen. Die Daten bleiben dabei erhalten.
 
-## Sicherungen und Kürzel
+## Sicherungen und Kennungen
 - Speichern: Einstellungen → Sichern → „Sicherungskopie ablegen“. Beim ersten Mal legst du ein Sicherungs-Passwort fest (mind. 8 Zeichen) und kannst es auf dem Gerät merken lassen. Dann geht jede weitere Sicherung mit einem Tipp. „Passwort vergessen“ löscht es nur auf diesem Gerät.
 - Vor der ersten Sicherung erklärt die App, wohin die Datei gehört: iPad/iPhone „In Dateien sichern“ → „Auf meinem iPad“ → Ordner „Pfad“ → „Sichern“. Spätere Sicherungen kommen in denselben Ordner, jede als eigene Datei mit Datum.
 - Die Datei (`pfad-sicherung-NB-2026-10-23.json`) ist verschlüsselt und enthält alle eigenen Kinder und Einstellungen. Ablage nur lokal auf dem Dienstgerät (z. B. „Dateien“ → „Auf meinem iPad“), nicht in einer Cloud.
 - Das Passwort ist nicht wiederherstellbar. Ohne Passwort lässt sich die Sicherung nicht öffnen.
 - Empfehlung: spätestens alle 5 Tage sichern (die App erinnert daran), zusätzlich vor jedem Gerätewechsel und vor dem Löschen des App-Symbols.
 - Symbol pro Kind (z. B. 🦊) zum schnellen Wiedererkennen: 46 neutrale Motive (Tiere, Pflanzen, Dinge), die App schlägt ein freies zufällig vor, änderbar per Tipp auf das Symbol beim Kind. Nicht passend zum Kind wählen (kein Fußball für das Fußballkind). Das Symbol wird beim Teilen und am Server mitgegeben und steht auch auf dem Gesprächsblatt.
-- Kürzel nach dem Muster Klasse-Nummer (`8A-01`). Wählt man beim Anlegen die Klasse, schlägt die App die nächste freie Nummer vor. Keine Namen oder Initialen.
+- Kinder haben eine **Kennung** (ab 1.3.1, vorher „Kürzel“; „Kürzel“ meint nur noch die Lehrkraft): Klasse und Platz in der Klassenliste im Schulmanager, z. B. `8A-07`. Beim Anlegen wählt man die Klasse (Jahrgang 5 bis 10 plus Buchstabe, Eingabe wird vereinheitlicht: „8 a“ → 8A) und trägt die Nummer ein (1 bis 40). Freitext gibt es nicht mehr, doppelte Kennungen lehnt die App ab. Die Kennung bleibt fest, auch wenn sich die Klassenliste später ändert; beim Kind „Kennung ändern“ (Klasse und Nummer). Ältere Kennungen, die nicht ins Schema passen, zeigen beim Kind den Hinweis „Kennung anpassen“. Jedes Kind hat ein Symbol (fehlende werden beim Start zufällig ergänzt). Der Beispielfall heißt ab 1.3.1 `7B-99`.
 - Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Deshalb nur dienstliche Geräte mit Code-Sperre nutzen.
 
 ## Laden und selektiv ergänzen
@@ -117,7 +117,7 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 - Sicherungen und geteilte Dateien sind verschlüsselt (AES-256-GCM, Schlüssel per PBKDF2 mit 310.000 Runden aus dem Passwort). Sie gehören trotzdem nur auf dienstlichen Speicher.
 - Teilen nur mit Lehrkräften, die am Fall mitarbeiten, und nur die Kinder, um die es geht.
 - Wird der Browserspeicher gelöscht, sind die Daten weg. Deshalb regelmäßig eine Sicherung speichern.
-- Kinder nur mit Kürzel anlegen, keine Namen in Kommentare schreiben. Die Zuordnungsliste (Kürzel ↔ Name) liegt nur in der Förderakte.
+- Kinder nur mit Kennung anlegen, keine Namen in Kommentare schreiben. Die Zuordnung (Kennung ↔ Name) ergibt sich aus der Klassenliste im Schulmanager zum Zeitpunkt des Anlegens und gehört zusätzlich in die Förderakte, weil sich die Liste im Laufe des Jahres ändern kann.
 - Vor dem Einsatz mit echten Fällen: Freigabe durch Schulleitung und Datenschutzbeauftragte:n (VO-DV I). Für den späteren Schulserver ist eine eigene Abstimmung nötig.
 
 ## Förderbeginn
@@ -152,13 +152,13 @@ Offene Punkte für den Betrieb: Wer betreibt den Server (Schulträger, Medienzen
 - Wurde ein Kind 7 Tage nicht eingeschätzt, steht das auf „Heute“ bei dem Kind.
 
 ## Schuljahreswechsel
-- Einstellungen → „Schuljahreswechsel“ → „Klassen hochsetzen“: 7B wird 8B, Kürzel 7B-01 wird 8B-01. Einträge bleiben unverändert. Jahrgang 10 und Klassen ohne Zahl bleiben.
+- Einstellungen → „Schuljahreswechsel“ → „Klassen hochsetzen“: 7B wird 8B, Kennung 7B-01 wird 8B-01. Einträge bleiben unverändert. Jahrgang 10 und Klassen ohne Zahl bleiben.
 - Vorher zeigt Pfad, welche Klasse wohin geht. Danach kurz „Rückgängig“ im Hinweis und dauerhaft in den Einstellungen („Wechsel vom … rückgängig machen“), bis zum nächsten Wechsel.
 - Ab August erinnert „Heute“ einmal an das neue Schuljahr („Nicht nötig“ blendet es aus).
 
 ## Förderung abschließen und Bericht
 - Beim Kind → „Förderung abschließen“: Das Kind verschwindet von „Heute“, Pfad öffnet den Bericht und erinnert nach 4 Wochen auf „Heute“ ans Löschen. „Wieder aufnehmen“ macht es rückgängig.
-- Bericht für die Förderakte (beim Kind oder im Verlauf): Kopf mit Kürzel, Zeitraum, wer eingeschätzt hat; pro Verhalten Graph, Auswertung, Nach Fach; dazu das Tagebuch. A4 hoch, über „PDF erstellen“. Pfad baut die PDF selbst, weil iOS in der Home-Bildschirm-App kein Druckfenster öffnet. Auf iPhone und iPad öffnet sich das Teilen-Fenster mit „Drucken“ und „In Dateien sichern“, am Rechner lädt die Datei herunter. Das Gesprächsblatt geht genauso („PDF / Drucken“, A4 quer). Den Namen trägst du nur auf dem Ausdruck von Hand ein.
+- Bericht für die Förderakte (beim Kind oder im Verlauf): Kopf mit Kennung, Zeitraum, wer eingeschätzt hat; pro Verhalten Graph, Auswertung, Nach Fach; dazu das Tagebuch. A4 hoch, über „PDF erstellen“. Pfad baut die PDF selbst, weil iOS in der Home-Bildschirm-App kein Druckfenster öffnet. Auf iPhone und iPad öffnet sich das Teilen-Fenster mit „Drucken“ und „In Dateien sichern“, am Rechner lädt die Datei herunter. Das Gesprächsblatt geht genauso („PDF / Drucken“, A4 quer). Den Namen trägst du nur auf dem Ausdruck von Hand ein.
 
 ## App-Sperre mit Verschlüsselung (optional, Standard aus, in der Einrichtung empfohlen)
 - Einstellungen → „App-Sperre und Verschlüsselung“: Code mit 4 bis 6 Ziffern (entschieden 24.10.2026), Sperre sofort, nach 1 oder nach 5 Minuten im Hintergrund, beim Start immer.
