@@ -102,7 +102,7 @@ const ok=(c,m)=>{if(!c)throw new Error("FEHLER: "+m);console.log("✓ "+m)};
   await p.reload();ok(await p.locator("#lock").count()===1,"Nach dem Löschen weiter gesperrt");
   await code("2468");await p.waitForSelector("#lock",{state:"detached"});
 
-  // Stundenplan: Tabelle aus dem Schulmanager einfügen, leere Tage bleiben erhalten (ab 1.3.4). Nur erfundene Kürzel.
+  // Stundenplan: Tabelle aus dem Schulmanager einfügen, leere Tage bleiben erhalten (ab 1.3.5). Nur erfundene Kürzel.
   {const html=`<table><tr><th>Stunde</th><th>Montag</th><th>Dienstag</th><th>Mittwoch</th><th>Donnerstag</th><th>Freitag</th></tr>
 <tr><td>1</td><td><b>D</b> G1 XA<br>R 1</td><td></td><td><b>M</b> G1 XB</td><td></td><td><b>SP</b> G1 XC</td></tr>
 <tr><td>2</td><td rowspan="2">E5 G2 XD</td><td></td><td></td><td>QQ L1 XE</td><td></td></tr><tr><td>3</td><td></td><td></td><td></td><td></td></tr></table>`;
