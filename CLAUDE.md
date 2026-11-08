@@ -18,6 +18,7 @@ Weicht der Code von diesen Dateien ab, gilt der Code. Weise auf die Abweichung h
 
 1. Jede Änderung an der App passiert in `quelle/pfad.html`. Das ist die einzige Quelldatei.
 2. Beta bauen: `python3 werkzeuge/beta-bauen.py pfad-beta-<version>` und nur `beta/` plus `quelle/` committen.
+   Danach Rauchtest: `node tests/rauchtest.js` (Playwright, fiktiver Beispielfall). Neue Funktionen dort ergänzen.
 3. Die Projektleitung prüft die Beta selbst auf iPad und Handy (github.io ist aus der Cloud-Umgebung meist nicht erreichbar).
 4. Die Hauptversion (`index.html`, `sw.js` im Repo-Hauptordner) wird NUR auf ausdrückliches Kommando der Projektleitung aktualisiert:
    `python3 werkzeuge/hauptversion-freigeben.py pfad-<version>`.

@@ -304,7 +304,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.3.1",PFAD_STAND="08.11.2026";
+const PFAD_VERSION="1.3.2",PFAD_STAND="08.11.2026";
 const KEY="verlaufsbogen-v2";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
 const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
@@ -1033,7 +1033,7 @@ function talkV(){
 const HW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,350,556,350,222,556,333,1000,556,556,333,1000,667,333,1000,350,611,350,350,222,222,333,333,350,556,1000,333,1000,500,333,944,350,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
 const HBW=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,350,556,350,278,556,500,1000,556,556,333,1000,667,333,1000,350,611,350,350,278,278,500,500,350,556,1000,333,1000,556,333,944,350,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
 const WINA={"€":128,"‚":130,"„":132,"…":133,"‘":145,"’":146,"“":147,"”":148,"•":149,"–":150,"—":151};
-function pdfTxt(t){let o="";for(const ch of String(t??"").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/→/g,"->").replace(/\s+/g," ")){let c=WINA[ch]||ch.codePointAt(0);if(!WINA[ch]&&(c>255||(c>=127&&c<160)||c<32))continue;o+=String.fromCharCode(c)}return o}
+function pdfTxt(t){let o="";for(const ch of String(t??"").replace(/≤/g,"<=").replace(/≥/g,">=").replace(/→/g,"->").replace(/−/g,"-").replace(/\s+/g," ")){let c=WINA[ch]||ch.codePointAt(0);if(!WINA[ch]&&(c>255||(c>=127&&c<160)||c<32))continue;o+=String.fromCharCode(c)}return o}
 const PC={ink:[43,36,32],muted:[110,98,89],acc:[208,100,60],up:[76,138,90],down:[192,72,58],line:[221,210,196],soft:[245,236,224],white:[255,255,255]};
 class Pdf{constructor(w,h,m=40){this.W=w;this.H=h;this.M=m;this.pages=[];this.add()}
   add(){this.c=[];this.pages.push(this.c);this.y=this.M+8}
@@ -1537,7 +1537,7 @@ function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=
 function exportCSV(kid,gid){const k=kidById(kid),g=goalById(k,gid);
   const rows=[["Kennung","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value==null?"nicht beobachtet":dv(g,e.value),e.note,e.rater]));
   download(`verlauf-${k.code}-${today()}.csv`,"﻿"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/^[=+\-@\t\r]/,"'$&").replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
-async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,team:db.team,shareTip:db.shareTip,classes:[],kids:[]};save();go({tab:"heute"})}
+async function wipe(){if(!await ask("Wirklich alle Daten auf diesem Gerät löschen? Speichere vorher eine Sicherung.",{ok:"Alles löschen",danger:true}))return;db={v:2,me:db.me,subjects:db.subjects,raster:db.raster,game:db.game,theme:db.theme,fs:db.fs,srv:db.srv?{url:db.srv.url,token:""}:undefined,bsalt:db.bsalt,team:db.team,shareTip:db.shareTip,lock:db.lock,setupDone:db.setupDone,classes:[],kids:[]};save();go({tab:"heute"})} // App-Sperre und Einrichtung bleiben, damit neue Einträge weiter verschlüsselt sind (1.3.2)
 async function delDemo(){if(!await ask("Den fiktiven Beispielfall entfernen? Deine eigenen Kinder bleiben.",{ok:"Entfernen"}))return;db.kids=db.kids.filter(k=>!k.demo);save();render();toast("Beispielfall entfernt")}
 /* ===== Schuljahreswechsel ===== */
 const syNow=()=>{const d=new Date(),y=d.getFullYear()-(d.getMonth()<7?1:0);return `${y}/${String(y+1).slice(2)}`};

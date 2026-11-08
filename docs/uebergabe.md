@@ -11,11 +11,13 @@
 | Bauwege | `werkzeuge/beta-bauen.py`, `werkzeuge/hauptversion-freigeben.py`, `werkzeuge/paket-bauen.py` (ZIP für eigenen Webspace) |
 | Bildanleitung zur Einrichtung | `einrichten.html` (nur nach Rückfrage ändern) |
 | Schulserver (vorbereitet, geparkt) | `server/pfad-server.mjs`, `server/README.md` |
+| Rauchtest (Playwright, fiktiver Beispielfall) | `tests/rauchtest.js`, Aufruf `node tests/rauchtest.js` nach dem Beta-Bau |
 | Funktionsbeschreibung | `docs/funktionen.md` |
 | Änderungsprotokoll | `AENDERUNGEN.md` |
 
 ## Stand
 
+- Beta 1.3.2 (08.11.2026): Technik aus SoMi übernommen (Löschen behält App-Sperre, Offline-Datei räumt nur eigene Speicher, Minuszeichen im PDF) und Rauchtest im Repo. Wartet mit 1.2.6 bis 1.3.1 auf Nicks Test.
 - Hauptversion 1.2.5 (03.11.2026, von Nick direkt freigegeben): entspricht Beta 1.2.5. Nachfedern am Seitenende ist aus (`overscroll-behavior-y:none`), weil die Menüleiste auf dem iPad sonst mitgezogen wurde. Nick hatte es am 02.11. kurz wieder angeschaltet und am 03.11. endgültig abgeschaltet.
 - Beta 1.3.0 und 1.3.1 (08.11.2026, Feedback der Schulleitung): „Heute“ beginnt mit der Kinderliste, offene Kinder zuerst, ein Tipp auf die Karte startet das Bewerten. „Sicherungskopie ablegen“ statt „Sicherung speichern“ („Speicherort festlegen“ bewusst nicht, weil iOS sich keinen Ort merkt). Kinder haben eine einheitliche **Kennung** = Klasse + Platz in der Klassenliste im Schulmanager (z. B. 8A-07), „Kürzel“ meint nur noch die Lehrkraft. Wartet mit 1.2.6 bis 1.2.9 auf Nicks Test. Die Schulleitung will vorerst keinen DSB-Kontakt, Hosting soll über den all-inkl-Webspace laufen (eigener Thread).
 - Beta 1.2.9 (08.11.2026): Fenster „Neu in Pfad“ nach jedem Update, Texte in der Liste `NEU` in `quelle/pfad.html`. **Bei jeder neuen Version mit sichtbarer Änderung dort einen Eintrag ergänzen.** Beta 1.2.6 bis 1.2.8 (Bewerten auf einem Bildschirm, Stundenauswahl, Streifen oben weg) warten mit 1.2.9 auf Nicks Test.
@@ -33,7 +35,7 @@
 5. **Schulserver Phase 2: geparkt (Stand 29.10.2026).** Laut Schul-IT kommen eigene Geräte heute kaum noch ins Schulnetz. Ein Weg wäre höchstens ein Betrieb über NetCologne (Dienstleister für den Schulserver), auf dem Schulserver oder als VM. Die technische Anfrage dort stellt der IT-Kollege der Schule; Datenschutz läuft getrennt über Punkt 3. Bis dahin nicht weiter am Server bauen; Server-Punkte S1 bis S6 aus der Prüfung sind nachrangig. Falls es weitergeht: Der Server muss die App selbst ausliefern (CSP `connect-src 'self'`), Updates ohne eigenen Serverzugriff klären, Zertifikat per Geräteverwaltung. Wiederherstellung per Dienstmail entfällt bis dahin (kein Mailversand).
 6. **ThinkCentre (privates Altgerät).** Nur als Testgerät mit dem fiktiven Beispielfall sinnvoll, nicht für den Echtbetrieb. Falls aufgesetzt: SSD statt alter Festplatte.
 7. **iPadOS 27: Weg zum Home-Bildschirm bestätigen.** Echte Safari-Infos fehlen noch, dann ggf. Hinweis in der App und `einrichten.html` anpassen (nach Rückfrage).
-8. **Testskript ins Repo.** Bisher liefen Playwright-Prüfungen nur in der Arbeitsumgebung. Ein dauerhaftes Testskript mit Beispielfall unter `tests/` wäre sinnvoll.
+8. **Testskript ins Repo: erledigt (1.3.2).** `tests/rauchtest.js` prüft Einrichtung, Kind anlegen, Bewerten, Sicherung, App-Sperre und Löschen. Neue Funktionen dort ergänzen.
 9. **Auslieferung ohne GitHub (Prüfung 01.11.2026).** Schülerdaten berühren GitHub nicht, GitHub sieht beim Laden nur Daten der Lehrkraft (IP). Empfehlung: Pfad auf eigener Subdomain beim Schulträger oder auf der Schul-Website ausliefern (statisch, Paket aus `werkzeuge/paket-bauen.py`). Eigene Subdomain, weil andere Skripte auf derselben Adresse den Speicher lesen könnten. Adresse vor dem ersten echten Fall festlegen, weil die Daten an der Adresse hängen. Anfragen an Website-Kollegen, Medienberatung und Datenschutzstelle liegen als Claude Docs vor. Dienst-iPads: laut Nick keine iCloud-Sicherung der Daten. Rein lokale HTML-Datei ist auf iOS nicht tragfähig.
 
 ## Was außerhalb dieses Repos liegt
