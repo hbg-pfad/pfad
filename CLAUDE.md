@@ -14,11 +14,18 @@ Weicht der Code von diesen Dateien ab, gilt der Code. Weise auf die Abweichung h
 - Das Team (ca. 25 Kolleg:innen) hat in der Regel KEIN Claude-Konto. Alles, was Kolleg:innen bekommen (Anleitungen, Links, Seiten), darf kein Claude-Login voraussetzen.
 - Texte für Kolleg:innen: gendern mit Doppelpunkt, klare kurze Sätze, locker statt förmlich.
 
+## Erst planen, dann bauen
+
+- Größere Vorhaben (neue Bereiche, Datenaustausch, Server, alles mit mehreren Schritten) erst als kurzen Plan mit der Projektleitung besprechen: Was ändert sich für die Kolleg:innen, in welchen Schritten, was wird getestet. Erst nach Okay bauen.
+- Dann in kleinen Schritten umsetzen, je Schritt eine Beta. Nicht alles auf einmal.
+- Kleine Korrekturen und Fehlerbehebungen ohne Plan direkt umsetzen.
+
 ## Veröffentlichen: Beta zuerst
 
 1. Jede Änderung an der App passiert in `quelle/pfad.html`. Das ist die einzige Quelldatei.
 2. Beta bauen: `python3 werkzeuge/beta-bauen.py pfad-beta-<version>` und nur `beta/` plus `quelle/` committen.
    Danach Rauchtest: `node tests/rauchtest.js` (Playwright, fiktiver Beispielfall). Neue Funktionen dort ergänzen.
+   Dann Bildschirmtest: `node tests/bildschirmtest.js` (iPhone- und iPad-Größen, hell und dunkel). Er prüft seitliches Überlaufen, Schrift in Feldern, Tippziele und abgeschnittene Knöpfe und legt Fotos plus `tests/bilder/uebersicht.html` an. Fehler beheben, Fotos der geänderten Ansichten selbst ansehen (Abstände, Überlappungen, abgeschnittene Texte). Neue Ansichten dort in `ANSICHTEN` ergänzen.
 3. Die Projektleitung prüft die Beta selbst auf iPad und Handy (github.io ist aus der Cloud-Umgebung meist nicht erreichbar).
 4. Die Hauptversion (`index.html`, `sw.js` im Repo-Hauptordner) wird NUR auf ausdrückliches Kommando der Projektleitung aktualisiert:
    `python3 werkzeuge/hauptversion-freigeben.py pfad-<version>`.
