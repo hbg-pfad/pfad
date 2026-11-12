@@ -226,6 +226,8 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 .pick select{padding:8px 6px}
 /* Bewerten: alles auf einen Bildschirm (Nick, 07.11.2026). Fach als Auswahlliste statt Knopf-Raster, Abstände knapper */
 .pick button,.pick select{min-height:40px}.pick.subjs{grid-template-columns:1fr}.pick.subjs select{font-size:1rem}
+/* iOS zoomt bei Feldern unter 16 px hinein (Bildschirmtest 12.11.2026) */
+.pick select{font-size:16px}
 .rate .goalTitle{margin:14px 0 2px}.rate .big{height:52px;font-size:2.6rem;margin-top:4px}.rate .ruler{margin:6px 0 4px}
 .rate textarea{min-height:48px;height:56px}.rate label{margin-top:8px}.rate .foot{padding-top:10px}
 @media (max-width:600px){.rate .pinsub{display:none}.rate .ends{font-size:.82rem}}
@@ -267,7 +269,7 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 #lock{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:24px;overflow:auto}
 #lock .box{max-width:340px;width:100%;text-align:center}
 /* Touch: Tippziele mindestens 40 px */
-@media (pointer:coarse){.btn.small,.btn.ghost{min-height:40px}.chip,.chips button,.catpick button{min-height:40px}button[aria-label="Schließen"],button[aria-label="Abbrechen"],.rast .x{min-width:44px;min-height:44px}}
+@media (pointer:coarse){.btn.small,.btn.ghost{min-height:40px}.chip,.chips button,.catpick button{min-height:40px}button[aria-label="Schließen"],button[aria-label="Abbrechen"],.rast .x{min-width:44px;min-height:44px}.rate label.row{min-height:40px}}
 .tdot{display:inline-block;width:20px;height:20px;border-radius:50%;flex:none;vertical-align:-3px}.tdot.sm{width:11px;height:11px;vertical-align:0;margin-right:4px}
 #lock .pins{display:flex;justify-content:center;gap:14px;margin:18px 0 8px}
 #lock .pins i{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink)}#lock .pins i.on{background:var(--ink)}
@@ -305,7 +307,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.3.5",PFAD_STAND="08.11.2026";
+const PFAD_VERSION="1.3.6",PFAD_STAND="12.11.2026";
 const KEY="verlaufsbogen-v2";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
 const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
@@ -519,6 +521,7 @@ async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-s
 // Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
 // Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
 const NEU=[
+ ["1.3.6",["Bewerten: Die Auswahl „früher …“ vergrößert die Ansicht auf dem iPhone nicht mehr.","„Im Verlauf markieren“ ist leichter zu treffen."]],
  ["1.3.5",["Neu: Stundenplan beim Kind. Kopiere den Plan aus dem Schulmanager und füge ihn in Pfad ein. Beim Bewerten ist dann das Fach zur Stunde schon ausgewählt.","Pfad übernimmt nur die Fächer, keine Lehrkräfte und keine Räume."]],
  ["1.3.2",["Klassen heißen jetzt wie im Schulmanager: 5.1 bis 10.9, dazu EF, Q1 und Q2."]],
  ["1.3.1",["Kinder haben jetzt eine einheitliche Kennung: Klasse und Platz in der Klassenliste im Schulmanager, z. B. 8.1-07. Beim Anlegen wählst du die Klasse und trägst die Nummer ein.","Passt eine ältere Kennung nicht dazu, zeigt Pfad beim Kind „Kennung anpassen“.","Jedes Kind hat jetzt ein Symbol."]],

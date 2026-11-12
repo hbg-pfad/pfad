@@ -1,4 +1,4 @@
-# Übergabe Pfad (Stand 08.11.2026)
+# Übergabe Pfad (Stand 12.11.2026)
 
 ## Wo was liegt
 
@@ -12,11 +12,13 @@
 | Bildanleitung zur Einrichtung | `einrichten.html` (nur nach Rückfrage ändern) |
 | Schulserver (vorbereitet, geparkt) | `server/pfad-server.mjs`, `server/README.md` |
 | Rauchtest (Playwright, fiktiver Beispielfall) | `tests/rauchtest.js`, Aufruf `node tests/rauchtest.js` nach dem Beta-Bau |
+| Bildschirmtest (Fotos iPhone/iPad, Prüfung Tippziele, Überlauf, Feldschrift) | `tests/bildschirmtest.js`, Aufruf `node tests/bildschirmtest.js` nach dem Beta-Bau, Ergebnis in `tests/bilder/` (nicht im Repo) |
 | Funktionsbeschreibung | `docs/funktionen.md` |
 | Änderungsprotokoll | `AENDERUNGEN.md` |
 
 ## Stand
 
+- Beta 1.3.6 (12.11.2026): Bildschirmtest neu. Behoben: Auswahl „früher …“ beim Bewerten zoomte auf iOS hinein, „Im Verlauf markieren“ war zu klein zum Tippen. Bekannte Hinweise ohne Änderung: Punkte im Verlaufs-Diagramm (12–21 px, Tippen nur Zusatz), Schalter in den Einstellungen 30 px hoch (wie iOS-Schalter), Skala 0–10 bewusst schmal. Auf dem iPhone SE wird der Platzhalter im Kommentarfeld beim Bewerten abgeschnitten (offen, Nick fragen).
 - Beta 1.3.5 (08.11.2026): Stundenplan beim Kind, aus dem Schulmanager kopieren und einfügen. Pfad liest die Tabelle lokal, speichert nur Fachkürzel und wählt beim Bewerten das Fach vor. Offen: auf dem iPad prüfen, ob Safari die Tabellenfassung mitkopiert (sonst Text mit markierten Zeilen).
 - Hauptversion 1.3.4 = Beta 1.3.4 (08.11.2026, von Nick ohne eigenen Beta-Test freigegeben): enthält alles aus Beta 1.2.6 bis 1.3.3. Bitte nach dem Update auf iPad und Handy prüfen (vor allem Kennung/Klassen, Bewerten, „Neu in Pfad“). Mails/Anleitungen müssen nachgezogen werden (Kennung, „Sicherungskopie ablegen“).
 - Beta 1.3.3 (08.11.2026): Technik aus SoMi übernommen (Löschen behält App-Sperre, Offline-Datei räumt nur eigene Speicher, Minuszeichen im PDF) und Rauchtest im Repo.
