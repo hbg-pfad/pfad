@@ -308,7 +308,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.3.6 Beta",PFAD_STAND="12.11.2026";
+const PFAD_VERSION="1.3.7 Beta",PFAD_STAND="13.11.2026";
 const KEY="pfad-beta";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
 const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
@@ -338,7 +338,8 @@ function applyTheme(){const t=db?.theme,r=document.documentElement;if(t==="light
   
   const dark=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches);document.querySelector('meta[name=theme-color]')?.setAttribute("content",dark?"#1d1916":"#fbf6ef")}
 let SAVEQ=Promise.resolve(),SAVEN=0;
-function save(){if(ENCWAIT)return; // gesperrt und noch nicht entschlüsselt: nichts überschreiben
+let WIPED=false; // 1.3.7 (wie SoMi 0.5.10): gesperrt, Kinder und Schlüssel aus dem Arbeitsspeicher entfernt
+function save(){if(ENCWAIT||WIPED)return; // gesperrt und noch nicht entschlüsselt: nichts überschreiben
   if(db.lock&&LKEY){const n=++SAVEN,key=LKEY,json=JSON.stringify(db),meta={pfadEnc:1,salt:db.lock.salt,after:db.lock.after,len:db.lock.len};
     SAVEQ=SAVEQ.then(async()=>{const body=await gcm(key,enc(json));if(n===SAVEN)localStorage.setItem(KEY,JSON.stringify({...meta,...body}))}).catch(()=>toast("Speichern nicht möglich. Bitte exportieren."))}
   else try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast("Speichern nicht möglich. Bitte exportieren.")}
@@ -465,7 +466,7 @@ function navTo(k){HIST=[];draft=null;go({tab:k})}
 const TI={talk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
  report:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 17l2-3 2 2 3-4"/></svg>'};
 const docTiles=(k,tab)=>`<div class="tiles noprint"><button class="tile" onclick="go({tab:'${tab}',kid:${ja(k.id)},talk:true,aKid:${ja(k.id)}})">${TI.talk}<b>Gesprächsblatt</b><span>für Kind und Eltern</span></button><button class="tile" onclick="go({tab:'${tab}',kid:${ja(k.id)},report:true,aKid:${ja(k.id)}})">${TI.report}<b>Bericht</b><span>PDF für die Förderakte</span></button></div>`;
-function render(){
+function render(){if(WIPED)return; // gesperrt: Ansicht bleibt stehen, bis entsperrt ist
   renderNav();
   const a=$("#app"),inst=setupMode();$("#nav").style.display=inst?"none":"";
   if(inst)a.innerHTML=installV();
@@ -1442,7 +1443,7 @@ async function srvConnect(){const url=$("#srvUrl").value.trim().replace(/\/$/,""
   catch(e){toast(e.name==="AbortError"||e.message==="Failed to fetch"?"Server nicht erreichbar":"Anmeldung fehlgeschlagen");db.srv={url,token:""};save()}render()}
 async function srvLogout(){if(!await ask("Vom Schulserver abmelden? Die Daten bleiben auf diesem Gerät.",{ok:"Abmelden"}))return;const u=db.srv?.url;db.srv={url:u,token:""};save();render()}
 const toPush=()=>db.kids.filter(k=>k.srv&&kidVer(k)>(SV().pushed[k.id]||0));
-async function srvSync(loud){if(!srvOn()||SRVBUSY)return;SRVBUSY=true;
+async function srvSync(loud){if(!srvOn()||SRVBUSY||WIPED||ENCWAIT)return;SRVBUSY=true;
   try{const push=toPush().map(k=>structuredClone(k)),sent=Object.fromEntries(push.map(k=>[k.id,kidVer(k)]));
     const r=await api("/api/sync",{since:SV().rev||0,push},8000);SRVREACH=true;
     Object.assign(SV().pushed,sent);let ch=0;
@@ -1694,7 +1695,7 @@ const saveFail=()=>{try{LOCKFAIL?localStorage.setItem(FAILKEY,JSON.stringify({n:
 async function codeKey(code,salt){const base=await crypto.subtle.importKey("raw",enc(code),"PBKDF2",false,["deriveKey"]);
   return crypto.subtle.deriveKey({name:"PBKDF2",salt:unb64(salt),iterations:600000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
 // Prüft einen Code am gespeicherten Umschlag; gibt {key,data} zurück oder null
-async function tryCode(c){const raw=ENCWAIT||JSON.parse(localStorage.getItem(KEY)||"null");if(!raw?.pfadEnc)return null;
+async function tryCode(c){await SAVEQ.catch(()=>{});const raw=ENCWAIT||JSON.parse(localStorage.getItem(KEY)||"null");if(!raw?.pfadEnc)return null;
   try{const key=await codeKey(c,raw.salt);return {key,data:JSON.parse(dec(await ungcm(key,raw)))}}catch(e){return null}}
 function askCode(msg,sub){return dlg(`<p style="font-weight:700;margin:0 0 6px">${esc(msg)}</p>${sub?`<p class="small muted" style="margin:0 0 10px">${sub}</p>`:""}<input id="dlgIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="4 bis 6 Ziffern">
   <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">OK</button></div>`,
@@ -1714,7 +1715,10 @@ async function setLock(change){if(!crypto.subtle){toast("In dieser Ansicht nicht
   const salt=b64(rnd(16));LKEY=await codeKey(a,salt);db.lock={salt,len:a.length,after:db.lock?.after??1};save();await SAVEQ;render();toast(change?"Code geändert":"Pfad ist jetzt gesperrt und verschlüsselt")}
 async function offLock(){const c=await askCode("Zum Ausschalten Code eingeben","Danach liegen die Daten wieder unverschlüsselt im Speicher dieses Geräts.");
   if(c!=null&&await tryCode(c)){delete db.lock;LKEY=null;save();render();toast("App-Sperre ist aus")}else{render();if(c)toast("Code falsch")}}
-function lockNow(){if(!db.lock)return;LOCKED=true;LOCKIN="";document.body.classList.add("locked");document.activeElement?.blur?.();renderLock()}
+// 1.3.7: Beim Sperren verlassen Schlüssel und Kinderdaten den Arbeitsspeicher (nicht während eines Abgleichs). Die Sperre ist dann mehr als ein Vorhang.
+function lockNow(){if(!db.lock)return;
+  if(LKEY&&!ENCWAIT&&!WIPED&&!SRVBUSY){save();WIPED=true;LKEY=null;const {kids,quarantine,...rest}=db;db={...rest,kids:[]}}
+  LOCKED=true;LOCKIN="";document.body.classList.add("locked");document.activeElement?.blur?.();renderLock()}
 function renderLock(msg,busy){let el=$("#lock");if(!LOCKED){el?.remove();return}
   if(!el){el=document.createElement("div");el.id="lock";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Pfad ist gesperrt");document.body.appendChild(el)}
   const wait=Math.ceil((LOCKWAIT-Date.now())/1000),len=db.lock.len||4;
@@ -1726,10 +1730,12 @@ function renderLock(msg,busy){let el=$("#lock");if(!LOCKED){el?.remove();return}
 let LOCKBUSY=false;
 async function lockPress(d){if(LOCKWAIT>Date.now()||LOCKBUSY)return;const len=db.lock.len||4;if(LOCKIN.length>=len)return;LOCKIN+=d;renderLock();if(LOCKIN.length<len)return;
   LOCKBUSY=true;renderLock("",true);const r=await tryCode(LOCKIN);LOCKBUSY=false;LOCKIN="";
-  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT){ENCWAIT=null;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();checkNeu();return}
+  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT||WIPED){ENCWAIT=null;WIPED=false;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();checkNeu();return}
   LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**Math.min(LOCKFAIL-5,10);saveFail();try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
-async function lockForgot(){if(!await ask("Code vergessen? Ohne Code lassen sich die Daten nicht entschlüsseln. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden.",{ok:"Alles löschen",danger:true}))return;
-  const keep=ENCWAIT?{}:db;ENCWAIT=null;LKEY=null;
+// 1.3.7 (wie SoMi 0.5.10): Löschen nur, wenn LÖSCHEN eingetippt wird. Sonst könnte jemand am fremden Gerät mit zwei Tipps alles löschen.
+async function lockForgot(){const v=await askText("Code vergessen? Ohne Code lassen sich die Daten nicht entschlüsseln. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden. Zum Löschen tippe LÖSCHEN ein.","LÖSCHEN eintippen");
+  if(v==null)return;if(v.trim().toUpperCase()!=="LÖSCHEN")return toast("Nichts gelöscht.");
+  const keep=ENCWAIT?{}:db;ENCWAIT=null;WIPED=false;LKEY=null;
   db={v:2,me:keep.me||"",subjects:keep.subjects||SUBJECTS.slice(),raster:keep.raster,planMap:keep.planMap,game:keep.game,theme:keep.theme,fs:keep.fs,bsalt:keep.bsalt,yearSY:keep.yearSY,classes:[],kids:[]};migrate();
   localStorage.removeItem(KEY);save();LOCKED=false;document.body.classList.remove("locked");renderLock();applyTheme();go({tab:"profil"});toast("Alles gelöscht. Lade jetzt deine letzte Sicherung.")}
 document.addEventListener("visibilitychange",()=>{if(!db?.lock)return;if(document.hidden){HIDDEN_AT=Date.now();if(!db.lock.after)lockNow()}

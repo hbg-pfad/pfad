@@ -91,6 +91,12 @@ const ok=(c,m)=>{if(!c)throw new Error("FEHLER: "+m);console.log("✓ "+m)};
   const code=async c=>{for(const d of c)await p.locator("#lock button",{hasText:new RegExp("^"+d+"$")}).first().click()};
   await code("1111");await p.waitForTimeout(400);ok(await p.locator("#lock").count()===1,"Falscher Code öffnet nicht");
   await code("2468");await p.waitForSelector("#lock",{state:"detached"});
+  // 1.3.7: Beim Sperren verlassen Kinderdaten und Schlüssel den Arbeitsspeicher; „Vergessen?“ nur mit LÖSCHEN
+  {const n=await p.evaluate(()=>db.kids.length);await p.evaluate(()=>lockNow());
+  ok(await p.evaluate(()=>WIPED&&LKEY===null&&db.kids.length===0),"Gesperrt: Kinderdaten und Schlüssel nicht im Arbeitsspeicher");
+  await p.click("#lock button:has-text('Vergessen?')");await p.fill("#dlgIn","nein");await p.press("#dlgIn","Enter");
+  ok(await p.evaluate(()=>WIPED),"Vergessen? löscht nur mit LÖSCHEN");
+  await code("2468");await p.waitForSelector("#lock",{state:"detached"});ok(await p.evaluate(n=>!WIPED&&db.kids.length===n,n),"Nach Entsperren alles wieder da")}
   ok(await p.evaluate(()=>db.kids.some(k=>k.code==="7.2-03")),"Entsperrt, Daten da");
 
   // 5. Alle Daten löschen: Sperre bleibt (ab 1.3.3)
