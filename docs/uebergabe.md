@@ -18,7 +18,7 @@
 
 ## Stand
 
-- Beta 1.3.7 (13.11.2026): Sperre sicherer, aus der SoMi-Durchsicht übernommen: Beim Sperren verlassen Schlüssel und Kinderdaten den Arbeitsspeicher; „Vergessen?“ löscht nur nach Eintippen von LÖSCHEN. Wartet auf Nicks Test, Hauptversion nur auf Kommando.
+- Beta 1.3.7 (13.11.2026): Sperre sicherer, aus der SoMi-Durchsicht übernommen: Beim Sperren verlassen Schlüssel und Kinderdaten den Arbeitsspeicher; „Vergessen?“ löscht nur nach Eintippen von LÖSCHEN. Seit 13.11.2026 auch Hauptversion (Nicks Freigabe nach der zweiten Prüfung, enthält 1.3.5 bis 1.3.7). Offen: „Neu in Pfad“ hat keinen Eintrag für 1.3.7; Mails/Anleitungen nachziehen (Stundenplan in der Datenschutz-Beschreibung).
 - Beta 1.3.6 (12.11.2026): Bildschirmtest neu. Behoben: Auswahl „früher …“ beim Bewerten zoomte auf iOS hinein, „Im Verlauf markieren“ war zu klein zum Tippen. Bekannte Hinweise ohne Änderung: Punkte im Verlaufs-Diagramm (12–21 px, Tippen nur Zusatz), Schalter in den Einstellungen 30 px hoch (wie iOS-Schalter), Skala 0–10 bewusst schmal. Auf dem iPhone SE wird der Platzhalter im Kommentarfeld beim Bewerten abgeschnitten (offen, Nick fragen).
 - Beta 1.3.5 (08.11.2026): Stundenplan beim Kind, aus dem Schulmanager kopieren und einfügen. Pfad liest die Tabelle lokal, speichert nur Fachkürzel und wählt beim Bewerten das Fach vor. Offen: auf dem iPad prüfen, ob Safari die Tabellenfassung mitkopiert (sonst Text mit markierten Zeilen).
 - Hauptversion 1.3.4 = Beta 1.3.4 (08.11.2026, von Nick ohne eigenen Beta-Test freigegeben): enthält alles aus Beta 1.2.6 bis 1.3.3. Bitte nach dem Update auf iPad und Handy prüfen (vor allem Kennung/Klassen, Bewerten, „Neu in Pfad“). Mails/Anleitungen müssen nachgezogen werden (Kennung, „Sicherungskopie ablegen“).
