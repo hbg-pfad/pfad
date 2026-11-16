@@ -31,7 +31,6 @@ const ANSICHTEN=[
   {name:"bewerten",titel:"Bewerten",klick:true},
   {name:"klassen",titel:"Klassen",js:`go({tab:"klassen"})`,voll:true},
   {name:"kind",titel:"Kind",js:`go({tab:"klassen",kid:${kid()}})`,voll:true},
-  {name:"stundenplan",titel:"Stundenplan",js:`openPlan(${kid()})`,voll:true},
   {name:"notiz",titel:"Notiz schreiben",js:`go({tab:"klassen",kid:${kid()}});openDiary(${kid()})`},
   {name:"bericht",titel:"Bericht",js:`go({tab:"klassen",kid:${kid()},report:true})`,voll:true},
   {name:"analyse",titel:"Verlauf",js:`go({tab:"analyse",aKid:${kid()}})`,voll:true},
