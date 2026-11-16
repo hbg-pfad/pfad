@@ -18,6 +18,7 @@ const URL="http://localhost:8766/beta/";
 
 const GERAETE=[
   {name:"iphone-se",titel:"iPhone SE (klein)",w:375,h:667,mobil:true},
+  {name:"iphone-se-browser",titel:"iPhone SE im Browser (niedrig)",w:375,h:548,mobil:true},
   {name:"iphone",titel:"iPhone 15",w:393,h:852,mobil:true},
   {name:"iphone-dunkel",titel:"iPhone 15, dunkel",w:393,h:852,mobil:true,dunkel:true},
   {name:"ipad",titel:"iPad hochkant",w:820,h:1180,mobil:true},
@@ -66,7 +67,7 @@ function pruefen(){
 (async()=>{fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
   const b=await chromium.launch(),bericht=[];let fehlerZahl=0,hinweisZahl=0;
   for(const g of GERAETE){
-    const ctx=await b.newContext({viewport:{width:g.w,height:g.h},isMobile:g.mobil,hasTouch:g.mobil,deviceScaleFactor:1,colorScheme:g.dunkel?"dark":"light"});
+    const ctx=await b.newContext({viewport:{width:g.w,height:g.h},isMobile:g.mobil,hasTouch:g.mobil,deviceScaleFactor:1,colorScheme:g.dunkel?"dark":"light",locale:"de-DE"});
     // Jede Ansicht auf einer frischen Seite: Ein Ganzseiten-Foto schaltet in Chromium die Touch-Nachbildung ab,
     // danach würden die Touch-Regeln der App (Tippziele 40 px) nicht mehr greifen.
     const konsole=[];
