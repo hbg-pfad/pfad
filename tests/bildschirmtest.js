@@ -71,9 +71,9 @@ function pruefen(){
     // Jede Ansicht auf einer frischen Seite: Ein Ganzseiten-Foto schaltet in Chromium die Touch-Nachbildung ab,
     // danach würden die Touch-Regeln der App (Tippziele 40 px) nicht mehr greifen.
     const konsole=[];
-    {const p=await ctx.newPage();await p.goto(URL);await p.close()}
+    {const p=await ctx.newPage();await p.goto(URL);await p.waitForFunction(()=>!!db);await p.close()}
     for(const a of ANSICHTEN){
-      const p=await ctx.newPage();p.on("pageerror",e=>konsole.push(e.message));await p.goto(URL);
+      const p=await ctx.newPage();p.on("pageerror",e=>konsole.push(e.message));await p.goto(URL);await p.waitForFunction(()=>!!db);
       if(!a.leer&&!await p.evaluate(()=>db.kids.some(k=>k.demo))){
         await p.evaluate(()=>{db.me=db.me||"TE";save();go({tab:"profil"})});await p.click("button:has-text('Fiktiven Beispielfall laden')")}
       await p.evaluate(()=>{const o=document.querySelector("#overlay button");if(o&&/✕/.test(o.textContent))o.click()}).catch(()=>{});

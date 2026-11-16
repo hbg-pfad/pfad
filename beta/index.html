@@ -37,13 +37,13 @@ h2{font-size:1.1rem;margin:18px 0 8px}
 p{margin:6px 0}
 .muted{color:var(--muted);font-size:.92rem}
 .small{font-size:.85rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.card{background:var(--card);border:1px solid transparent;box-shadow:var(--shd);border-radius:14px;padding:14px;margin-bottom:10px}
 .card.tap{cursor:pointer}
 .row{display:flex;gap:10px;align-items:center}
 .grow{flex:1;min-width:0}
 .between{display:flex;justify-content:space-between;align-items:center;gap:10px}
 button{font:inherit;color:inherit;cursor:pointer}
-.btn{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;font-weight:600}
+.btn{border:1px solid transparent;background:var(--btn);border-radius:12px;padding:10px 14px;font-weight:600}
 .btn.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 .btn.block{width:100%;padding:14px}
 .btn.ghost{background:none;border:none;color:var(--acc);padding:8px 4px}
@@ -51,9 +51,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .btn:disabled{opacity:.45;cursor:default}
 .fab{width:46px;height:46px;border-radius:50%;border:none;background:var(--acc);color:var(--acc-ink);font-size:1.6rem;line-height:1}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
-.chip{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;font-weight:600;font-size:.92rem}
+.chip{white-space:nowrap;border:1px solid transparent;background-color:var(--btn);border-radius:999px;padding:7px 13px;font-weight:600;font-size:.92rem}
 .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chip.dash{border-style:dashed;background:none}
+.chip.dash{border-style:dashed;border-color:var(--fld);background:none}
 select.chip{width:auto;appearance:none;-webkit-appearance:none;padding-right:26px;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px;background-repeat:no-repeat;color:var(--ink)}
 select.chip.warnchip{border-color:var(--new);color:var(--new)}
 .avatar{width:46px;height:46px;border-radius:12px;background:var(--soft);display:grid;place-items:center;font:600 .95rem ui-monospace,Menlo,monospace;flex:none}
@@ -78,8 +78,8 @@ textarea{min-height:76px;resize:vertical}
 .dentry{border-top:1px solid var(--line);padding:10px 0}.dentry:first-of-type{border-top:none}
 .cat{display:inline-block;border-radius:6px;padding:1px 7px;font-size:.78rem;font-weight:700;background:var(--soft);color:var(--muted)}
 .cat.c-Notiz{background:var(--accs);color:var(--chart1)}.cat.c-Erfolg{background:var(--ups);color:var(--up)}.cat.c-Vorfall{background:var(--downs);color:var(--down)}.cat.c-Elternkontakt,.cat.c-Gespräch{background:var(--accs);color:var(--acc)}.cat.c-Absprache{background:var(--news);color:var(--new)}
-.catpick{display:flex;flex-wrap:wrap;gap:6px}.catpick button{border:1.5px solid var(--line);background:var(--card);border-radius:999px;padding:6px 11px;font-size:.88rem;font-weight:600}.catpick button.on{border-color:var(--acc);background:var(--accs);color:var(--acc)}
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+.catpick{display:flex;flex-wrap:wrap;gap:6px}.catpick button{border:1.5px solid transparent;background:var(--btn);border-radius:999px;padding:6px 11px;font-size:.88rem;font-weight:600}.catpick button.on{border-color:var(--acc);background:var(--accs);color:var(--acc)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid transparent;box-shadow:var(--shn);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:5}
 nav button{flex:1;max-width:160px;background:none;border:none;padding:9px 0 10px;color:var(--muted);font-size:.78rem;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
 nav button.on{color:var(--acc)}
 nav svg{width:24px;height:24px}
@@ -117,14 +117,14 @@ table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{text-align:left
 --acc:#f0936b;--acc-ink:#1d1916;--accs:#43291f;--up:#8ccb98;--ups:#20301f;--down:#f28d7f;--downs:#3b2320;--flat:#b3a69b;--flats:#302a25;--new:#e8c15f;--news:#382d16;--chart1:#f0936b;--sig:#f5c542;--sigt:#f5c542;--sig-ink:#1d1916}
 html,body{font-family:ui-rounded,"SF Pro Rounded","Nunito","Varela Round",system-ui,sans-serif}
 h1{font-size:1.9rem;font-weight:800}
-.card{border-radius:24px;border:1.5px solid var(--line);padding:16px}
+.card{border-radius:24px;border:1.5px solid transparent;padding:16px}
 .btn{border-radius:999px;border-width:1.5px}
 .btn.block{border-radius:18px}
 .avatar{border-radius:16px;background:var(--accs);color:var(--acc);font-family:inherit;font-weight:800}
 .code{font-family:inherit;font-weight:800;letter-spacing:.02em}
 .chip.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 .badge{border-radius:10px}
-.stat div{background:var(--card);border:1.5px solid var(--line);border-radius:20px}
+.stat div{background:var(--card);border:1.5px solid transparent;box-shadow:var(--shd);border-radius:20px}
 .stat b{font-size:1.6rem;color:var(--acc)}
 nav button.on{color:var(--acc)}
 .goalTitle{font-size:1.75rem}
@@ -244,7 +244,7 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 .marktip::before{content:"↓";font-size:1.2rem;line-height:1;flex:none}
 
 .setup{list-style:none;padding:0;margin:14px 0;display:grid;gap:10px}
-.setup li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:12px 14px}
+.setup li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1.5px solid transparent;box-shadow:var(--shd);border-radius:18px;padding:12px 14px}
 .setup li.now{border:2.5px solid var(--sig)}
 .setup .n{width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--ink);display:grid;place-items:center;font-weight:800;flex:none}
 .setup li.now .n{background:var(--sig);color:var(--sig-ink)}
@@ -276,7 +276,7 @@ body.touring #app{pointer-events:none}body.touring main{padding-bottom:62vh}
 #lock .pins.bad{animation:shake .35s}
 @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 #lock .keys{display:grid;grid-template-columns:repeat(3,70px);justify-content:center;gap:14px 22px;margin:12px auto 0}
-#lock .keys button{height:64px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:1.5rem;font-weight:700}
+#lock .keys button{height:64px;border-radius:50%;border:1.5px solid transparent;background:var(--btn);color:var(--ink);font-size:1.5rem;font-weight:700}
 #lock .keys button{width:70px;height:70px;padding:0}#lock .keys button.nb{border:none;background:none;font-size:.8rem;font-weight:600;color:var(--muted)}#lock .keys button.nb:last-child{font-size:1.3rem;color:var(--ink)}
 body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.locked .cele:not(.lockdlg),body.locked .toast{visibility:hidden}
 /* Bericht für die Förderakte */
@@ -305,6 +305,18 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 :root[data-theme=dark]{--fld:#857869;--muted:#b3a69b}
 input,select,textarea{border-color:var(--fld)}
 .swr{min-height:40px}html{touch-action:manipulation}
+/* 1.4.0: neues Aussehen. Knöpfe und Karten mit ruhiger Fläche statt Rahmen, Umschalter in den Einstellungen als Leiste (.seg),
+   Rückfragen ohne Textfeld kommen auf dem Handy von unten (.sheet). Auswahl beim Bewerten bleibt kräftig gefüllt. */
+:root{--btn:#f1e6d7;--segon:#fffdf9;--shd:0 1px 2px rgba(60,40,20,.05),0 6px 18px -12px rgba(60,40,20,.2);--shn:0 -6px 18px -14px rgba(60,40,20,.28)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--btn:#3a322c;--segon:#54483f;--shd:none;--shn:none}}
+:root[data-theme=dark]{--btn:#3a322c;--segon:#54483f;--shd:none;--shn:none}
+@media print{.card,.stat div{box-shadow:none}}
+@media (max-width:600px){.cele.sheet{place-items:end center;background:rgba(0,0,0,.3)}.cele.sheet .box{width:100%;max-width:none;max-height:88vh;overflow:auto;border-radius:28px 28px 0 0;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));animation:sheet .22s ease-out}}
+@keyframes sheet{from{transform:translateY(48px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.cele.sheet .box{animation:none}}
+.pick.seg{background:var(--btn);padding:4px;border-radius:16px;gap:2px}
+.pick.seg button{border-color:transparent;background:transparent;color:var(--ink);font-weight:600}
+.pick.seg button.on{background:var(--segon);color:var(--ink);font-weight:800;box-shadow:0 1px 3px rgba(40,30,20,.18)}
 .betab{position:fixed;top:calc(env(safe-area-inset-top) + 6px);right:10px;z-index:50;background:var(--sig,#e3a008);color:#2b2420;font:700 .7rem/1 system-ui,sans-serif;letter-spacing:.06em;padding:5px 8px;border-radius:8px;pointer-events:none}@media (display-mode:standalone){.betab{top:calc(env(safe-area-inset-top) + 36px)}}@media print{.betab{display:none}}
 </style>
 <style id="pg"></style>
@@ -316,10 +328,10 @@ input,select,textarea{border-color:var(--fld)}
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.3.9 Beta",PFAD_STAND="16.11.2026";
+const PFAD_VERSION="1.4.0 Beta",PFAD_STAND="16.11.2026";
 const KEY="pfad-beta";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
-const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
+let HADDATA=false;
 const OLD_SUBJECTS=["Deutsch","Mathe","Englisch","GL","NW","Sport","AL","Kunst","Musik","Religion/PP"];
 // Fächer laut schulinternen Lehrplänen auf hbg-koeln.de (Sek I), Stand 10/2026
 const SUBJECTS=["Deutsch","Mathe","Englisch","Franz.","Spanisch","Latein","Türkisch","GL","NW","Bio","Chemie","Physik","WAW","Technik","HW","Info","Kunst","Musik","Sport","D&G","Rel. ev.","Rel. kath.","PP","FUF"];
@@ -329,7 +341,19 @@ const OLD_RASTER=JSON.stringify([...RASTER.slice(0,5),["5.","14:35","15:42","14:
 let db;
 // Mit App-Sperre liegt im Speicher nur ein verschlüsselter Umschlag {pfadEnc,salt,iv,ct}; db bleibt bis zum Entsperren leer
 let ENCWAIT=null,LKEY=null;
-function load(){try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+/* 1.4.0 (wie SoMi 0.5.10): Die Daten liegen im Speicher der App (IndexedDB) statt im Browserspeicher (localStorage hat nur etwa 5 MB).
+   Gespeichert wird derselbe Text wie vorher. Alte Daten zieht Pfad beim ersten Start einmal um und löscht die alte Kopie erst,
+   wenn die neue nachweislich gelesen werden kann. Geht IndexedDB nicht, bleibt alles im localStorage. */
+let STORE="ls";
+async function rawRead(){if(STORE==="idb"){const v=await idbGet(KEY);if(typeof v==="string")return v}return localStorage.getItem(KEY)}
+async function rawWrite(t){if(STORE==="idb")return idbSet(KEY,t);localStorage.setItem(KEY,t)}
+async function rawDel(){try{if(STORE==="idb")await idbSet(KEY,null)}catch(e){}try{localStorage.removeItem(KEY)}catch(e){}}
+async function load(){let t=null;
+  try{t=await idbGet(KEY);if(typeof t!=="string"){t=null;const old=localStorage.getItem(KEY);
+      if(old){await idbSet(KEY,old);if(await idbGet(KEY)===old){localStorage.removeItem(KEY);t=old}else throw 0}}
+    STORE="idb"}
+  catch(e){STORE="ls";try{t=localStorage.getItem(KEY)}catch(e2){t=null}}
+  HADDATA=!!t;db=null;try{db=JSON.parse(t)}catch(e){}
   if(db?.pfadEnc){ENCWAIT=db;db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[],lock:{salt:ENCWAIT.salt,after:ENCWAIT.after??1,len:ENCWAIT.len||4}}}
   migrate()}
 function migrate(){if(!db||!Array.isArray(db.kids))db={v:2,me:"",subjects:SUBJECTS.slice(),classes:[],kids:[]};
@@ -348,9 +372,10 @@ function applyTheme(){const t=db?.theme,r=document.documentElement;if(t==="light
 let SAVEQ=Promise.resolve(),SAVEN=0;
 let WIPED=false; // 1.3.7 (wie SoMi 0.5.10): gesperrt, Kinder und Schlüssel aus dem Arbeitsspeicher entfernt
 function save(){if(ENCWAIT||WIPED)return; // gesperrt und noch nicht entschlüsselt: nichts überschreiben
-  if(db.lock&&LKEY){const n=++SAVEN,key=LKEY,json=JSON.stringify(db),meta={pfadEnc:1,salt:db.lock.salt,after:db.lock.after,len:db.lock.len};
-    SAVEQ=SAVEQ.then(async()=>{const body=await gcm(key,enc(json));if(n===SAVEN)localStorage.setItem(KEY,JSON.stringify({...meta,...body}))}).catch(()=>toast("Speichern nicht möglich. Bitte exportieren."))}
-  else try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast("Speichern nicht möglich. Bitte exportieren.")}
+  const n=++SAVEN,fail=()=>toast("Speichern nicht möglich. Bitte exportieren.");
+  if(db.lock&&LKEY){const key=LKEY,json=JSON.stringify(db),meta={pfadEnc:1,salt:db.lock.salt,after:db.lock.after,len:db.lock.len};
+    SAVEQ=SAVEQ.then(async()=>{const body=await gcm(key,enc(json));if(n===SAVEN)await rawWrite(JSON.stringify({...meta,...body}))}).catch(fail)}
+  else{const json=JSON.stringify(db);SAVEQ=SAVEQ.then(()=>n===SAVEN?rawWrite(json):0).catch(fail)}
   window.autoSoon?.()}
 /* ===== Helfer ===== */
 const $=s=>document.querySelector(s);
@@ -521,7 +546,7 @@ function decorateHeads(){
 
 /* ===== Eigene Dialoge (funktionieren auch in App-Vorschauen, wo confirm/prompt blockiert sind) ===== */
 function dlg(html,onMount){return new Promise(res=>{const el=document.createElement("div");el.className="cele"+(LOCKED?" lockdlg":"");el.style.zIndex=LOCKED?120:40;
-  el.innerHTML=`<div class="box" role="dialog" aria-modal="true" style="text-align:left">${html}</div>`;document.body.appendChild(el);
+  el.innerHTML=`<div class="box" role="dialog" aria-modal="true" style="text-align:left">${html}</div>`;if(!el.querySelector("input,textarea,select"))el.classList.add("sheet");document.body.appendChild(el);
   // 1.3.9 (wie SoMi 0.5.13): Escape bricht ab, Tab bleibt im Dialog. Tipp daneben schließt nur, wenn nichts eingetippt werden kann.
   const key=e=>{if(!el.isConnected)return document.removeEventListener("keydown",key,true);const all=document.querySelectorAll(".cele");if(all[all.length-1]!==el)return;
     if(e.key==="Escape"){e.preventDefault();done(null)}
@@ -536,6 +561,7 @@ async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-s
 // Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
 // Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
 const NEU=[
+ ["1.4.0",["Pfad speichert jetzt im eigenen Speicher der App. Dort ist mehr Platz. Vorhandene Daten zieht Pfad beim ersten Start selbst um.","Neues Aussehen: Knöpfe und Karten haben ruhige Flächen statt Rahmen. Rückfragen kommen auf dem Handy von unten."]],
  ["1.3.9",["Kind gelöscht aus Versehen? Direkt danach kannst du es mit „Rückgängig“ zurückholen.","Beim Sperren räumt Pfad auch die zuletzt gezeigte Seite weg.","Felder haben einen besser sichtbaren Rahmen. Du kannst die Ansicht mit zwei Fingern vergrößern.","Fenster mit Textfeld schließen nicht mehr, wenn du daneben tippst."]],
  ["1.3.7",["App-Sperre: Beim Sperren sind die Daten jetzt wirklich weggeschlossen, bis du den Code eingibst.","„Vergessen?“ auf dem Sperrbildschirm löscht nur noch, wenn du das Wort LÖSCHEN eintippst."]],
  ["1.3.8",["Beim Bewerten schlägt Pfad das Fach jetzt selbst vor: so, wie du es zuletzt an diesem Wochentag in dieser Stunde gewählt hast. Einen Stundenplan musst du nicht mehr einfügen.","Du kannst das Fach jederzeit ändern."]],
@@ -1319,9 +1345,10 @@ async function pwKey(pw,salt){const base=await crypto.subtle.importKey("raw",enc
   return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:310000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
 async function gcm(key,data){const iv=rnd(12);return {iv:b64(iv),ct:b64(await crypto.subtle.encrypt({name:"AES-GCM",iv},key,data))}}
 const ungcm=(key,o)=>crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(o.iv)},key,unb64(o.ct));
-async function idb(){return new Promise((ok,no)=>{const r=indexedDB.open("pfad-beta",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>ok(r.result);r.onerror=no})}
-async function idbGet(k){const d=await idb();return new Promise(ok=>{const r=d.transaction("h").objectStore("h").get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}
-async function idbSet(k,v){const d=await idb();return new Promise(ok=>{const t=d.transaction("h","readwrite");v==null?t.objectStore("h").delete(k):t.objectStore("h").put(v,k);t.oncomplete=ok})}
+let IDBC=null;
+function idb(){return IDBC||=new Promise((ok,no)=>{const r=indexedDB.open("pfad-beta",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>{const d=r.result;d.onclose=()=>{IDBC=null};ok(d)};r.onerror=()=>{IDBC=null;no(r.error)};r.onblocked=()=>{IDBC=null;no(new Error("blocked"))}})}
+async function idbGet(k){const d=await idb();return new Promise((ok,no)=>{const r=d.transaction("h").objectStore("h").get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+async function idbSet(k,v){const d=await idb();return new Promise((ok,no)=>{const t=d.transaction("h","readwrite");v==null?t.objectStore("h").delete(k):t.objectStore("h").put(v,k);t.oncomplete=()=>ok();t.onerror=t.onabort=()=>no(t.error)})}
 async function askNewPw(msg){const pw=await askText(msg+" Tipp: Drei zufällige Wörter hintereinander sind sicherer als ein kurzes Passwort.","Passwort (mind. 8 Zeichen)","password");if(!pw)return null;if(pw.length<8){toast("Mindestens 8 Zeichen");return null}
   if(await askText("Passwort wiederholen","Passwort","password")!==pw){toast("Passwörter sind verschieden");return null}return pw}
 // Eigene Sicherung: Passwort einmal festlegen; der daraus abgeleitete Schlüssel bleibt nicht auslesbar auf dem Gerät
@@ -1422,7 +1449,7 @@ function clrRD(i,wd){const r=db.raster[i];if(r[3]){delete r[3][wd];if(!Object.ke
 const hasRD=wd=>db.raster.some(r=>r[3]?.[wd]);
 function rasterV(){const wd=RDAY;
   return `<div class="card"><h2 style="margin-top:0">Stundenraster</h2><div class="sub">Damit beim Bewerten die laufende Stunde vorausgewählt ist.</div>
-  <div class="pick days5" style="margin-top:10px"><button class="${wd?"":"on"}" onclick="RDAY=0;render()">Alle Tage</button>${WDN.slice(1).map((n,d)=>`<button class="${wd===d+1?"on":""}" onclick="RDAY=${d+1};render()">${n}${hasRD(d+1)?" •":""}</button>`).join("")}</div>
+  <div class="pick days5 seg" style="margin-top:10px"><button class="${wd?"":"on"}" onclick="RDAY=0;render()">Alle Tage</button>${WDN.slice(1).map((n,d)=>`<button class="${wd===d+1?"on":""}" onclick="RDAY=${d+1};render()">${n}${hasRD(d+1)?" •":""}</button>`).join("")}</div>
   <div class="sub" style="margin-top:8px">${wd?`Abweichende Zeiten am ${["","Montag","Dienstag","Mittwoch","Donnerstag","Freitag"][wd]}. Was du nicht änderst, gilt wie an allen Tagen.`:"Gilt für jeden Schultag. Weicht ein Tag ab, wähle ihn oben aus."}</div>
   <div class="rast${wd?" r4":""}"><span></span><span class="sub">Beginn</span><span class="sub">Ende</span>${wd?"<span></span>":""}${db.raster.map((r,i)=>{if(!wd)return `<b>${esc(r[0])}</b><input type="time" value="${r[1]}" onchange="setR(${i},1,this.value)"><input type="time" value="${r[2]}" onchange="setR(${i},2,this.value)">`;
     const [a,b]=rTime(r,wd),dv=r[3]?.[wd];return `<b>${esc(r[0])}</b><input type="time" class="${dv?.[0]?"dev":""}" value="${a}" onchange="setRD(${i},${wd},0,this.value)"><input type="time" class="${dv?.[1]?"dev":""}" value="${b}" onchange="setRD(${i},${wd},1,this.value)">${dv?`<button class="x" aria-label="Zurücksetzen" onclick="clrRD(${i},${wd})">✕</button>`:"<span></span>"}`}).join("")}</div>
@@ -1443,8 +1470,8 @@ function profilV(){
   return `<h1>Einstellungen</h1>
   <div class="card row"><div class="grow"><b>Anleitung</b><br><span class="small muted">Pfad zeigt dir in 8 Schritten die wichtigsten Stellen der App.</span></div><button class="btn" onclick="openHelp()">Starten</button></div>
   ${austauschV()}
-  <div class="card"><b>Erscheinungsbild</b><div class="pick theme" style="margin-top:10px">${[["system","Wie Gerät"],["light","Hell"],["dark","Dunkel"]].map(([k,t])=>`<button class="${(db.theme||"system")===k?"on":""}" onclick="db.theme='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div><div class="sub" style="margin-top:6px">„Wie Gerät“ folgt der Einstellung von iPad oder iPhone.</div>
-  <div class="sub" style="margin:14px 0 6px;font-weight:700">Schriftgröße</div><div class="pick theme">${[["m","Normal"],["l","Groß"],["xl","Sehr groß"]].map(([k,t])=>`<button class="${(db.fs||"m")===k?"on":""}" onclick="db.fs='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div></div>
+  <div class="card"><b>Erscheinungsbild</b><div class="pick theme seg" style="margin-top:10px">${[["system","Wie Gerät"],["light","Hell"],["dark","Dunkel"]].map(([k,t])=>`<button class="${(db.theme||"system")===k?"on":""}" onclick="db.theme='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div><div class="sub" style="margin-top:6px">„Wie Gerät“ folgt der Einstellung von iPad oder iPhone.</div>
+  <div class="sub" style="margin:14px 0 6px;font-weight:700">Schriftgröße</div><div class="pick theme seg">${[["m","Normal"],["l","Groß"],["xl","Sehr groß"]].map(([k,t])=>`<button class="${(db.fs||"m")===k?"on":""}" onclick="db.fs='${k}';save();applyTheme();render()">${t}</button>`).join("")}</div></div>
   <div class="card"><label style="margin-top:0">Dein Kürzel</label><div class="sub">Wird bei jeder Einschätzung gespeichert. Hilfreich, wenn ihr Daten im Team zusammenführt.</div>
   ${srvOn()?`<input value="${esc(db.me)}" disabled><div class="sub" style="margin-top:4px">Fest, solange du am Schulserver angemeldet bist.</div>`:`${mtip("me")}<div class="row" style="gap:8px"><input id="meIn" class="grow${mk("me")}" value="${esc(db.me)}" placeholder="z. B. MU" onkeydown="if(event.key==='Enter')this.blur()" onchange="db.me=this.value.trim();save();render();toast('Gespeichert')">${view.mark==="me"?`<button class="btn pri" onclick="const v=$('#meIn').value.trim();if(!v)return toast('Bitte dein Kürzel eintragen.');db.me=v;save();render()">Weiter</button>`:""}</div>`}
   <label>Alle Fächer deiner Schule</label><div class="sub">Mit Komma getrennt. Reihenfolge = Reihenfolge der Knöpfe beim Bewerten.</div>
@@ -1626,7 +1653,7 @@ const saveFail=()=>{try{LOCKFAIL?localStorage.setItem(FAILKEY,JSON.stringify({n:
 async function codeKey(code,salt){const base=await crypto.subtle.importKey("raw",enc(code),"PBKDF2",false,["deriveKey"]);
   return crypto.subtle.deriveKey({name:"PBKDF2",salt:unb64(salt),iterations:600000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
 // Prüft einen Code am gespeicherten Umschlag; gibt {key,data} zurück oder null
-async function tryCode(c){await SAVEQ.catch(()=>{});const raw=ENCWAIT||JSON.parse(localStorage.getItem(KEY)||"null");if(!raw?.pfadEnc)return null;
+async function tryCode(c){await SAVEQ.catch(()=>{});let raw=ENCWAIT;if(!raw)try{raw=JSON.parse(await rawRead()||"null")}catch(e){}if(!raw?.pfadEnc)return null;
   try{const key=await codeKey(c,raw.salt);return {key,data:JSON.parse(dec(await ungcm(key,raw)))}}catch(e){return null}}
 function askCode(msg,sub){return dlg(`<p style="font-weight:700;margin:0 0 6px">${esc(msg)}</p>${sub?`<p class="small muted" style="margin:0 0 10px">${sub}</p>`:""}<input id="dlgIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="4 bis 6 Ziffern">
   <div class="duo" style="margin-top:14px"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">OK</button></div>`,
@@ -1634,7 +1661,7 @@ function askCode(msg,sub){return dlg(`<p style="font-weight:700;margin:0 0 6px">
 function lockV(){const L=db.lock;
   return `<div class="card"><h2 style="margin-top:0">App-Sperre und Verschlüsselung</h2>
   ${mtip("lock")}<label class="swr${mk("lock")}"><span class="grow">Pfad mit Code sperren und verschlüsseln<span class="sub">Zusätzlich zur Gerätesperre. Empfohlen, vor allem wenn du dein Gerät aus der Hand gibst.</span></span><input type="checkbox" class="sw" ${L?"checked":""} onchange="this.checked?setLock():offLock()"></label>
-  ${L?`<div class="sub" style="margin:10px 0 6px;font-weight:700">Sperren, wenn Pfad im Hintergrund war</div><div class="pick theme">${[[0,"Sofort"],[1,"Nach 1 Min."],[5,"Nach 5 Min."]].map(([m,t])=>`<button class="${L.after===m?"on":""}" onclick="db.lock.after=${m};save();render()">${t}</button>`).join("")}</div>
+  ${L?`<div class="sub" style="margin:10px 0 6px;font-weight:700">Sperren, wenn Pfad im Hintergrund war</div><div class="pick theme seg">${[[0,"Sofort"],[1,"Nach 1 Min."],[5,"Nach 5 Min."]].map(([m,t])=>`<button class="${L.after===m?"on":""}" onclick="db.lock.after=${m};save();render()">${t}</button>`).join("")}</div>
   <p class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn" onclick="setLock(true)">Code ändern</button><button class="btn" onclick="lockNow()">Jetzt sperren</button></p>`:""}
   ${markFor("lock")?`<p><button class="btn" onclick="db.lockSkip=1;save();render()">Ohne Sperre weiter</button></p>`:""}
   <p class="muted small" style="margin-bottom:0">Ist die Sperre an, liegen die Daten auf diesem Gerät nur verschlüsselt im Speicher. Ein Ziffern-Code schützt vor einem Blick und vor einfachem Auslesen, mit viel Aufwand ließe er sich durchprobieren. Der Gerätecode bleibt deshalb Pflicht. Wer den Code vergisst, kommt nicht mehr an die Daten und muss die letzte Sicherung laden.</p></div>`}
@@ -1670,7 +1697,7 @@ async function lockForgot(){const v=await askText("Code vergessen? Ohne Code las
   if(v==null)return;if(v.trim().toUpperCase()!=="LÖSCHEN")return toast("Nichts gelöscht.");
   const keep=ENCWAIT?{}:db;ENCWAIT=null;WIPED=false;LKEY=null;
   db={v:2,me:keep.me||"",subjects:keep.subjects||SUBJECTS.slice(),raster:keep.raster,planMap:keep.planMap,game:keep.game,theme:keep.theme,fs:keep.fs,bsalt:keep.bsalt,yearSY:keep.yearSY,classes:[],kids:[]};migrate();
-  localStorage.removeItem(KEY);save();LOCKED=false;document.body.classList.remove("locked");renderLock();applyTheme();go({tab:"profil"});toast("Alles gelöscht. Lade jetzt deine letzte Sicherung.")}
+  await rawDel();save();LOCKED=false;document.body.classList.remove("locked");renderLock();applyTheme();go({tab:"profil"});toast("Alles gelöscht. Lade jetzt deine letzte Sicherung.")}
 document.addEventListener("visibilitychange",()=>{if(!db?.lock)return;if(document.hidden){HIDDEN_AT=Date.now();if(!db.lock.after)lockNow()}
   else if(!LOCKED&&HIDDEN_AT&&Date.now()-HIDDEN_AT>=db.lock.after*6e4)lockNow()});
 document.addEventListener("keydown",e=>{if(!LOCKED||e.target.closest?.(".cele"))return;if(/^\d$/.test(e.key))lockPress(e.key);else if(e.key==="Backspace"){LOCKIN=LOCKIN.slice(0,-1);renderLock()}});
@@ -1692,7 +1719,7 @@ function demo(quiet){
     .map(([o,cat,subj,text],i)=>({id:uid(),date:addDays(t,o),cat,subj,text,rater:"MU",ts:new Date(addDays(t,o)+"T15:00").getTime()+i,gen:true}));
   db.kids.push({id:uid(),code:"7.2-99",icon:"🦉",cls:"7.2",demo:true,goals:[g1,g2],diary});save();if(quiet)return;toast("Beispielfall geladen");go(view.mark?{tab:"profil",mark:"demo"}:{tab:"klassen"})}
 
-load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();checkNeu();
+(async()=>{await load();applyTheme();matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",applyTheme);if(db.lock)lockNow();render();checkNeu()})();
 </script>
 </body>
 </html>
