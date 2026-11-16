@@ -5,6 +5,9 @@ Aufruf (im Repo-Ordner): python3 werkzeuge/hauptversion-freigeben.py <cache-name
 import sys, re, shutil, pathlib
 repo = pathlib.Path(__file__).resolve().parent.parent; cache = sys.argv[1]
 assert cache.startswith("pfad-") and not cache.startswith("pfad-beta"), "Cache-Name wie pfad-1.1.4"
+# Der Cache-Name muss zur Version in der Quelldatei passen, sonst laden Geräte die neue Fassung nicht
+_v = re.search(r'const PFAD_VERSION="([^"]+)"', (repo / "quelle" / "pfad.html").read_text()).group(1)
+assert cache == "pfad-" + _v, f"Cache-Name {cache} passt nicht zur Version {_v} in quelle/pfad.html (erwartet: pfad-{_v})"
 src = repo / "quelle" / "pfad.html"
 assert 'const KEY="verlaufsbogen-v2";' in src.read_text(), "Speicher-Schlüssel der Hauptversion fehlt"
 shutil.copy(src, repo / "index.html")

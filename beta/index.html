@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#fbf6ef">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -297,6 +297,14 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 :root nav button.on svg{background:var(--accs)}
 @supports (padding:max(0px)){:root nav{padding-bottom:max(6px,env(safe-area-inset-bottom))}}
 .updbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 84px);z-index:60;max-width:min(92vw,520px);min-height:44px;padding:10px 16px;border:0;border-radius:14px;background:var(--sig,#e3a008);color:#2b2420;font:600 1rem/1.3 system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.18)}@media print{.updbar{display:none}}
+/* 1.3.9: sehr niedrige Bildschirme (iPhone SE im Browser, 548 px): Bewerten passt ohne Scrollen */
+@media (max-height:580px){.rate .inner{padding-top:6px;padding-bottom:6px}.rate .goalTitle{font-size:1.2rem;margin-top:4px}.rate .big{height:32px;font-size:1.7rem;margin-top:0}.rate .ruler button{height:46px}.rate .ruler.s5 button,.rate .ruler.sc button,.rate .ruler.s2 button{height:48px}.rate .foot{padding-top:4px}}
+/* 1.3.9: Feldrahmen sichtbar (Kontrast mind. 3:1), Hilfetext etwas dunkler, Schalter-Zeilen 40 px hoch */
+:root{--fld:#998777;--muted:#75695f}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--fld:#857869;--muted:#b3a69b}}
+:root[data-theme=dark]{--fld:#857869;--muted:#b3a69b}
+input,select,textarea{border-color:var(--fld)}
+.swr{min-height:40px}html{touch-action:manipulation}
 .betab{position:fixed;top:calc(env(safe-area-inset-top) + 6px);right:10px;z-index:50;background:var(--sig,#e3a008);color:#2b2420;font:700 .7rem/1 system-ui,sans-serif;letter-spacing:.06em;padding:5px 8px;border-radius:8px;pointer-events:none}@media (display-mode:standalone){.betab{top:calc(env(safe-area-inset-top) + 36px)}}@media print{.betab{display:none}}
 </style>
 <style id="pg"></style>
@@ -308,7 +316,7 @@ body.locked #app,body.locked #nav,body.locked #overlay,body.locked #tour,body.lo
 <script>
 "use strict";
 /* ===== Speicher ===== */
-const PFAD_VERSION="1.3.8 Beta",PFAD_STAND="16.11.2026";
+const PFAD_VERSION="1.3.9 Beta",PFAD_STAND="16.11.2026";
 const KEY="pfad-beta";
 // Gab es vor diesem Start schon Daten? Dann ist es ein Update (Neuerungen zeigen), sonst ein neues Gerät (nichts zeigen)
 const HADDATA=(()=>{try{return !!localStorage.getItem(KEY)}catch(e){return false}})();
@@ -346,7 +354,7 @@ function save(){if(ENCWAIT||WIPED)return; // gesperrt und noch nicht entschlüss
   window.autoSoon?.()}
 /* ===== Helfer ===== */
 const $=s=>document.querySelector(s);
-const uid=()=>Math.random().toString(36).slice(2,10);
+const uid=()=>{const b=crypto.getRandomValues(new Uint8Array(8));let r="";for(const x of b)r+=(x%36).toString(36);return r}; // 1.3.9: sicherer Zufall
 const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
 const today=()=>iso(new Date());
 const addDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d)};
@@ -514,7 +522,13 @@ function decorateHeads(){
 /* ===== Eigene Dialoge (funktionieren auch in App-Vorschauen, wo confirm/prompt blockiert sind) ===== */
 function dlg(html,onMount){return new Promise(res=>{const el=document.createElement("div");el.className="cele"+(LOCKED?" lockdlg":"");el.style.zIndex=LOCKED?120:40;
   el.innerHTML=`<div class="box" role="dialog" aria-modal="true" style="text-align:left">${html}</div>`;document.body.appendChild(el);
-  const done=v=>{el.remove();res(v)};el.onclick=e=>{if(e.target===el)done(null)};onMount(el,done)})}
+  // 1.3.9 (wie SoMi 0.5.13): Escape bricht ab, Tab bleibt im Dialog. Tipp daneben schließt nur, wenn nichts eingetippt werden kann.
+  const key=e=>{if(!el.isConnected)return document.removeEventListener("keydown",key,true);const all=document.querySelectorAll(".cele");if(all[all.length-1]!==el)return;
+    if(e.key==="Escape"){e.preventDefault();done(null)}
+    else if(e.key==="Tab"){const f=[...el.querySelectorAll("button,input,select,textarea,summary,[tabindex]")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const i=f.indexOf(document.activeElement);if(e.shiftKey?i<=0:i===f.length-1){e.preventDefault();f[e.shiftKey?f.length-1:0].focus()}}};
+  const done=v=>{document.removeEventListener("keydown",key,true);el.remove();res(v)};document.addEventListener("keydown",key,true);
+  el.onclick=e=>{if(e.target===el&&!el.querySelector("textarea,input:not([type=checkbox]):not([type=radio])"))done(null)};onMount(el,done);
+  const bx=el.firstElementChild,ti=bx.querySelector("p,h2");if(ti){ti.id=ti.id||"dlgT"+Date.now();bx.setAttribute("aria-labelledby",ti.id)}if(!el.contains(document.activeElement)){bx.tabIndex=-1;bx.style.outline="none";bx.focus({preventScroll:true})}})}
 async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-size:1.05rem;margin:0 0 16px">${esc(msg)}</p>
   <div class="duo"><button class="btn" data-a="0">${esc(o.cancel||"Abbrechen")}</button><button class="btn pri" data-a="1" style="${o.danger?"background:var(--down);border-color:var(--down)":""}">${esc(o.ok||"OK")}</button></div>`,
   (el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"));el.querySelector('[data-a="1"]').focus()});return r===true}
@@ -522,6 +536,8 @@ async function ask(msg,o={}){const r=await dlg(`<p style="font-weight:700;font-s
 // Neueste oben. Für Kolleg:innen geschrieben: kurz, ohne Fachbegriffe, nur was man in der App merkt.
 // Bei jeder Version mit sichtbarer Änderung oben einen Eintrag ergänzen. Ohne Eintrag erscheint kein Hinweis.
 const NEU=[
+ ["1.3.9",["Kind gelöscht aus Versehen? Direkt danach kannst du es mit „Rückgängig“ zurückholen.","Beim Sperren räumt Pfad auch die zuletzt gezeigte Seite weg.","Felder haben einen besser sichtbaren Rahmen. Du kannst die Ansicht mit zwei Fingern vergrößern.","Fenster mit Textfeld schließen nicht mehr, wenn du daneben tippst."]],
+ ["1.3.7",["App-Sperre: Beim Sperren sind die Daten jetzt wirklich weggeschlossen, bis du den Code eingibst.","„Vergessen?“ auf dem Sperrbildschirm löscht nur noch, wenn du das Wort LÖSCHEN eintippst."]],
  ["1.3.8",["Beim Bewerten schlägt Pfad das Fach jetzt selbst vor: so, wie du es zuletzt an diesem Wochentag in dieser Stunde gewählt hast. Einen Stundenplan musst du nicht mehr einfügen.","Du kannst das Fach jederzeit ändern."]],
  ["1.3.6",["Bewerten: Die Auswahl „früher …“ vergrößert die Ansicht auf dem iPhone nicht mehr.","„Im Verlauf markieren“ ist leichter zu treffen."]],
  ["1.3.5",["Neu: Stundenplan beim Kind. Kopiere den Plan aus dem Schulmanager und füge ihn in Pfad ein. Beim Bewerten ist dann das Fach zur Stunde schon ausgewählt.","Pfad übernimmt nur die Fächer, keine Lehrkräfte und keine Räume."]],
@@ -838,7 +854,8 @@ async function closeKid(id){const k=kidById(id);
   <div class="duo"><button class="btn" data-a="0">Abbrechen</button><button class="btn pri" data-a="1">Abschließen</button></div>`,(el,done)=>{el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>done(b.dataset.a==="1"))});
   if(r!==true)return;Object.assign(k,{closed:today(),delAt:addDays(today(),28),upd:Date.now()});save();go({tab:view.tab,kid:id,report:true});toast("Abgeschlossen. Jetzt den Bericht als PDF sichern.")}
 function reopenKid(id){const k=kidById(id);delete k.closed;delete k.delAt;k.upd=Date.now();save();render();toast(`${k.code} ist wieder aktiv`)}
-async function delKid(id){if(!await ask(`Kind mit allen Zielen, Einschätzungen und Tagebucheinträgen von diesem Gerät löschen? ${kidById(id)?.srv?"Auf dem Schulserver bleibt es für die anderen erhalten.":""}`,{ok:"Löschen",danger:true}))return;db.kids=db.kids.filter(k=>k.id!==id);save();go({tab:"klassen"})}
+async function delKid(id){if(!await ask(`Kind mit allen Zielen, Einschätzungen und Tagebucheinträgen von diesem Gerät löschen? ${kidById(id)?.srv?"Auf dem Schulserver bleibt es für die anderen erhalten.":""}`,{ok:"Löschen",danger:true}))return;const k=kidById(id),at=db.kids.indexOf(k);db.kids=db.kids.filter(k=>k.id!==id);save();go({tab:"klassen"});
+  if(k)undoToast(`${k.code} gelöscht`,()=>{if(kidById(k.id))return;db.kids.splice(Math.min(at,db.kids.length),0,k);save();render();toast(`${k.code} ist wieder da`)},10000)} // 1.3.9: Fehltipp lässt sich zurücknehmen
 
 /* ===== Verhalten bearbeiten ===== */
 let draft=null;
@@ -933,7 +950,7 @@ function renderRate(){
   <div class="ruler s${sc(g)==="c"&&scaleOpts(g).length>7?"10":sc(g)} ${c.na?"off":""}" style="${sc(g)==="c"?`grid-template-columns:repeat(${scaleOpts(g).length},1fr)`:""}" id="ruler" role="radiogroup" aria-label="Einschätzung: ${esc(g.title)}">${scaleOpts(g).map(o=>`<button data-v="${o.v}" role="radio" aria-label="${esc(o.l)}${sc(g)==="2"?"":` von ${rng(g)[1]}`}" aria-checked="${c.value===o.v}" class="${c.value===o.v?"sel":sc(g)!=="2"&&c.value!=null&&o.v<c.value?"lit":""}">${esc(o.l)}</button>`).join("")}</div>
   ${sc(g)==="2"?"":`<div class="ends"><span>${rng(g)[0]} = ${esc(g.a0)}</span><span>${esc(g.a10)} = ${rng(g)[1]}</span></div>`}
   <label>Kommentar <span class="sub">(optional)</span></label>
-  <textarea id="note" rows="2" placeholder="Was war los? Was hat geholfen? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
+  <textarea id="note" rows="2" placeholder="Was war los? (ohne Namen)" oninput="rs.cur.note=this.value">${esc(c.note)}</textarea>
   <label class="row small" style="margin:6px 0 0;font-weight:600"><input type="checkbox" id="pin" style="width:auto" ${c.pin?"checked":""} onchange="rs.cur.pin=this.checked"> Im Verlauf markieren <span class="sub pinsub" style="font-weight:400">(erscheint als Markierung im Graphen)</span></label>
   <div class="foot duo"><button class="btn ${c.na?"na-on":""}" onclick="rs.cur.na=!rs.cur.na;if(rs.cur.na)rs.cur.value=null;renderRate()">${c.na?"✓ Heute nicht gesehen":"Heute nicht gesehen"}</button>
   <button class="btn pri" ${c.value==null&&!c.na?"disabled":""} onclick="nextRate()">${rs.i<k.goals.length-1?"Weiter":"Speichern"}</button></div>
@@ -1194,7 +1211,7 @@ function chart(g,k,max=30){
   const marks=sortD([...(k?.diary||[]),...pins]).reverse().map(d=>({d,x:xDate(d.date)})).filter(m=>m.x!=null),used={};
   marks.forEach((m,n)=>{const col=`var(${CATCOL[m.d.cat]||"--muted"})`,key=Math.round(m.x),off=(used[key]=(used[key]||0)+1)-1,cx=Math.min(W-9,Math.max(L+9,m.x+off*15));
     s+=`<line x1="${m.x}" x2="${m.x}" y1="${T-4}" y2="${H-B}" stroke="${col}" stroke-width="1" opacity=".45"/>
-    <g style="cursor:pointer" onclick="const el=document.getElementById('dn${n+1}');el.scrollIntoView({block:'center'});el.animate([{background:'var(--accs)'},{background:'transparent'}],1200)"><circle cx="${cx}" cy="${T-14}" r="8" fill="${col}"/><text x="${cx}" y="${T-10.5}" font-size="10" font-weight="700" text-anchor="middle" fill="var(--card)">${n+1}</text><title>${dDE(m.d.date)} ${esc(m.d.cat)}: ${esc(m.d.text)}</title></g>`});
+    <g style="cursor:pointer" onclick="const el=document.getElementById('dn${n+1}');el.scrollIntoView({block:'center'});el.animate([{background:'var(--accs)'},{background:'transparent'}],1200)"><circle cx="${cx}" cy="${T-14}" r="28" fill="transparent"/><circle cx="${cx}" cy="${T-14}" r="8" fill="${col}"/><text x="${cx}" y="${T-10.5}" font-size="10" font-weight="700" text-anchor="middle" fill="var(--card)">${n+1}</text><title>${dDE(m.d.date)} ${esc(m.d.cat)}: ${esc(m.d.text)}</title></g>`});
   chart.marks=marks;
   const step=Math.max(1,Math.ceil(e.length/6));
   e.forEach((x,i)=>{if(i%step===0||i===e.length-1)s+=`<text x="${X(i)}" y="${H-7}" font-size="11" text-anchor="${i===e.length-1?"end":i===0?"start":"middle"}" fill="var(--muted)">${dDE(x.date)}</text>`});
@@ -1305,7 +1322,7 @@ const ungcm=(key,o)=>crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(o.iv)},key,u
 async function idb(){return new Promise((ok,no)=>{const r=indexedDB.open("pfad-beta",1);r.onupgradeneeded=()=>r.result.createObjectStore("h");r.onsuccess=()=>ok(r.result);r.onerror=no})}
 async function idbGet(k){const d=await idb();return new Promise(ok=>{const r=d.transaction("h").objectStore("h").get(k);r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)})}
 async function idbSet(k,v){const d=await idb();return new Promise(ok=>{const t=d.transaction("h","readwrite");v==null?t.objectStore("h").delete(k):t.objectStore("h").put(v,k);t.oncomplete=ok})}
-async function askNewPw(msg){const pw=await askText(msg,"Passwort (mind. 8 Zeichen)","password");if(!pw)return null;if(pw.length<8){toast("Mindestens 8 Zeichen");return null}
+async function askNewPw(msg){const pw=await askText(msg+" Tipp: Drei zufällige Wörter hintereinander sind sicherer als ein kurzes Passwort.","Passwort (mind. 8 Zeichen)","password");if(!pw)return null;if(pw.length<8){toast("Mindestens 8 Zeichen");return null}
   if(await askText("Passwort wiederholen","Passwort","password")!==pw){toast("Passwörter sind verschieden");return null}return pw}
 // Eigene Sicherung: Passwort einmal festlegen; der daraus abgeleitete Schlüssel bleibt nicht auslesbar auf dem Gerät
 async function backupKey(){let k=null;try{k=await idbGet("bkey")}catch(e){}if(k&&db.bsalt)return {key:k,salt:db.bsalt};
@@ -1446,6 +1463,7 @@ function profilV(){
   <div class="card"><h2 style="margin-top:0">Datenschutz</h2>
   <p>Die Daten liegen in diesem Browser auf diesem Gerät. Sie verlassen es nur als verschlüsselte Datei, wenn du sicherst oder teilst${srvOn()?", oder für freigegebene Kinder an euren Schulserver":""}.</p>
   <p>Lege Kinder nur mit Kennung an (Klasse und Nummer aus der Klassenliste). Schreibe in Kommentare keine Namen.</p>
+  <p>Berichte, Gesprächsblätter (PDF) und Tabellen (CSV) sind nicht verschlüsselt. Speichere und verschicke sie nur dienstlich.</p>
   <p>Sicherungen und geteilte Stände sind mit Passwort verschlüsselt. Speichere sie trotzdem nur auf dienstlichem Speicher.</p><p>Auf dem Gerät selbst liegen die Daten unverschlüsselt im Browser. Nutze deshalb nur dienstliche Geräte mit Code-Sperre.</p>
   <p>Vor dem Einsatz mit echten Fällen: Absprache mit Schulleitung und Datenschutzbeauftragten.</p></div>
   <p class="muted small" style="text-align:center;margin-bottom:0">Pfad ${PFAD_VERSION} · Stand ${PFAD_STAND} · schulintern</p>
@@ -1556,7 +1574,7 @@ function importV(){if(!IMP){view={tab:"profil"};return profilV()}
   ${IMP.d.subjects?`<label class="row" style="margin:12px 0;font-weight:600"><input type="checkbox" style="width:auto" ${IMP.settings?"checked":""} onchange="IMP.settings=this.checked"> Auch Einstellungen übernehmen (Fächer, Stundenraster, Wochenziel${IMP.files>1?", aus der neuesten Sicherung":""})</label>`:""}
   <p><button class="btn pri block" ${IMP.sel.size||IMP.settings?"":"disabled"} onclick="applyImport()">${IMP.sel.size?`${IMP.sel.size} Kind${IMP.sel.size===1?"":"er"} übernehmen`:"Übernehmen"}</button></p>`}
 function applyImport(){let n=0;for(const k of IMP.kids)if(IMP.sel.has(k.id)){n+=mergeKid(structuredClone(k))}
-  if(IMP.settings){const d=IMP.d;for(const f of ["subjects","raster","game","planMap"])if(d[f]){if(okSetting[f](d[f]))db[f]=d[f];else toast("Einstellungen aus der Datei teilweise ungültig, nicht übernommen")}if(!db.me&&d.me)db.me=d.me;(d.classes||[]).forEach(c=>db.classes.includes(c)||db.classes.push(c))}
+  if(IMP.settings){const d=IMP.d;for(const f of ["subjects","raster","game","planMap"])if(d[f]){if(okSetting[f](d[f]))db[f]=d[f];else toast("Einstellungen aus der Datei teilweise ungültig, nicht übernommen")}if(!db.me&&typeof d.me==="string"&&d.me.length<=20)db.me=d.me;(Array.isArray(d.classes)?d.classes:[]).filter(c=>typeof c==="string"&&c&&c.length<=20).slice(0,200).forEach(c=>db.classes.includes(c)||db.classes.push(c))} // 1.3.9: Klassen und Kürzel aus der Datei prüfen
   const m=IMP.sel.size;IMP=null;save();toast(m?`${m} Kind${m===1?"":"er"} übernommen${n<m?` (${m-n} ohne Änderung)`:""}`:"Einstellungen übernommen");go({tab:"klassen"})}
 function exportCSV(kid,gid){const k=kidById(kid),g=goalById(k,gid);
   const rows=[["Kennung","Verhalten","Datum","Stunde","Fach","Wert","Kommentar","Von"]].concat(sortE(g.entries).map(e=>[k.code,g.title,dDEy(e.date),e.slot,e.subj,e.value==null?"nicht beobachtet":dv(g,e.value),e.note,e.rater]));
@@ -1631,6 +1649,8 @@ async function offLock(){const c=await askCode("Zum Ausschalten Code eingeben","
 // 1.3.7: Beim Sperren verlassen Schlüssel und Kinderdaten den Arbeitsspeicher (nicht während eines Abgleichs). Die Sperre ist dann mehr als ein Vorhang.
 function lockNow(){if(!db.lock)return;
   if(LKEY&&!ENCWAIT&&!WIPED&&!SRVBUSY){save();WIPED=true;LKEY=null;const {kids,quarantine,...rest}=db;db={...rest,kids:[]}}
+  // 1.3.9 (wie SoMi 0.5.13): Die zuletzt gezeigte Seite bleibt nicht hinter dem Sperrbildschirm liegen. Ein laufendes Bewerten (rs) geht nach dem Entsperren weiter.
+  for(const q of ["#app","#nav","#overlay"]){const e=$(q);if(e)e.innerHTML=""}
   LOCKED=true;LOCKIN="";document.body.classList.add("locked");document.activeElement?.blur?.();renderLock()}
 function renderLock(msg,busy){let el=$("#lock");if(!LOCKED){el?.remove();return}
   if(!el){el=document.createElement("div");el.id="lock";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Pfad ist gesperrt");document.body.appendChild(el)}
@@ -1643,7 +1663,7 @@ function renderLock(msg,busy){let el=$("#lock");if(!LOCKED){el?.remove();return}
 let LOCKBUSY=false;
 async function lockPress(d){if(LOCKWAIT>Date.now()||LOCKBUSY)return;const len=db.lock.len||4;if(LOCKIN.length>=len)return;LOCKIN+=d;renderLock();if(LOCKIN.length<len)return;
   LOCKBUSY=true;renderLock("",true);const r=await tryCode(LOCKIN);LOCKBUSY=false;LOCKIN="";
-  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT||WIPED){ENCWAIT=null;WIPED=false;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();checkNeu();return}
+  if(r){LOCKFAIL=0;LOCKWAIT=0;saveFail();LKEY=r.key;if(ENCWAIT||WIPED){ENCWAIT=null;WIPED=false;db=r.data;migrate();applyTheme()}LOCKED=false;document.body.classList.remove("locked");renderLock();render();if(rs&&kidById(rs.kid))renderRate();else rs=null;checkNeu();return}
   LOCKFAIL++;if(LOCKFAIL>=5)LOCKWAIT=Date.now()+30000*2**Math.min(LOCKFAIL-5,10);saveFail();try{navigator.vibrate?.(80)}catch(e){}renderLock("Falscher Code. Versuch es noch einmal.")}
 // 1.3.7 (wie SoMi 0.5.10): Löschen nur, wenn LÖSCHEN eingetippt wird. Sonst könnte jemand am fremden Gerät mit zwei Tipps alles löschen.
 async function lockForgot(){const v=await askText("Code vergessen? Ohne Code lassen sich die Daten nicht entschlüsseln. Du kannst alles auf diesem Gerät löschen und danach deine letzte Sicherung laden. Zum Löschen tippe LÖSCHEN ein.","LÖSCHEN eintippen");

@@ -94,6 +94,7 @@ const ok=(c,m)=>{if(!c)throw new Error("FEHLER: "+m);console.log("✓ "+m)};
   // 1.3.7: Beim Sperren verlassen Kinderdaten und Schlüssel den Arbeitsspeicher; „Vergessen?“ nur mit LÖSCHEN
   {const n=await p.evaluate(()=>db.kids.length);await p.evaluate(()=>lockNow());
   ok(await p.evaluate(()=>WIPED&&LKEY===null&&db.kids.length===0),"Gesperrt: Kinderdaten und Schlüssel nicht im Arbeitsspeicher");
+  ok(await p.evaluate(()=>["#app","#nav","#overlay"].every(q=>document.querySelector(q).innerHTML==="")),"Gesperrt: zuletzt gezeigte Seite ist weggeräumt (1.3.9)");
   await p.click("#lock button:has-text('Vergessen?')");await p.fill("#dlgIn","nein");await p.press("#dlgIn","Enter");
   ok(await p.evaluate(()=>WIPED),"Vergessen? löscht nur mit LÖSCHEN");
   await code("2468");await p.waitForSelector("#lock",{state:"detached"});ok(await p.evaluate(n=>!WIPED&&db.kids.length===n,n),"Nach Entsperren alles wieder da")}
@@ -121,6 +122,14 @@ const ok=(c,m)=>{if(!c)throw new Error("FEHLER: "+m);console.log("✓ "+m)};
   // PDF-Text: Minuszeichen bleibt lesbar (ab 1.3.3)
   ok(await p.evaluate(()=>pdfTxt("−2 → 3").includes("-2 -> 3")),"Minuszeichen im PDF als -");
 
+  // 1.3.9: Kind löschen mit Rückgängig, Dialoge, Klassen aus Dateien werden geprüft
+  await p.evaluate(()=>{if(!db.kids.some(k=>k.demo))demo(true);go({tab:"klassen"})});
+  {const id=await p.evaluate(()=>db.kids.find(k=>k.demo).id);const q=p.evaluate(i=>delKid(i),id);await p.locator(".cele button",{hasText:"Löschen"}).last().click();await q;
+  ok(await p.evaluate(i=>!kidById(i),id)&&await p.locator(".toast.undo").count()===1,"Kind gelöscht, Rückgängig wird angeboten");
+  await p.locator(".toast.undo button").first().click();ok(await p.evaluate(i=>!!kidById(i)&&kidById(i).goals.length===2,id),"Rückgängig holt das Kind mit allen Einträgen zurück")}
+  {const q=p.evaluate(()=>askText("Test","x"));await p.waitForSelector(".cele #dlgIn");await p.fill("#dlgIn","abc");await p.mouse.click(3,3);ok(await p.locator(".cele #dlgIn").count()===1,"Dialog mit Textfeld bleibt bei Tipp daneben offen");
+  await p.keyboard.press("Escape");ok(await q===null&&await p.locator(".cele").count()===0,"Escape schließt den Dialog")}
+  ok(await p.evaluate(()=>{const n=db.classes.length;IMP={kids:[],sel:new Set(),settings:true,d:{classes:[{x:1},"9.9",5,"x".repeat(50)],me:{a:1}}};applyImport();return db.classes.length===n+1&&db.classes.includes("9.9")&&typeof db.me==="string"}),"Klassen und Kürzel aus Dateien werden geprüft");
   ok(!errs.length,"keine Fehler in der Konsole"+(errs.length?": "+errs.join(" | "):""));
   for(const w of [390,820]){await p.setViewportSize({width:w,height:900});await tab("heute");await p.screenshot({path:tmp(`pfad-${w}.png`),fullPage:true})}
   await b.close();srv.close();console.log("Alle Prüfungen bestanden.")})().catch(e=>{console.error(e.message);srv.close();process.exit(1)});
